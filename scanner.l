@@ -13,6 +13,10 @@
 /* habilita contador de linhas */
 
 espaco [ \t\n\r]
+special_char [;:\(\){}|\-\+%\^!<>=\*\/]
+multiline_comment \/\*[^"]*\*\/
+inline_comment \/\/[^\n\r]+?(?:\*\)|[\n\r])
+float_literal ((\+|\-)?[0-9]+)(.?)([0-9]*)(((e|E))((\+|\-)?[0-9]+))?
 
 /* Expr. regulares e acoes */
 
@@ -45,13 +49,12 @@ espaco [ \t\n\r]
 
 [a-zA-Z]+ { return TK_IDENTIFICADOR; }
 (\+|\-)?[0-9]+ { return TK_LIT_INT; }
-((\+|\-)?[0-9]+)(.?)([0-9]*)(((e|E))((\+|\-)?[0-9]+))? { return TK_LIT_FLOAT; }
-('(\S)?') { return TK_LIT_CHAR; }
-\/\/[^\n\r]+?(?:\*\)|[\n\r]) {}
-\/\*[^"]*\*\/ {} 
+{float_literal} { return TK_LIT_FLOAT; }
+'([a-zA-Z]|{special_char})?' { return TK_LIT_CHAR; }
+{inline_comment} {}
+{multiline_comment} {} 
 
-[a-z]+ {return TK_IDENTIFICADOR;}
-[;:\(\){}|\-\+%\^!<>=\*\/] {return yytext[0];}
+{special_char} {return yytext[0];}
 
 . {return TK_ERRO;} /* reconhece todos os outros tokens que não se enquadraram nas outras regras */
 %%
