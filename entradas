@@ -17,7 +17,7 @@ Sou uma frase que deve ser ignorada
 Mas o que está abaixo dela não deve ser ignorado até o próximo comentário
 */
 
-Aqui nao deve ser totalmente ignorado
+Aqui nao deve ser ignorado
 */
 
 !input
@@ -43,6 +43,14 @@ oi^
 
 '/'
 
+/* Isso é um comentário */
+
+/*
+*
+* Isso é comentário
+*
+*/
+
 /* 
 Isso é um comentário
 /*
@@ -55,6 +63,25 @@ issoNaoEhComentario */
 
 // Esse próximo também é comentário
 /* // */
+
+/**isso é comentário*/**isso nao eh um comentario**/
+
+/**//**/
+
+// Isso é um caracter especial *
+/**/*/**/
+
+/*
+// Um comentário com //
+*/
+
+/* Isso é comentário
+*// Isso nao eh comentario
+*/
+
+/* 
+*/ Isso nao eh comentario
+*/
 
 'a'
 
