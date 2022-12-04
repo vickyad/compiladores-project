@@ -14,9 +14,9 @@
 
 espaco [ \t\n\r]
 special_char [;:\(\){}|\-\+%\^!<>=\*\/]
-multiline_comment \/\*[^"]*\*\/
+multiline_comment \/\*([^\*\/]|\n|\/\*|\*|([^*]\/))*\*\/
 inline_comment \/\/[^\n\r]+?(?:\*\)|[\n\r])
-float_literal ((\+|\-)?[0-9]+)(.?)([0-9]*)(((e|E))((\+|\-)?[0-9]+))?
+float_literal ((\+|\-)?[0-9]+)[.]([0-9]+)(((e|E))((\+|\-)?[0-9]+))?
 
 /* Expr. regulares e acoes */
 

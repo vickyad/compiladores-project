@@ -1,4 +1,7 @@
 int number = 5;
+float floatNumber = 10.0;
+float scientificFloatNumber = 10.0e-99;
+
 float : if then else
 bool - true
 char +
@@ -7,13 +10,14 @@ while ( >= && > || < ) {
 	return // comentario no meio 
 }
 
+int /* deve ser ignorado */
 
 /*
 Sou uma frase que deve ser ignorada
-
+Mas o que está abaixo dela não deve ser ignorado até o próximo comentário
 */
 
-Aqui tambem deve ser totalmente ignorado
+Aqui nao deve ser totalmente ignorado
 */
 
 !input
@@ -34,5 +38,24 @@ souUmaSequencia
 oi^
 
 ''
+
+' '
+
+'/'
+
+/* 
+Isso é um comentário
+/*
+*/
+
+issoNaoEhComentario */
+
+// Esse próximo é comentário
+//*/
+
+// Esse próximo também é comentário
+/* // */
+
+'a'
 
 'isso quebra'
