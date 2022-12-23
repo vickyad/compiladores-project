@@ -119,15 +119,19 @@ attribution: TK_IDENTIFICADOR ':' attr_array;
 attr_array: expression;
 attr_array: expression '^' attr_array;
 
-function_call: '%';
-return_command: '!';
+function_call: TK_IDENTIFICADOR '(' arg_fn_list ')';
+arg_fn_list: expression;
+arg_fn_list: expression ',' arg_fn_list;
+
+return_command: TK_PR_RETURN expression;
+
 flow_control_commands: '^';
 
 
 // =======================
 // =     Expressoes      =
 // =======================
-expression: ;
+expression: '+';
 %%
 
 void yyerror (const char *message) {
