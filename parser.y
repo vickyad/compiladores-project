@@ -56,6 +56,16 @@ type: TK_PR_CHAR;
 
 
 // =======================
+// =      Literais       =
+// =======================
+literal: TK_LIT_INT;
+literal: TK_LIT_FLOAT;
+literal: TK_LIT_FALSE;
+literal: TK_LIT_TRUE;
+literal: TK_LIT_CHAR;
+
+
+// =======================
 // =  Variaveis globais  =
 // =======================
 declaration: type var_list ';';
@@ -93,6 +103,7 @@ command_block: '{' simple_command_list '}';
 simple_command_list: simple_command;
 simple_command_list: simple_command simple_command_list;
 
+
 // =======================
 // =  Comandos simples   =
 // =======================
@@ -103,29 +114,31 @@ simple_command: return_command ';';
 simple_command: flow_control_commands ';';
 simple_command: command_block;
 
+// Declaracao de variavel
 var_declaration: type var_decl_list;
 var_decl_list: TK_IDENTIFICADOR;
 var_decl_list: TK_IDENTIFICADOR TK_OC_LE literal;
 var_decl_list: TK_IDENTIFICADOR ',' var_decl_list;
 var_decl_list: TK_IDENTIFICADOR TK_OC_LE literal ',' var_decl_list;
-literal: TK_LIT_INT;
-literal: TK_LIT_FLOAT;
-literal: TK_LIT_FALSE;
-literal: TK_LIT_TRUE;
-literal: TK_LIT_CHAR;
 
+// Atribuicao
 attribution: TK_IDENTIFICADOR '=' expression;
 attribution: TK_IDENTIFICADOR ':' attr_array;
 attr_array: expression;
 attr_array: expression '^' attr_array;
 
+// Chamada de funcao
 function_call: TK_IDENTIFICADOR '(' arg_fn_list ')';
 arg_fn_list: expression;
 arg_fn_list: expression ',' arg_fn_list;
 
+// Comando de retorno
 return_command: TK_PR_RETURN expression;
 
-flow_control_commands: '^';
+// Comando de controle de fluxo
+flow_control_commands: TK_PR_IF '(' expression ')' TK_PR_THEN command_block;
+flow_control_commands: TK_PR_IF '(' expression ')' TK_PR_THEN command_block TK_PR_ELSE command_block;
+flow_control_commands: TK_PR_WHILE '(' expression ')' command_block;
 
 
 // =======================
