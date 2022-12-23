@@ -84,10 +84,45 @@ argumments: '(' arg_list ')';
 arg_list: type TK_IDENTIFICADOR;
 arg_list: type TK_IDENTIFICADOR ',' arg_list;
 
+
 // =======================
 // =  Bloco de comandos  =
 // =======================
 command_block: '{' '}';
+command_block: '{' simple_command_list '}';
+simple_command_list: simple_command;
+simple_command_list: simple_command simple_command_list;
+
+// =======================
+// =  Comandos simples   =
+// =======================
+simple_command: var_declaration ';';
+simple_command: attribution ';';
+simple_command: function_call ';';
+simple_command: return_command ';';
+simple_command: flow_control_commands ';';
+simple_command: command_block;
+
+var_declaration: type var_decl_list;
+var_decl_list: TK_IDENTIFICADOR;
+var_decl_list: TK_IDENTIFICADOR TK_OC_LE literal;
+var_decl_list: TK_IDENTIFICADOR ',' var_decl_list;
+var_decl_list: TK_IDENTIFICADOR TK_OC_LE literal ',' var_decl_list;
+literal: TK_LIT_INT;
+literal: TK_LIT_FLOAT;
+literal: TK_LIT_FALSE;
+literal: TK_LIT_TRUE;
+literal: TK_LIT_CHAR;
+
+attribution: '-';
+function_call: '%';
+return_command: '!';
+flow_control_commands: '^';
+
+
+// =======================
+// =     Expressoes      =
+// =======================
 %%
 
 void yyerror (const char *message) {
