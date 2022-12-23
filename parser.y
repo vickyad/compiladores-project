@@ -114,7 +114,11 @@ literal: TK_LIT_FALSE;
 literal: TK_LIT_TRUE;
 literal: TK_LIT_CHAR;
 
-attribution: '-';
+attribution: TK_IDENTIFICADOR '=' expression;
+attribution: TK_IDENTIFICADOR ':' attr_array;
+attr_array: expression;
+attr_array: expression '^' attr_array;
+
 function_call: '%';
 return_command: '!';
 flow_control_commands: '^';
@@ -123,6 +127,7 @@ flow_control_commands: '^';
 // =======================
 // =     Expressoes      =
 // =======================
+expression: ;
 %%
 
 void yyerror (const char *message) {
