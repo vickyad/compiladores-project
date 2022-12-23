@@ -144,7 +144,26 @@ flow_control_commands: TK_PR_WHILE '(' expression ')' command_block;
 // =======================
 // =     Expressoes      =
 // =======================
-expression: '+';
+expression: expr_list;
+expr_list: operand;
+expr_list: operator;
+expr_list: operand expr_list;
+expr_list: operator expr_list;
+
+operand: TK_IDENTIFICADOR;
+operand: TK_IDENTIFICADOR: operand_exp_list;
+operand_exp_list: expression;
+operand_exp_list: expression '^' operand_exp_list;
+operand: literal;
+operand: function_call;
+operator: '-';
+operator: '!';
+operator: '+';
+operator: '-';
+operator: '*';
+operator: '/';
+operator: '%';
+
 %%
 
 void yyerror (const char *message) {
