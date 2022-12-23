@@ -6,4 +6,4 @@ scanner: scanner.l
 	gcc lex.yy.c -c #gera lex.yy.o
 
 all: main scanner
-	gcc lex.yy.o main.o -o etapa1
+	gcc lex.yy.o main.o -o etapa2

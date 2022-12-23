@@ -1,7 +1,7 @@
 /* João Pedro Silveira e Silva e Victoria Duarte */
 /* Definições */
 %{
-    #include "tokens.h"
+	#include "parser.tab.h"
     #define MEU_TOKEN 300
     int global = 0;
 %}
