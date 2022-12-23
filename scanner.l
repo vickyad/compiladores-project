@@ -13,7 +13,7 @@
 /* habilita contador de linhas */
 
 espaco [ \t\n\r]
-special_char [;:\(\){}|\-\+%\^!<>=\*\/]
+special_char [,;:\(\){}|\-\+%\^!<>=\*\/]
 multiline_comment \/\*(\/)*([^/]|[^*/](\/)+)*\*\/
 inline_comment \/\/[^\n\r]+?(?:\*\)|[\n\r])
 float_literal ((\+|\-)?[0-9]+)[.]([0-9]+)(((e|E))((\+|\-)?[0-9]+))?

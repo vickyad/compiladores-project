@@ -46,17 +46,48 @@ elements_list: elements_list declaration;
 elements_list: function;
 elements_list: declaration;
 
+// =======================
+// =        Tipos        =
+// =======================
 type: TK_PR_INT;
 type: TK_PR_FLOAT;
 type: TK_PR_BOOL;
 type: TK_PR_CHAR;
 
-function: type ';';
 
+// =======================
+// =  Variaveis globais  =
+// =======================
 declaration: type var_list ';';
-var_list: TK_IDENTIFICADOR;
-var_list: TK_IDENTIFICADOR ',' var_list;
 
+var_list: TK_IDENTIFICADOR;
+var_list: array;
+var_list: TK_IDENTIFICADOR ',' var_list;
+var_list: array ',' var_list;
+
+// Arranjos
+array: TK_IDENTIFICADOR ':' dimension;
+dimension: TK_LIT_INT;
+dimension: TK_LIT_INT '^' dimension;
+
+
+// =======================
+// =       Funcoes       =
+// =======================
+function: header body;
+header: type TK_IDENTIFICADOR argumments;
+body: command_block;
+
+// Lista de argumentos
+argumments: '(' ')';
+argumments: '(' arg_list ')';
+arg_list: type TK_IDENTIFICADOR;
+arg_list: type TK_IDENTIFICADOR ',' arg_list;
+
+// =======================
+// =  Bloco de comandos  =
+// =======================
+command_block: '{' '}';
 %%
 
 void yyerror (const char *message) {
