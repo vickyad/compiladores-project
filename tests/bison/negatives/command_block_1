@@ -1,0 +1,4 @@
+// Using = instead of <=
+int method() {
+    int name = 10;
+}

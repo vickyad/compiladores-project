@@ -1,0 +1,4 @@
+// Maybe we should not accept +10 as an integer but accept +10 as a uniry operator on 10
+int method() {
+    var = -10 +10;
+}

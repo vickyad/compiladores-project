@@ -1,0 +1,4 @@
+// Missing identifier
+int method() {
+    (100 % 10) + (10 + 10);
+}

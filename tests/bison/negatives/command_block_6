@@ -1,0 +1,4 @@
+// Missing return expression
+char function() {
+    return;
+}

@@ -42,9 +42,9 @@ program: ;
 program: elements_list;
 
 elements_list: elements_list function;
-elements_list: elements_list declaration;
+elements_list: elements_list global_declaration;
 elements_list: function;
-elements_list: declaration;
+elements_list: global_declaration;
 
 // =======================
 // =        Tipos        =
@@ -68,7 +68,7 @@ literal: TK_LIT_CHAR;
 // =======================
 // =  Variaveis globais  =
 // =======================
-declaration: type var_list ';';
+global_declaration: type var_list ';';
 
 var_list: TK_IDENTIFICADOR;
 var_list: array;
@@ -128,6 +128,7 @@ attr_array: expression;
 attr_array: expression '^' attr_array;
 
 // Chamada de funcao
+function_call: TK_IDENTIFICADOR '(' ')';
 function_call: TK_IDENTIFICADOR '(' arg_fn_list ')';
 arg_fn_list: expression;
 arg_fn_list: expression ',' arg_fn_list;
@@ -146,23 +147,23 @@ flow_control_commands: TK_PR_WHILE '(' expression ')' command_block;
 // =======================
 expression: expr_list;
 expr_list: operand;
-expr_list: operator;
-expr_list: operand expr_list;
-expr_list: operator expr_list;
+expr_list: unary_operator expr_list;
+expr_list: expr_list binary_operator expr_list;
+expr_list: '(' expr_list ')';
 
 operand: TK_IDENTIFICADOR;
-operand: TK_IDENTIFICADOR: operand_exp_list;
+operand: TK_IDENTIFICADOR ':' operand_exp_list;
 operand_exp_list: expression;
 operand_exp_list: expression '^' operand_exp_list;
 operand: literal;
 operand: function_call;
-operator: '-';
-operator: '!';
-operator: '+';
-operator: '-';
-operator: '*';
-operator: '/';
-operator: '%';
+unary_operator: '-';
+unary_operator: '!';
+binary_operator: '+';
+binary_operator: '-';
+binary_operator: '*';
+binary_operator: '/';
+binary_operator: '%';
 
 %%
 

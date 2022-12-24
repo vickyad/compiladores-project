@@ -1,0 +1,4 @@
+// Missing ;
+int function() {
+    var = 10
+}

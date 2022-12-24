@@ -1,0 +1,9 @@
+int integer;
+float floatingPoint;
+bool boolean;
+char character;
+int intList:2;
+float floatMatrix:4^8;
+bool booleanMatrix:10^5^5;
+char characterMatrix:50^100;
+int one,two,three;

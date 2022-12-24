@@ -1,0 +1,4 @@
+// Missing type
+int method() {
+    name <= 10;
+}

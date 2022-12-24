@@ -1,0 +1,22 @@
+int method() {
+    var = 1 + 1;
+    var = 10 - 10;
+    var = 'a' + 'b';
+    var = 10 * 10;
+    var = 20 % 100.0;
+    var = getOne() + getTwo();
+    var = getOne() + 100;
+    var = 50 * 10 + 20;
+    var = (50 + 10);
+    var = (50 + 10) * 3;
+    var = (100 % 10) + (10 + 10);
+    var = -10;
+    var = !false;
+    var = !true;
+    var = -10 * 20;
+    var = (-10 + 20) * (10 + 20);
+    var = -(10 + 10);
+    var = -(-10);
+    var = -----10;
+    varOne = varTwo;
+}

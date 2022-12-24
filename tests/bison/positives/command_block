@@ -1,0 +1,67 @@
+int method() {
+
+}
+
+int method() {
+    int name <= 10;
+}
+
+int method() {
+    float var,var,var;
+}
+
+int method() {
+    float var,var,var <= 10.5;
+}
+
+int method() {
+    bool var <= true;
+}
+
+int function() {
+    char var <= 'a';
+}
+
+int function() {
+    var = 10;
+}
+
+int function() {
+    var : 10^20^30;
+}
+
+float function() {
+    method();
+}
+
+float function() {
+    method(var,var,var,var);
+}
+
+char function() {
+    return 'a';
+}
+
+char function() {
+    return method('a', 'b');
+}
+
+char conditional() {
+    if (true) then {
+        
+    };
+}
+
+char conditional() {
+    if (true) then {
+        
+    } else {
+
+    };
+}
+
+char loop() {
+    while (false) {
+        
+    };
+}

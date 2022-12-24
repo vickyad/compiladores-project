@@ -1,0 +1,4 @@
+// Missing operand
+int method() {
+    var = () + 1;
+}

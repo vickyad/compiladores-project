@@ -1,0 +1,16 @@
+int nome (int param, bool param) { }
+int nome (int param, bool param) { 
+
+}
+float nome () { 
+
+}
+bool nome () { 
+
+}
+char charFunction () { 
+
+}
+int test() {
+
+}
