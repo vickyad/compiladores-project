@@ -34,6 +34,16 @@ int get_line_number();
 %token TK_IDENTIFICADOR
 %token TK_ERRO
 
+// ======================================================
+// =        Definições de precedencia                   =
+// ======================================================
+
+%left '-' '+' '*' '/' '%'
+%precedence UNARY
+%precedence MULTI_DIV
+%precedence SUM_MINUS
+%precedence FORCED
+
 %start program
 
 %%
@@ -145,25 +155,27 @@ flow_control_commands: TK_PR_WHILE '(' expression ')' command_block;
 // =======================
 // =     Expressoes      =
 // =======================
-expression: expr_list;
-expr_list: operand;
-expr_list: unary_operator expr_list;
-expr_list: expr_list binary_operator expr_list;
-expr_list: '(' expr_list ')';
+expression: expression_sequence;
+expression_sequence: operand;
+expression_sequence: expression_sequence sum_minus_operator expression_sequence %prec SUM_MINUS;
+expression_sequence: expression_sequence multi_div_operator expression_sequence %prec MULTI_DIV;
+expression_sequence: unary_operator expression_sequence %prec UNARY;
+expression_sequence: '(' expression_sequence ')' %prec FORCED;
 
-operand: TK_IDENTIFICADOR;
-operand: TK_IDENTIFICADOR ':' operand_exp_list;
-operand_exp_list: expression;
-operand_exp_list: expression '^' operand_exp_list;
+operand: TK_IDENTIFICADOR
+operand: TK_IDENTIFICADOR ':' expression_list;
+expression_list: expression_sequence;
+expression_list: expression_sequence '^' expression_list;
+
 operand: literal;
 operand: function_call;
-unary_operator: '-';
 unary_operator: '!';
-binary_operator: '+';
-binary_operator: '-';
-binary_operator: '*';
-binary_operator: '/';
-binary_operator: '%';
+unary_operator: '-';
+sum_minus_operator: '+';
+sum_minus_operator: '-';
+multi_div_operator: '*';
+multi_div_operator: '/';
+multi_div_operator: '%';
 
 %%
 
