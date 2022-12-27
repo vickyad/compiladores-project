@@ -78,11 +78,7 @@ extern int yydebug;
     TK_LIT_TRUE = 279,             /* TK_LIT_TRUE  */
     TK_LIT_CHAR = 280,             /* TK_LIT_CHAR  */
     TK_IDENTIFICADOR = 281,        /* TK_IDENTIFICADOR  */
-    TK_ERRO = 282,                 /* TK_ERRO  */
-    UNARY = 283,                   /* UNARY  */
-    MULTI_DIV = 284,               /* MULTI_DIV  */
-    SUM_MINUS = 285,               /* SUM_MINUS  */
-    FORCED = 286                   /* FORCED  */
+    TK_ERRO = 282                  /* TK_ERRO  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif

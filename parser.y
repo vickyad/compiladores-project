@@ -38,12 +38,6 @@ int get_line_number();
 // =        Definições de precedencia                   =
 // ======================================================
 
-%left '-' '+' '*' '/' '%'
-%precedence UNARY
-%precedence MULTI_DIV
-%precedence SUM_MINUS
-%precedence FORCED
-
 %start program
 
 %%
@@ -155,28 +149,31 @@ flow_control_commands: TK_PR_WHILE '(' expression ')' command_block;
 // =======================
 // =     Expressoes      =
 // =======================
-expression: expression_sequence;
-expression_sequence: operand;
-expression_sequence: expression_sequence sum_minus_operator expression_sequence %prec SUM_MINUS;
-expression_sequence: expression_sequence multi_div_operator expression_sequence %prec MULTI_DIV;
-expression_sequence: unary_operator expression_sequence %prec UNARY;
-expression_sequence: '(' expression_sequence ')' %prec FORCED;
+expression: expression_grade_four;
 
-operand: TK_IDENTIFICADOR
-operand: TK_IDENTIFICADOR ':' expression_list;
-expression_list: expression_sequence;
-expression_list: expression_sequence '^' expression_list;
+expression_grade_four: expression_grade_four '+' expression_grade_three;
+expression_grade_four: expression_grade_four '-' expression_grade_three;
+expression_grade_four: expression_grade_three;
 
-operand: literal;
-operand: function_call;
-unary_operator: '!';
-unary_operator: '-';
-sum_minus_operator: '+';
-sum_minus_operator: '-';
-multi_div_operator: '*';
-multi_div_operator: '/';
-multi_div_operator: '%';
+expression_grade_three: expression_grade_three '*' expression_grade_two;
+expression_grade_three: expression_grade_three '/' expression_grade_two;
+expression_grade_three: expression_grade_three '%' expression_grade_two;
+expression_grade_three: expression_grade_two;
 
+expression_grade_two: negation_loop expression_grade_one;
+expression_grade_two: minus_loop expression_grade_one;
+expression_grade_two: expression_grade_one;
+
+negation_loop: negation_loop '!';
+negation_loop: '!';
+
+minus_loop: minus_loop '-';
+minus_loop: '-';
+
+expression_grade_one: TK_IDENTIFICADOR;
+expression_grade_one: literal;
+expression_grade_one: function_call;
+expression_grade_one: '(' expression ')';
 %%
 
 void yyerror (const char *message) {
