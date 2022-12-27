@@ -16,7 +16,7 @@ espaco [ \t\n\r]
 special_char [,;:\(\){}|\-\+%\^!<>=\*\/]
 multiline_comment \/\*(\/)*([^/]|[^*/](\/)+)*\*\/
 inline_comment \/\/[^\n\r]+?(?:\*\)|[\n\r])
-float_literal ((\+|\-)?[0-9]+)[.]([0-9]+)(((e|E))((\+|\-)?[0-9]+))?
+float_literal ([0-9]+)[.]([0-9]+)(((e|E))((\+|\-)?[0-9]+))?
 
 /* Expr. regulares e acoes */
 
@@ -48,7 +48,7 @@ float_literal ((\+|\-)?[0-9]+)[.]([0-9]+)(((e|E))((\+|\-)?[0-9]+))?
 
 
 [a-zA-Z]+ { return TK_IDENTIFICADOR; }
-(\+|\-)?[0-9]+ { return TK_LIT_INT; }
+[0-9]+ { return TK_LIT_INT; }
 {float_literal} { return TK_LIT_FLOAT; }
 '.?' { return TK_LIT_CHAR; }
 {inline_comment} {}

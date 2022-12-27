@@ -21,7 +21,11 @@ int method() {
     var = ---10;
     var = 1;
     var = getOne();
+    var = -(10 + 10);
     var = (10 + 10) / getOne();
     var = ((10 + 10)) / (((200)));
     varOne = varTwo;
+    var : !!false ^ !!false ^ 10;
+    var : 10 ^ 20 ^ 30;
+    var : varTwo : 20 ^ 30 ^ 40 ^ varThree : 10 ^ 20 ^ 30;
 }
