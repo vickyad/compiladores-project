@@ -80,7 +80,7 @@ var_list: TK_IDENTIFICADOR ',' var_list;
 var_list: array ',' var_list;
 
 // Arranjos
-array: TK_IDENTIFICADOR ':' dimension;
+array: TK_IDENTIFICADOR '[' dimension ']';
 dimension: TK_LIT_INT;
 dimension: TK_LIT_INT '^' dimension;
 
@@ -127,7 +127,7 @@ var_decl_list: TK_IDENTIFICADOR TK_OC_LE literal ',' var_decl_list;
 
 // Atribuicao
 attribution: TK_IDENTIFICADOR '=' expression;
-attribution: TK_IDENTIFICADOR ':' attr_array;
+attribution: TK_IDENTIFICADOR '[' attr_array ']';
 attr_array: expression;
 attr_array: expression '^' attr_array;
 
@@ -171,9 +171,13 @@ minus_loop: minus_loop '-';
 minus_loop: '-';
 
 expression_grade_one: TK_IDENTIFICADOR;
+expression_grade_one: TK_IDENTIFICADOR '[' expression_list ']';
 expression_grade_one: literal;
 expression_grade_one: function_call;
 expression_grade_one: '(' expression ')';
+
+expression_list: expression_list '^' expression;
+expression_list: expression;
 %%
 
 void yyerror (const char *message) {
