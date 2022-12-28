@@ -28,5 +28,5 @@ int method() {
     var [ x ^ y ^ z ] = 10 - 20;
     var [ 1 ^ 2 ^ 3 ] = 10 - 20;
     var [ 10 * 3 + 10 ^ 2 ^ 3 ^ getValue() ^ i] = 30 + 10 * list[5];
-    var [x] = list[10+10 ^ 20 ^ 30] * list[10*10 ^ 30 ^ 40];
+    var [x] = a + list[10+10 ^ 20 ^ 30] * list[10*10 ^ 30 ^ 40];
 }
