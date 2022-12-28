@@ -127,7 +127,7 @@ var_decl_list: TK_IDENTIFICADOR TK_OC_LE literal ',' var_decl_list;
 
 // Atribuicao
 attribution: TK_IDENTIFICADOR '=' expression;
-attribution: TK_IDENTIFICADOR '[' attr_array ']';
+attribution: TK_IDENTIFICADOR '[' attr_array ']' '=' expression;
 attr_array: expression;
 attr_array: expression '^' attr_array;
 

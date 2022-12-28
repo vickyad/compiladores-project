@@ -25,6 +25,8 @@ int method() {
     var = (10 + 10) / getOne();
     var = ((10 + 10)) / (((200)));
     varOne = varTwo;
-    var [ 10 ^ 20 ^ 30 ];
-    var [ varTwo [ 20 ^ 30 ^ 40 ] ^ 5 ^ 5/5 ^ varThree [ 10 ^ 20 ^ 30] ^ getValue() ^ !false];
+    var [ x ^ y ^ z ] = 10 - 20;
+    var [ 1 ^ 2 ^ 3 ] = 10 - 20;
+    var [ 10 * 3 + 10 ^ 2 ^ 3 ^ getValue() ^ i] = 30 + 10 * list[5];
+    var [x] = list[10+10 ^ 20 ^ 30] * list[10*10 ^ 30 ^ 40];
 }
