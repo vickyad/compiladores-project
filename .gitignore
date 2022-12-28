@@ -1,0 +1,5 @@
+*.tab.*
+*.yy.*
+*.o
+etapa2
+.vscode
