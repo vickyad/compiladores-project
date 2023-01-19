@@ -138,62 +138,56 @@ arg_fn_list: expression;
 arg_fn_list: expression ',' arg_fn_list;
 
 // Comando de retorno
-return_command: TK_PR_RETURN expression;
+return_command: TK_PR_RETURN expression { $$ = create_node(RETURN, "return"); add_child($$, $2); };
 
 // Comando de controle de fluxo
-flow_control_commands: TK_PR_IF '(' expression ')' TK_PR_THEN command_block;
-flow_control_commands: TK_PR_IF '(' expression ')' TK_PR_THEN command_block TK_PR_ELSE command_block;
-flow_control_commands: TK_PR_WHILE '(' expression ')' command_block;
+flow_control_commands: TK_PR_IF '(' expression ')' TK_PR_THEN command_block { $$ = create_node(IF, "if"); add_child($$, $3); add_child($$, $5); add_child($$, NULL); };
+flow_control_commands: TK_PR_IF '(' expression ')' TK_PR_THEN command_block TK_PR_ELSE command_block { $$ = create_node(IF, "if"); add_child($$, $3); add_child($$, $5); add_child($$, $7); };
+flow_control_commands: TK_PR_WHILE '(' expression ')' command_block { $$ = create_node(WHILE, "while"); add_child($$, $3); add_child($$, $5); };
 
 
 // =======================
 // =     Expressoes      =
 // =======================
-expression: expression_grade_eight;
+expression: expression_grade_eight { $$ = $1 };
 
-expression_grade_eight: expression_grade_eight TK_OC_OR expression_grade_seven;
-expression_grade_eight: expression_grade_seven;
+expression_grade_eight: expression_grade_eight TK_OC_OR expression_grade_seven { $$ = create_node(OR, "||"); add_child($$, $1); add_child($$, $3); };
+expression_grade_eight: expression_grade_seven { $$ = $1 };
 
-expression_grade_seven: expression_grade_seven TK_OC_AND expression_grade_six;
-expression_grade_seven: expression_grade_six;
+expression_grade_seven: expression_grade_seven TK_OC_AND expression_grade_six { $$ = create_node(AND, "&&"); add_child($$, $1); add_child($$, $3); };
+expression_grade_seven: expression_grade_six { $$ = $1 };
 
-expression_grade_six: expression_grade_six TK_OC_EQ expression_grade_five;
-expression_grade_six: expression_grade_six TK_OC_NE expression_grade_five;
-expression_grade_six: expression_grade_five;
+expression_grade_six: expression_grade_six TK_OC_EQ expression_grade_five { $$ = create_node(EQ, "=="); add_child($$, $1); add_child($$, $3); };
+expression_grade_six: expression_grade_six TK_OC_NE expression_grade_five { $$ = create_node(NE, "!="); add_child($$, $1); add_child($$, $3); };
+expression_grade_six: expression_grade_five { $$ = $1 };
 
-expression_grade_five: expression_grade_five '>' expression_grade_four;
-expression_grade_five: expression_grade_five '<' expression_grade_four;
-expression_grade_five: expression_grade_five TK_OC_LE expression_grade_four;
-expression_grade_five: expression_grade_five TK_OC_GE expression_grade_four;
-expression_grade_five: expression_grade_four;
+expression_grade_five: expression_grade_five '>' expression_grade_four { $$ = create_node(GT, ">"); add_child($$, $1); add_child($$, $3); };
+expression_grade_five: expression_grade_five '<' expression_grade_four { $$ = create_node(LT, "<"); add_child($$, $1); add_child($$, $3); };
+expression_grade_five: expression_grade_five TK_OC_LE expression_grade_four { $$ = create_node(LE, "<="); add_child($$, $1); add_child($$, $3); };
+expression_grade_five: expression_grade_five TK_OC_GE expression_grade_four { $$ = create_node(GE, ">="); add_child($$, $1); add_child($$, $3); };
+expression_grade_five: expression_grade_four { $$ = $1 };
 
-expression_grade_four: expression_grade_four '+' expression_grade_three;
-expression_grade_four: expression_grade_four '-' expression_grade_three;
-expression_grade_four: expression_grade_three;
+expression_grade_four: expression_grade_four '+' expression_grade_three $$ = create_node(ADD, "+"); add_child($$, $1); add_child($$, $3);;
+expression_grade_four: expression_grade_four '-' expression_grade_three { $$ = create_node(MINUS, "-"); add_child($$, $1); add_child($$, $3); };
+expression_grade_four: expression_grade_three { $$ = $1 };
 
-expression_grade_three: expression_grade_three '*' expression_grade_two;
-expression_grade_three: expression_grade_three '/' expression_grade_two;
-expression_grade_three: expression_grade_three '%' expression_grade_two;
-expression_grade_three: expression_grade_two;
+expression_grade_three: expression_grade_three '*' expression_grade_two { $$ = create_node(MULTIPLY, "*"); add_child($$, $1); add_child($$, $3); };
+expression_grade_three: expression_grade_three '/' expression_grade_two { $$ = create_node(DIVISION, "/"); add_child($$, $1); add_child($$, $3); };
+expression_grade_three: expression_grade_three '%' expression_grade_two { $$ = create_node(REMAINDER, "%"); add_child($$, $1); add_child($$, $3); };
+expression_grade_three: expression_grade_two { $$ = $1 } ;
 
-expression_grade_two: negation_loop expression_grade_one;
-expression_grade_two: minus_loop expression_grade_one;
-expression_grade_two: expression_grade_one;
+expression_grade_two: '!' expression_grade_one { $$ = create_node(UNARY_NEGATION, "-"); add_child($$, $2); };
+expression_grade_two: '-' expression_grade_one { $$ = create_node(UNARY_MINUS, "-"); add_child($$, $2); };
+expression_grade_two: expression_grade_one { $$ = $1; };
 
-negation_loop: negation_loop '!';
-negation_loop: '!';
+expression_grade_one: TK_IDENTIFICADOR { $$ = create_leaf(IDENTIFICADOR, $1); };
+expression_grade_one: TK_IDENTIFICADOR '[' expression_list ']' { $$ = create_node(SQUARE_BRACKETS, "[]"); add_child($$, $1), add_child($$, $3); };
+expression_grade_one: literal { $$ = $1; };
+expression_grade_one: function_call { $$ = $1; };
+expression_grade_one: '(' expression ')' { $$ = create_node(BRACKETS, "()"); add_child($$, $2); };
 
-minus_loop: minus_loop '-';
-minus_loop: '-';
-
-expression_grade_one: TK_IDENTIFICADOR;
-expression_grade_one: TK_IDENTIFICADOR '[' expression_list ']';
-expression_grade_one: literal;
-expression_grade_one: function_call;
-expression_grade_one: '(' expression ')';
-
-expression_list: expression_list '^' expression;
-expression_list: expression;
+expression_list: expression_list '^' expression { $$ = $1; add_child($$, $3); };
+expression_list: expression { $$ = $1; };
 %%
 
 void yyerror (const char *message) {
