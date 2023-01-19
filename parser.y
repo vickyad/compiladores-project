@@ -116,7 +116,7 @@ simple_command: attribution ';';
 simple_command: function_call ';';
 simple_command: return_command ';';
 simple_command: flow_control_commands ';';
-simple_command: command_block;
+simple_command: command_block ';';
 
 // Declaracao de variavel
 var_declaration: type var_decl_list;
@@ -149,7 +149,23 @@ flow_control_commands: TK_PR_WHILE '(' expression ')' command_block;
 // =======================
 // =     Expressoes      =
 // =======================
-expression: expression_grade_four;
+expression: expression_grade_eight;
+
+expression_grade_eight: expression_grade_eight TK_OC_OR expression_grade_seven;
+expression_grade_eight: expression_grade_seven;
+
+expression_grade_seven: expression_grade_seven TK_OC_AND expression_grade_six;
+expression_grade_seven: expression_grade_six;
+
+expression_grade_six: expression_grade_six TK_OC_EQ expression_grade_five;
+expression_grade_six: expression_grade_six TK_OC_NE expression_grade_five;
+expression_grade_six: expression_grade_five;
+
+expression_grade_five: expression_grade_five '>' expression_grade_four;
+expression_grade_five: expression_grade_five '<' expression_grade_four;
+expression_grade_five: expression_grade_five TK_OC_LE expression_grade_four;
+expression_grade_five: expression_grade_five TK_OC_GE expression_grade_four;
+expression_grade_five: expression_grade_four;
 
 expression_grade_four: expression_grade_four '+' expression_grade_three;
 expression_grade_four: expression_grade_four '-' expression_grade_three;
