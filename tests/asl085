@@ -1,0 +1,8 @@
+//INCORRECT
+int f()
+{
+  int x;
+  int i;
+  int j;
+  while (i) do { };
+}

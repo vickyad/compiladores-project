@@ -1,0 +1,5 @@
+//CORRECT
+int f()
+{
+  int a;
+}

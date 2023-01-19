@@ -1,0 +1,7 @@
+//CORRECT
+int main ()
+{
+  int a;
+  a = 'c';
+  return 0;
+}

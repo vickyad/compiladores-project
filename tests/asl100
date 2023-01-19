@@ -1,0 +1,6 @@
+//INCORRECT
+int f()
+{
+  int a;
+  if (a == 0) then { x = 2; } else
+}

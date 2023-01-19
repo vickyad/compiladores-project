@@ -1,0 +1,7 @@
+//INCORRECT
+int main()
+{
+  {
+    int x;
+  } while ( 1 );
+}

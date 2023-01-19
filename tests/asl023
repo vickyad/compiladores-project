@@ -1,0 +1,2 @@
+//CORRECT
+int x, y, alfa[12^2], beta[12^8], omega[12^2], lambda, gama;

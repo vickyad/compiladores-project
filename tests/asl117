@@ -1,0 +1,7 @@
+//INCORRECT
+int main()
+{
+  if 1 then {
+    int x;
+  }
+}

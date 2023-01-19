@@ -1,0 +1,6 @@
+//INCORRECT
+int main()
+{
+  if (1) then
+    x = 2;
+}
