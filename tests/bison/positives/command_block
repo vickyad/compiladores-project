@@ -27,7 +27,7 @@ int function() {
 }
 
 int function() {
-    var : 10^20^30;
+    bool var [10^20^30];
 }
 
 float function() {
