@@ -42,31 +42,31 @@ int get_line_number();
 
 %%
 
-program: ;
-program: elements_list;
+program:  { $$ = NULL; };
+program: elements_list { $$ = $1 };
 
-elements_list: elements_list function;
-elements_list: elements_list global_declaration;
-elements_list: function;
-elements_list: global_declaration;
+elements_list: elements_list function { $$ = create_node(ELEMENT_LIST, "element_list"); add_child($$, $1); };
+elements_list: elements_list global_declaration { $$ = create_node(ELEMENT_LIST, "element_list"); add_child($$, $1); };
+elements_list: function { $$ = create_node(FUNCTION, "function"); };
+elements_list: global_declaration { $$ = create_node(GLOBAL_DECLARATION, "global_declaration"); };
 
 // =======================
 // =        Tipos        =
 // =======================
-type: TK_PR_INT;
-type: TK_PR_FLOAT;
-type: TK_PR_BOOL;
-type: TK_PR_CHAR;
+type: TK_PR_INT { $$ = create_leaf(TYPE, $1); };
+type: TK_PR_FLOAT { $$ = create_leaf(TYPE, $1); };
+type: TK_PR_BOOL { $$ = create_leaf(TYPE, $1); };
+type: TK_PR_CHAR { $$ = create_leaf(TYPE, $1); };
 
 
 // =======================
 // =      Literais       =
 // =======================
-literal: TK_LIT_INT;
-literal: TK_LIT_FLOAT;
-literal: TK_LIT_FALSE;
-literal: TK_LIT_TRUE;
-literal: TK_LIT_CHAR;
+literal: TK_LIT_INT { $$ = create_leaf(LITERAL, $1); };
+literal: TK_LIT_FLOAT { $$ = create_leaf(LITERAL, $1); };
+literal: TK_LIT_FALSE { $$ = create_leaf(LITERAL, $1); };
+literal: TK_LIT_TRUE { $$ = create_leaf(LITERAL, $1); };
+literal: TK_LIT_CHAR { $$ = create_leaf(LITERAL, $1); };
 
 
 // =======================
@@ -74,7 +74,7 @@ literal: TK_LIT_CHAR;
 // =======================
 global_declaration: type var_list ';';
 
-var_list: TK_IDENTIFICADOR;
+var_list: TK_IDENTIFICADOR { $$ = create_leaf(IDENTIFICADOR, $1); };
 var_list: array;
 var_list: TK_IDENTIFICADOR ',' var_list;
 var_list: array ',' var_list;
