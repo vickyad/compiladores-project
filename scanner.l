@@ -1,9 +1,11 @@
 /* João Pedro Silveira e Silva e Victoria Duarte */
 /* Definições */
 %{
+    #include <stdio.h>
+    #include "generic_tree.h"
+    #include "lexical_value.h"
 	#include "parser.tab.h"
-    #define MEU_TOKEN 300
-    int global = 0;
+    #define YYSTYPE LexicalValue
 %}
 
 %option noyywrap
@@ -23,38 +25,38 @@ float_literal ([0-9]+)[.]([0-9]+)(((e|E))((\+|\-)?[0-9]+))?
 %%
 {espaco} {} /* Todo espaço ou \n vai ser ignorado */
 
-"int"    { return TK_PR_INT; }
-"float"  { return TK_PR_FLOAT; }
-"bool"   { return TK_PR_BOOL; }
-"char"   { return TK_PR_CHAR; }
-"if"     { return TK_PR_IF; }
-"then"   { return TK_PR_THEN; }
-"else"   { return TK_PR_ELSE; }
-"while"  { return TK_PR_WHILE; }
-"input"  { return TK_PR_INPUT; }
-"output" { return TK_PR_OUTPUT; }
-"return" { return TK_PR_RETURN; }
-"for"    { return TK_PR_FOR; }
+"int"    { yylval.lexicalValue = createLexicalValue(yytext, RESERVED_WORD, NULL, yylineno); return TK_PR_INT; }
+"float"  { yylval.lexicalValue = createLexicalValue(yytext, RESERVED_WORD, NULL, yylineno); return TK_PR_FLOAT; }
+"bool"   { yylval.lexicalValue = createLexicalValue(yytext, RESERVED_WORD, NULL, yylineno); return TK_PR_BOOL; }
+"char"   { yylval.lexicalValue = createLexicalValue(yytext, RESERVED_WORD, NULL, yylineno); return TK_PR_CHAR; }
+"if"     { yylval.lexicalValue = createLexicalValue(yytext, RESERVED_WORD, NULL, yylineno); return TK_PR_IF; }
+"then"   { yylval.lexicalValue = createLexicalValue(yytext, RESERVED_WORD, NULL, yylineno); return TK_PR_THEN; }
+"else"   { yylval.lexicalValue = createLexicalValue(yytext, RESERVED_WORD, NULL, yylineno); return TK_PR_ELSE; }
+"while"  { yylval.lexicalValue = createLexicalValue(yytext, RESERVED_WORD, NULL, yylineno); return TK_PR_WHILE; }
+"input"  { yylval.lexicalValue = createLexicalValue(yytext, RESERVED_WORD, NULL, yylineno); return TK_PR_INPUT; }
+"output" { yylval.lexicalValue = createLexicalValue(yytext, RESERVED_WORD, NULL, yylineno); return TK_PR_OUTPUT; }
+"return" { yylval.lexicalValue = createLexicalValue(yytext, RESERVED_WORD, NULL, yylineno); return TK_PR_RETURN; }
+"for"    { yylval.lexicalValue = createLexicalValue(yytext, RESERVED_WORD, NULL, yylineno); return TK_PR_FOR; }
 
-"true"   { return TK_LIT_TRUE; }
-"false"  { return TK_LIT_FALSE; }
+"true"   { yylval.lexicalValue = createLexicalValue(yytext, LITERAL, BOOL, yylineno); return TK_LIT_TRUE; }
+"false"  { yylval.lexicalValue = createLexicalValue(yytext, LITERAL, BOOL, yylineno); return TK_LIT_FALSE; }
 
-"<="     { return TK_OC_LE; }
-">="     { return TK_OC_GE; }
-"=="     { return TK_OC_EQ; }
-"!="     { return TK_OC_NE; }
-"&&"     { return TK_OC_AND; }
-"||"     { return TK_OC_OR; }
+"<="     { yylval.lexicalValue = createLexicalValue(yytext, COMPOUND_OPERATOR, NULL, yylineno); return TK_OC_LE; }
+">="     { yylval.lexicalValue = createLexicalValue(yytext, COMPOUND_OPERATOR, NULL, yylineno); return TK_OC_GE; }
+"=="     { yylval.lexicalValue = createLexicalValue(yytext, COMPOUND_OPERATOR, NULL, yylineno); return TK_OC_EQ; }
+"!="     { yylval.lexicalValue = createLexicalValue(yytext, COMPOUND_OPERATOR, NULL, yylineno); return TK_OC_NE; }
+"&&"     { yylval.lexicalValue = createLexicalValue(yytext, COMPOUND_OPERATOR, NULL, yylineno); return TK_OC_AND; }
+"||"     { yylval.lexicalValue = createLexicalValue(yytext, COMPOUND_OPERATOR, NULL, yylineno); return TK_OC_OR; }
 
 
-[a-zA-Z]+ { return TK_IDENTIFICADOR; }
-[0-9]+ { return TK_LIT_INT; }
-{float_literal} { return TK_LIT_FLOAT; }
-'.?' { return TK_LIT_CHAR; }
+[a-zA-Z]+ { yylval.lexicalValue = createLexicalValue(yytext, IDENTIFIER, NULL, yylineno); return TK_IDENTIFICADOR; }
+[0-9]+ { yylval.lexicalValue = createLexicalValue(yytext, LITERAL, INT, yylineno); return TK_LIT_INT; }
+{float_literal} { yylval.lexicalValue = createLexicalValue(yytext, LITERAL, FLOAT, yylineno); return TK_LIT_FLOAT; }
+'.?' { yylval.lexicalValue = createLexicalValue(yytext, LITERAL, CHAR, yylineno); return TK_LIT_CHAR; }
 {inline_comment} {}
 {multiline_comment} {} 
 
-{special_char} {return yytext[0];}
+{special_char} {yylval.lexicalValue = createLexicalValue(yytext, SPECIAL_CHARACTER, NULL, yylineno); return yytext[0];}
 
 . {return TK_ERRO;} /* reconhece todos os outros tokens que não se enquadraram nas outras regras */
 %%

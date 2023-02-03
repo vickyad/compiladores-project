@@ -6,37 +6,79 @@ void yyerror (char const *message);
 int get_line_number();
 %}
 
+%code requires {
+    #include "generic_tree.h"
+    #include "lexical_value.h"
+}
+
+%union {
+   LexicalValue lexicalValue;
+   struct Node* node;
+}
+
 %define parse.error verbose
 
-%token TK_PR_INT
-%token TK_PR_FLOAT
-%token TK_PR_BOOL
-%token TK_PR_CHAR
-%token TK_PR_IF
-%token TK_PR_THEN
-%token TK_PR_ELSE
-%token TK_PR_WHILE
-%token TK_PR_INPUT
-%token TK_PR_OUTPUT
-%token TK_PR_RETURN
-%token TK_PR_FOR
-%token TK_OC_LE
-%token TK_OC_GE
-%token TK_OC_EQ
-%token TK_OC_NE
-%token TK_OC_AND
-%token TK_OC_OR
-%token TK_LIT_INT
-%token TK_LIT_FLOAT
-%token TK_LIT_FALSE
-%token TK_LIT_TRUE
-%token TK_LIT_CHAR
-%token TK_IDENTIFICADOR
+%token<LexicalValue>  TK_PR_INT
+%token<LexicalValue> TK_PR_FLOAT
+%token<LexicalValue> TK_PR_BOOL
+%token<LexicalValue> TK_PR_CHAR
+%token<LexicalValue> TK_PR_IF
+%token<LexicalValue> TK_PR_THEN
+%token<LexicalValue> TK_PR_ELSE
+%token<LexicalValue> TK_PR_WHILE
+%token<LexicalValue> TK_PR_INPUT
+%token<LexicalValue> TK_PR_OUTPUT
+%token<LexicalValue> TK_PR_RETURN
+%token<LexicalValue> TK_PR_FOR
+%token<LexicalValue> TK_OC_LE
+%token<LexicalValue> TK_OC_GE
+%token<LexicalValue> TK_OC_EQ
+%token<LexicalValue> TK_OC_NE
+%token<LexicalValue> TK_OC_AND
+%token<LexicalValue> TK_OC_OR
+%token<LexicalValue> TK_LIT_INT
+%token<LexicalValue> TK_LIT_FLOAT
+%token<LexicalValue> TK_LIT_FALSE
+%token<LexicalValue> TK_LIT_TRUE
+%token<LexicalValue> TK_LIT_CHAR
+%token<LexicalValue> TK_IDENTIFICADOR
 %token TK_ERRO
 
-// ======================================================
-// =        Definições de precedencia                   =
-// ======================================================
+%type<Node> program
+%type<Node> elements_list
+%type<Node> type
+%type<Node> literal
+%type<Node> global_declaration
+%type<Node> var_list
+%type<Node> array
+%type<Node> dimension
+%type<Node> function
+%type<Node> header
+%type<Node> body
+%type<Node> argumments
+%type<Node> arg_list
+%type<Node> command_block
+%type<Node> simple_command_list
+%type<Node> simple_command
+%type<Node> var_declaration
+%type<Node> var_decl_list
+%type<Node> attribution
+%type<Node> attr_array
+%type<Node> function_call
+%type<Node> arg_fn_list
+%type<Node> return_command
+%type<Node> flow_control_commands
+%type<Node> expression
+%type<Node> expression_grade_eight
+%type<Node> expression_grade_seven
+%type<Node> expression_grade_six
+%type<Node> expression_grade_five
+%type<Node> expression_grade_four
+%type<Node> expression_grade_three
+%type<Node> expression_grade_two
+%type<Node> expression_grade_one
+%type<Node> expression_list
+
 
 %start program
 
@@ -47,8 +89,8 @@ program: elements_list { $$ = $1; };
 
 elements_list: elements_list function {  };
 elements_list: elements_list global_declaration { };
-elements_list: function { $$ = create_node(FUNCTION, "function"); };
-elements_list: global_declaration { $$ = create_node(GLOBAL_DECLARATION, "global_declaration"); };
+elements_list: function { $$ = createNode(FUNCTION, "function"); };
+elements_list: global_declaration { $$ = createNode(GLOBAL_DECLARATION, "global_declaration"); };
 
 // =======================
 // =        Tipos        =
