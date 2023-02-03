@@ -79,7 +79,6 @@ int get_line_number();
 %type<Node> expression_grade_one
 %type<Node> expression_list
 
-
 %start program
 
 %%
@@ -89,8 +88,8 @@ program: elements_list { $$ = $1; };
 
 elements_list: elements_list function {  };
 elements_list: elements_list global_declaration { };
-elements_list: function { $$ = createNode(FUNCTION, "function"); };
-elements_list: global_declaration { $$ = createNode(GLOBAL_DECLARATION, "global_declaration"); };
+elements_list: function { $$ = create_leaf(FUNCTION, "function"); };
+elements_list: global_declaration { $$ = create_leaf(GLOBAL_DECLARATION, "global_declaration"); };
 
 // =======================
 // =        Tipos        =
