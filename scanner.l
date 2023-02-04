@@ -25,38 +25,38 @@ float_literal ([0-9]+)[.]([0-9]+)(((e|E))((\+|\-)?[0-9]+))?
 %%
 {espaco} {} /* Todo espaço ou \n vai ser ignorado */
 
-"int"    { yylval.lexicalValue = createLexicalValue(yytext, RESERVED_WORD, NULL, yylineno); return TK_PR_INT; }
-"float"  { yylval.lexicalValue = createLexicalValue(yytext, RESERVED_WORD, NULL, yylineno); return TK_PR_FLOAT; }
-"bool"   { yylval.lexicalValue = createLexicalValue(yytext, RESERVED_WORD, NULL, yylineno); return TK_PR_BOOL; }
-"char"   { yylval.lexicalValue = createLexicalValue(yytext, RESERVED_WORD, NULL, yylineno); return TK_PR_CHAR; }
-"if"     { yylval.lexicalValue = createLexicalValue(yytext, RESERVED_WORD, NULL, yylineno); return TK_PR_IF; }
-"then"   { yylval.lexicalValue = createLexicalValue(yytext, RESERVED_WORD, NULL, yylineno); return TK_PR_THEN; }
-"else"   { yylval.lexicalValue = createLexicalValue(yytext, RESERVED_WORD, NULL, yylineno); return TK_PR_ELSE; }
-"while"  { yylval.lexicalValue = createLexicalValue(yytext, RESERVED_WORD, NULL, yylineno); return TK_PR_WHILE; }
-"input"  { yylval.lexicalValue = createLexicalValue(yytext, RESERVED_WORD, NULL, yylineno); return TK_PR_INPUT; }
-"output" { yylval.lexicalValue = createLexicalValue(yytext, RESERVED_WORD, NULL, yylineno); return TK_PR_OUTPUT; }
-"return" { yylval.lexicalValue = createLexicalValue(yytext, RESERVED_WORD, NULL, yylineno); return TK_PR_RETURN; }
-"for"    { yylval.lexicalValue = createLexicalValue(yytext, RESERVED_WORD, NULL, yylineno); return TK_PR_FOR; }
+"int"    { yylval.valor_lexico = createLexicalValue(yytext, RESERVED_WORD, IS_NOT_LITERAL, yylineno); return TK_PR_INT; }
+"float"  { yylval.valor_lexico = createLexicalValue(yytext, RESERVED_WORD, IS_NOT_LITERAL, yylineno); return TK_PR_FLOAT; }
+"bool"   { yylval.valor_lexico = createLexicalValue(yytext, RESERVED_WORD, IS_NOT_LITERAL, yylineno); return TK_PR_BOOL; }
+"char"   { yylval.valor_lexico = createLexicalValue(yytext, RESERVED_WORD, IS_NOT_LITERAL, yylineno); return TK_PR_CHAR; }
+"if"     { yylval.valor_lexico = createLexicalValue(yytext, RESERVED_WORD, IS_NOT_LITERAL, yylineno); return TK_PR_IF; }
+"then"   { yylval.valor_lexico = createLexicalValue(yytext, RESERVED_WORD, IS_NOT_LITERAL, yylineno); return TK_PR_THEN; }
+"else"   { yylval.valor_lexico = createLexicalValue(yytext, RESERVED_WORD, IS_NOT_LITERAL, yylineno); return TK_PR_ELSE; }
+"while"  { yylval.valor_lexico = createLexicalValue(yytext, RESERVED_WORD, IS_NOT_LITERAL, yylineno); return TK_PR_WHILE; }
+"input"  { yylval.valor_lexico = createLexicalValue(yytext, RESERVED_WORD, IS_NOT_LITERAL, yylineno); return TK_PR_INPUT; }
+"output" { yylval.valor_lexico = createLexicalValue(yytext, RESERVED_WORD, IS_NOT_LITERAL, yylineno); return TK_PR_OUTPUT; }
+"return" { yylval.valor_lexico = createLexicalValue(yytext, RESERVED_WORD, IS_NOT_LITERAL, yylineno); return TK_PR_RETURN; }
+"for"    { yylval.valor_lexico = createLexicalValue(yytext, RESERVED_WORD, IS_NOT_LITERAL, yylineno); return TK_PR_FOR; }
 
-"true"   { yylval.lexicalValue = createLexicalValue(yytext, LITERAL, BOOL, yylineno); return TK_LIT_TRUE; }
-"false"  { yylval.lexicalValue = createLexicalValue(yytext, LITERAL, BOOL, yylineno); return TK_LIT_FALSE; }
+"true"   { yylval.valor_lexico = createLexicalValue(yytext, LITERAL, BOOL, yylineno); return TK_LIT_TRUE; }
+"false"  { yylval.valor_lexico = createLexicalValue(yytext, LITERAL, BOOL, yylineno); return TK_LIT_FALSE; }
 
-"<="     { yylval.lexicalValue = createLexicalValue(yytext, COMPOUND_OPERATOR, NULL, yylineno); return TK_OC_LE; }
-">="     { yylval.lexicalValue = createLexicalValue(yytext, COMPOUND_OPERATOR, NULL, yylineno); return TK_OC_GE; }
-"=="     { yylval.lexicalValue = createLexicalValue(yytext, COMPOUND_OPERATOR, NULL, yylineno); return TK_OC_EQ; }
-"!="     { yylval.lexicalValue = createLexicalValue(yytext, COMPOUND_OPERATOR, NULL, yylineno); return TK_OC_NE; }
-"&&"     { yylval.lexicalValue = createLexicalValue(yytext, COMPOUND_OPERATOR, NULL, yylineno); return TK_OC_AND; }
-"||"     { yylval.lexicalValue = createLexicalValue(yytext, COMPOUND_OPERATOR, NULL, yylineno); return TK_OC_OR; }
+"<="     { yylval.valor_lexico = createLexicalValue(yytext, COMPOUND_OPERATOR, IS_NOT_LITERAL, yylineno); return TK_OC_LE; }
+">="     { yylval.valor_lexico = createLexicalValue(yytext, COMPOUND_OPERATOR, IS_NOT_LITERAL, yylineno); return TK_OC_GE; }
+"=="     { yylval.valor_lexico = createLexicalValue(yytext, COMPOUND_OPERATOR, IS_NOT_LITERAL, yylineno); return TK_OC_EQ; }
+"!="     { yylval.valor_lexico = createLexicalValue(yytext, COMPOUND_OPERATOR, IS_NOT_LITERAL, yylineno); return TK_OC_NE; }
+"&&"     { yylval.valor_lexico = createLexicalValue(yytext, COMPOUND_OPERATOR, IS_NOT_LITERAL, yylineno); return TK_OC_AND; }
+"||"     { yylval.valor_lexico = createLexicalValue(yytext, COMPOUND_OPERATOR, IS_NOT_LITERAL, yylineno); return TK_OC_OR; }
 
 
-[a-zA-Z]+ { yylval.lexicalValue = createLexicalValue(yytext, IDENTIFIER, NULL, yylineno); return TK_IDENTIFICADOR; }
-[0-9]+ { yylval.lexicalValue = createLexicalValue(yytext, LITERAL, INT, yylineno); return TK_LIT_INT; }
-{float_literal} { yylval.lexicalValue = createLexicalValue(yytext, LITERAL, FLOAT, yylineno); return TK_LIT_FLOAT; }
-'.?' { yylval.lexicalValue = createLexicalValue(yytext, LITERAL, CHAR, yylineno); return TK_LIT_CHAR; }
+[a-zA-Z]+ { yylval.valor_lexico = createLexicalValue(yytext, IDENTIFIER, IS_NOT_LITERAL, yylineno); return TK_IDENTIFICADOR; }
+[0-9]+ { yylval.valor_lexico = createLexicalValue(yytext, LITERAL, INT, yylineno); return TK_LIT_INT; }
+{float_literal} { yylval.valor_lexico = createLexicalValue(yytext, LITERAL, FLOAT, yylineno); return TK_LIT_FLOAT; }
+'.?' { yylval.valor_lexico = createLexicalValue(yytext, LITERAL, CHAR, yylineno); return TK_LIT_CHAR; }
 {inline_comment} {}
 {multiline_comment} {} 
 
-{special_char} {yylval.lexicalValue = createLexicalValue(yytext, SPECIAL_CHARACTER, NULL, yylineno); return yytext[0];}
+{special_char} {yylval.valor_lexico = createLexicalValue(yytext, SPECIAL_CHARACTER, IS_NOT_LITERAL, yylineno); return yytext[0];}
 
 . {return TK_ERRO;} /* reconhece todos os outros tokens que não se enquadraram nas outras regras */
 %%

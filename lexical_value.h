@@ -2,6 +2,8 @@
 #define LEXICAL_VALUE_HEADER
 
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
 typedef enum TokenType {
     SPECIAL_CHARACTER,
@@ -15,13 +17,15 @@ typedef enum LiteralType {
     INT,
     FLOAT,
     CHAR,
-    BOOL
+    BOOL,
+    IS_NOT_LITERAL
 } LiteralType;
 
 typedef struct LexicalValue {
     int lineNumber;
     TokenType type;
     LiteralType literalType;
+    
     union value {
         int value_int;
         float value_float;
@@ -33,5 +37,12 @@ typedef struct LexicalValue {
 
 char* getLexicalValueLabel(LexicalValue value);
 LexicalValue createLexicalValue(char* text, TokenType type, LiteralType literalType, int lineNumber);
+void defineLiteralValue(LexicalValue* lexicalValue, char* text, LiteralType literalType);
+int isTextEqualTrue(char* text);
+char* getLexicalValueLabel(LexicalValue lexicalValue);
+char* getIntFromLexicalValue(LexicalValue lexicalValue);
+char* getCharFromLexicalValue(LexicalValue lexicalValue);
+char* getFloatFromLexicalValue(LexicalValue lexicalValue);
+char* getBooleanFromLexicalValue(LexicalValue lexicalValue);
 
 #endif

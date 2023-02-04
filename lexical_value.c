@@ -7,14 +7,16 @@ LexicalValue createLexicalValue(char* text, TokenType type, LiteralType literalT
     lexicalValue.type = type;
     lexicalValue.label = strdup(text);
     
-    if (literalType != NULL) 
+    if (literalType) 
     {
         defineLiteralValue(&lexicalValue, text, literalType);
     }
     else
     {
-        lexicalValue.literalType = NULL;
+        lexicalValue.literalType = IS_NOT_LITERAL;
     }
+
+    return lexicalValue;
 }
 
 void defineLiteralValue(LexicalValue* lexicalValue, char* text, LiteralType literalType) {
@@ -41,14 +43,14 @@ int isTextEqualTrue(char* text)
     return strncmp(text, "true", 4) == 0;
 }
 
-char* getLexicalValueLabel(LexicalValue lexicalValue) 
+char* getLexicalValueLabel(LexicalValue lexicalValue)
 {
     if (lexicalValue.type == SPECIAL_CHARACTER || lexicalValue.type == RESERVED_WORD 
         || lexicalValue.type == COMPOUND_OPERATOR || lexicalValue.type == IDENTIFIER
         || lexicalValue.literalType == CHAR) 
     {
-        return lexicalValue.value.value_char;
-    } 
+        return getCharFromLexicalValue(lexicalValue);
+    }
     else if (lexicalValue.literalType == INT)
     {
         return getIntFromLexicalValue(lexicalValue);
@@ -57,7 +59,7 @@ char* getLexicalValueLabel(LexicalValue lexicalValue)
     {
         return getFloatFromLexicalValue(lexicalValue);
     }
-    else if (lexicalValue.literalType == BOOL)
+    else
     {
         return getBooleanFromLexicalValue(lexicalValue);
     }
@@ -65,26 +67,35 @@ char* getLexicalValueLabel(LexicalValue lexicalValue)
 
 char* getIntFromLexicalValue(LexicalValue lexicalValue) 
 {
-    char stringInteger[10];
-    itoa(lexicalValue.value.value_int, stringInteger, 10);
+    char* stringInteger = malloc(10 * sizeof(char));
+    snprintf(stringInteger, sizeof(stringInteger), "%d", lexicalValue.value.value_int);
     return stringInteger;
+}
+
+char* getCharFromLexicalValue(LexicalValue lexicalValue) 
+{
+    char* stringChar = malloc(48 * sizeof(char));
+    snprintf(stringChar, sizeof(stringChar), "%c", lexicalValue.value.value_char);
+    return stringChar;
 }
 
 char* getFloatFromLexicalValue(LexicalValue lexicalValue) 
 {
-    char stringFloat[48];
+    char* stringFloat = malloc(48 * sizeof(char));
     snprintf(stringFloat, sizeof(stringFloat), "%f", lexicalValue.value.value_float);
     return stringFloat;
 }
 
 char* getBooleanFromLexicalValue(LexicalValue lexicalValue)
 {
+    char* stringBoolean = malloc(5 * sizeof(char));
     if (lexicalValue.value.value_bool == 1) 
     {
-        return "true";
+        snprintf(stringBoolean, sizeof(stringBoolean), "%s", "true");
     } 
     else 
     {
-        return "false";
+        snprintf(stringBoolean, sizeof(stringBoolean), "%s", "false");
     }
+    return stringBoolean;
 }

@@ -17,7 +17,7 @@ Node* createNodeFromSpecialCharacter(char* specialCharacter, int lineNumber)
 {
     Node* node = malloc(sizeof(Node));
 
-    node->lexicalValue = createLexicalValue(specialCharacter, SPECIAL_CHARACTER, NULL, lineNumber);
+    node->lexicalValue = createLexicalValue(specialCharacter, SPECIAL_CHARACTER, IS_NOT_LITERAL, lineNumber);
     node->nextBrother = NULL;
     node->firstChild = NULL;
     node->parent = NULL;
@@ -25,7 +25,7 @@ Node* createNodeFromSpecialCharacter(char* specialCharacter, int lineNumber)
     return node;
 }
 
-Node* addChild(Node* parent, Node* child) 
+void addChild(Node* parent, Node* child) 
 {
     Node* lastChild = getLastChild(parent);
     if (lastChild != NULL) 
@@ -48,25 +48,21 @@ void printTree(Node* node)
 
 void printNonNullTree(Node* node) 
 {
-    Node* node = getRoot(node);
-    printTreeRecursively(node, 1);
+    Node* rootNode = getRoot(node);
+    printTreeRecursively(rootNode, 1);
 }
 
 void printTreeRecursively(Node* node, int level) 
 {
-    for(int x = 0; x < level; x++) 
-    {
-        printf("    ");
-    }
-    printf("%s", getLexicalValueLabel(node->lexicalValue));
-    printf("\n");
-
     Node *child = node->firstChild;
     while(child != NULL)
     {
         printTreeRecursively(child, level + 1);
         child = child->nextBrother;
     }
+
+    printf("Nível %d %s", level, node->lexicalValue.label);
+    printf("\n");
 }
 
 Node* getRoot(Node* node) 
