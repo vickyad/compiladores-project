@@ -136,10 +136,41 @@ void libera(Node* node)
 
 void exporta(Node* node)
 {
+    if (!node) return;
 
+    printHeader(node);
+    printBody(node);
+}
+
+void printHeader(Node* node)
+{
+    printf("%p [label=\"%s\"]\n", node, node->lexicalValue.label);
+    if (node->child) 
+    {
+        printHeader(node->child);
+    }
+    if (node->brother)
+    {
+        printHeader(node->brother);
+    }
+}
+
+void printBody(Node* node)
+{
+    if (node->parent) {
+         printf("%p, %p \n", node->parent, node);
+    }
+    if (node->child) 
+    {
+        printBody(node->child);  
+    }
+    if (node->brother)
+    {
+        printBody(node->brother);
+    }
 }
 
 void getNodeLabel(Node* node)
 {
-    
+
 }

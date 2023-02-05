@@ -23,5 +23,7 @@ Node* getLastChild(Node* parent);
 void libera(Node* node);
 void exporta(Node* node);
 void getNodeLabel(Node* node);
+void printHeader(Node* node);
+void printBody(Node* node);
 
 #endif
