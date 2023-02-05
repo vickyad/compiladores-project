@@ -40,11 +40,6 @@ char* getLexicalValueLabel(LexicalValue value);
 LexicalValue createLexicalValue(char* text, TokenType type, LiteralType literalType, int lineNumber);
 void defineLiteralValue(LexicalValue* lexicalValue, char* text, LiteralType literalType);
 int isTextEqualTrue(char* text);
-char* getLexicalValueLabel(LexicalValue lexicalValue);
-char* getIntFromLexicalValue(LexicalValue lexicalValue);
-char* getCharFromLexicalValue(LexicalValue lexicalValue);
-char* getFloatFromLexicalValue(LexicalValue lexicalValue);
-char* getBooleanFromLexicalValue(LexicalValue lexicalValue);
 void freeLexicalValue(LexicalValue lexicalValue);
 
 #endif
