@@ -114,6 +114,7 @@ elements_list: global_declaration {
     $$ = NULL;
 };
 
+
 // =======================
 // =        Tipos        =
 // =======================
@@ -298,7 +299,7 @@ simple_command: function_call ';' {
 };
 
 simple_command: return_command ';' {
-    // TODO 
+    $$ = $1;
     freeLexicalValue($2);
 };
 
@@ -392,24 +393,36 @@ arg_fn_list: expression ',' arg_fn_list {
 
 // Comando de retorno
 return_command: TK_PR_RETURN expression { 
-    // TODO
+    $$ = createNode($1);
+    addChild($$, $2);
 };
 
 // Comando de controle de fluxo
 flow_control_commands: TK_PR_IF '(' expression ')' TK_PR_THEN command_block { 
-    // TODO
+    $$ = createNode($1);
+    addChild($$, $3);
+    addChild($$, $6);
     freeLexicalValue($2);
     freeLexicalValue($4);
+    freeLexicalValue($5);
 };
 
 flow_control_commands: TK_PR_IF '(' expression ')' TK_PR_THEN command_block TK_PR_ELSE command_block { 
-    // TODO
+    $$ = createNode($1);
+    addChild($$, $3);
+    addChild($$, $6);
+    addChild($$, $8);
     freeLexicalValue($2);
     freeLexicalValue($4);
+    freeLexicalValue($5);
+    freeLexicalValue($7);
 };
 
 flow_control_commands: TK_PR_WHILE '(' expression ')' command_block { 
     // TODO
+    $$ = createNode($1);
+    addChild($$, $3);
+    addChild($$, $5);
     freeLexicalValue($2);
     freeLexicalValue($4);
 };
