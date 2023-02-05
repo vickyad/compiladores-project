@@ -170,20 +170,22 @@ global_declaration: type var_list ';' {
 };
 
 var_list: TK_IDENTIFICADOR { 
-    $$ = createNode($1); 
+    $$ = NULL; 
+    freeLexicalValue($1);
 };
 
 var_list: array { 
-    // TODO
+    $$ = NULL; 
 };
 
 var_list: TK_IDENTIFICADOR ',' var_list {
-    // TODO
+    $$ = NULL;
+    freeLexicalValue($1);
     freeLexicalValue($2);
 };
 
 var_list: array ',' var_list { 
-    // TODO
+    $$ = NULL;
     freeLexicalValue($2);
 } ;
 
@@ -289,7 +291,7 @@ simple_command: var_declaration ';' {
 };
 
 simple_command: attribution ';' { 
-    // TODO
+    $$ = $1;
     freeLexicalValue($2);
 };
 
@@ -304,7 +306,7 @@ simple_command: return_command ';' {
 };
 
 simple_command: flow_control_commands ';' { 
-    // TODO
+    $$ = $1;
     freeLexicalValue($2);
 };
 
@@ -346,8 +348,9 @@ var_decl_list: TK_IDENTIFICADOR TK_OC_LE literal ',' var_decl_list {
 
 // Atribuicao
 attribution: TK_IDENTIFICADOR '=' expression { 
-    // TODO
-    freeLexicalValue($2);
+    $$ = createNode($2);
+    addChild($$, createNode($1));
+    addChild($$, $3);
 };
 
 attribution: TK_IDENTIFICADOR '[' attr_array ']' '=' expression {
@@ -419,7 +422,6 @@ flow_control_commands: TK_PR_IF '(' expression ')' TK_PR_THEN command_block TK_P
 };
 
 flow_control_commands: TK_PR_WHILE '(' expression ')' command_block { 
-    // TODO
     $$ = createNode($1);
     addChild($$, $3);
     addChild($$, $5);
