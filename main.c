@@ -12,7 +12,7 @@ void *arvore = NULL;
 int main (int argc, char **argv)
 {
   int ret = yyparse(); 
-  exporta (arvore);
+  // exporta(arvore);
   libera(arvore);
   arvore = NULL;
   yylex_destroy();
