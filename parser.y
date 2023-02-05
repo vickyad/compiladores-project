@@ -191,17 +191,20 @@ var_list: array ',' var_list {
 
 // Arranjos
 array: TK_IDENTIFICADOR '[' dimension ']' {
-    // TODO
+    $$ = NULL;
+    freeLexicalValue($1);
     freeLexicalValue($2);
     freeLexicalValue($4);
 }; 
 
 dimension: TK_LIT_INT {
-    // TODO    
+    $$ = NULL;
+    freeLexicalValue($1);
 };
 
 dimension: TK_LIT_INT '^' dimension {
-    // TODO
+    $$ = NULL;
+    freeLexicalValue($1);
     freeLexicalValue($2);
 };
 
@@ -354,10 +357,6 @@ attribution: TK_IDENTIFICADOR '=' expression {
 };
 
 attribution: TK_IDENTIFICADOR '[' attr_array ']' '=' expression {
-    // TODO
-    freeLexicalValue($2);
-    freeLexicalValue($4);
-    freeLexicalValue($5);
 };
 
 attr_array: expression { 
@@ -365,7 +364,8 @@ attr_array: expression {
 };
 
 attr_array: expression '^' attr_array { 
-    // TODO
+    $$ = $1;
+    addChild($$, $3);
     freeLexicalValue($2);
 };
 
