@@ -1,6 +1,0 @@
-//INCORRECT
-int f()
-{
-  int b <= 10;
-  int a <= b;
-}

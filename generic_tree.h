@@ -3,21 +3,23 @@
 
 #include <stdio.h>
 #include "lexical_value.h"
+#include "debug.h"
 
 typedef struct Node {
     LexicalValue lexicalValue;
-    struct Node* nextBrother;
-    struct Node* firstChild;
+    struct Node* brother;
+    struct Node* child;
     struct Node* parent;
 } Node;
 
-Node* createNode(LexicalValue LexicalValue);
-Node* createNodeFromSpecialCharacter(char* specialCharacter, int lineNumber);
+Node* createNode(LexicalValue lexicalValue);
+Node* createNodeFromLabel(char* label, int lineNumber);
 void addChild(Node* parent, Node* child);
 void printTree(Node* node);
 void printNonNullTree(Node* node);
 void printTreeRecursively(Node* node, int level);
 Node* getRoot(Node* node);
 Node* getLastChild(Node* parent);
+void freeNode(Node* node);
 
 #endif

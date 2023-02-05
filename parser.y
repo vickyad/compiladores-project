@@ -1,9 +1,13 @@
 %{
 #include <stdio.h>
+#include "generic_tree.h"
+#include "lexical_value.h"
+#include "debug.h"
 
 int yylex(void);
 void yyerror (char const *message);
 int get_line_number();
+extern void *arvore;
 %}
 
 %code requires {
@@ -12,8 +16,8 @@ int get_line_number();
 }
 
 %union {
-   LexicalValue valor_lexico;
-   struct Node* node;
+   LexicalValue LexicalValue;
+   struct Node* Node;
 }
 
 %define parse.error verbose
@@ -42,6 +46,7 @@ int get_line_number();
 %token<LexicalValue> TK_LIT_TRUE
 %token<LexicalValue> TK_LIT_CHAR
 %token<LexicalValue> TK_IDENTIFICADOR
+%token<LexicalValue> ',' ';' ':' '(' ')' '{' '}' '|' '-' '+' '%' '^' '!' '<' '>' '=' '*' '/' '[' ']' 
 %token TK_ERRO
 
 %type<Node> program
@@ -55,7 +60,7 @@ int get_line_number();
 %type<Node> function
 %type<Node> header
 %type<Node> body
-%type<Node> argumments
+%type<Node> arguments
 %type<Node> arg_list
 %type<Node> command_block
 %type<Node> simple_command_list
@@ -83,21 +88,44 @@ int get_line_number();
 
 %%
 
-program:  {  };
-program: elements_list { };
+program:  { 
+    $$ = NULL; 
+    arvore = NULL; 
+};
+program: elements_list { 
+    $$ = $1; 
+    arvore = $$;
+};
 
-elements_list: elements_list function {  };
-elements_list: elements_list global_declaration { };
-elements_list: function {  };
-elements_list: global_declaration {  };
+elements_list: function elements_list { 
+    $$ = $1;
+    addChild($$, $2);
+};
+elements_list: global_declaration elements_list {
+    $$ = $2;
+};
+elements_list: function { 
+    $$ = $1;
+};
+elements_list: global_declaration { 
+    $$ = NULL;
+};
 
 // =======================
 // =        Tipos        =
 // =======================
-type: TK_PR_INT {  };
-type: TK_PR_FLOAT {  };
-type: TK_PR_BOOL {  };
-type: TK_PR_CHAR {  };
+type: TK_PR_INT { 
+    $$ = createNode($1); 
+};
+type: TK_PR_FLOAT { 
+     $$ = createNode($1); 
+ };
+type: TK_PR_BOOL { 
+     $$ = createNode($1); 
+ };
+type: TK_PR_CHAR { 
+     $$ = createNode($1); 
+ };
 
 
 // =======================
@@ -113,78 +141,174 @@ literal: TK_LIT_CHAR {  };
 // =======================
 // =  Variaveis globais  =
 // =======================
-global_declaration: type var_list ';' { };
+global_declaration: type var_list ';' { 
+    $$ = NULL;
+    freeNode($1);
+    freeNode($2);
+    freeLexicalValue($3);
+ };
 
-var_list: TK_IDENTIFICADOR {  };
+var_list: TK_IDENTIFICADOR { 
+    $$ = createNode($1); 
+};
 var_list: array { };
-var_list: TK_IDENTIFICADOR ',' var_list { };
-var_list: array ',' var_list {  } ;
+var_list: TK_IDENTIFICADOR ',' var_list {
+    freeLexicalValue($2);
+ };
+var_list: array ',' var_list { 
+    freeLexicalValue($2);
+ } ;
 
 // Arranjos
-array: TK_IDENTIFICADOR '[' dimension ']' {}; 
-dimension: TK_LIT_INT {  };
-dimension: TK_LIT_INT '^' dimension {};
+array: TK_IDENTIFICADOR '[' dimension ']' {
+    freeLexicalValue($2);
+    freeLexicalValue($4);
+}; 
+dimension: TK_LIT_INT {
+    
+ };
+dimension: TK_LIT_INT '^' dimension {
+    freeLexicalValue($2);
+};
 
 
 // =======================
 // =       Funcoes       =
 // =======================
-function: header body {};
-header: type TK_IDENTIFICADOR argumments {};
-body: command_block {  };
+function: header body {
+    $$ = $1;
+    addChild($$, $2);
+};
+header: type TK_IDENTIFICADOR arguments {
+    $$ = createNode($2);
+    addChild($$, $1);
+    addChild($$, $3);
+};
+body: command_block { 
+    $$ = $1;
+ };
 
 // Lista de argumentos
-argumments: '(' ')' {  };
-argumments: '(' arg_list ')' {  };
-arg_list: type TK_IDENTIFICADOR {};
-arg_list: type TK_IDENTIFICADOR ',' arg_list {};
+arguments: '(' ')' { 
+    $$ = NULL;
+    freeLexicalValue($1);
+    freeLexicalValue($2);
+};
+arguments: '(' arg_list ')' { 
+    $$ = $2;
+    freeLexicalValue($1);
+    freeLexicalValue($3);
+};
+arg_list: type TK_IDENTIFICADOR {
+    $$ = createNode($2);
+    addChild($$, $1);
+};
+arg_list: type TK_IDENTIFICADOR ',' arg_list {
+    $$ = createNode($2);
+    addChild($$, $1);
+    addChild($$, $4);
+    freeLexicalValue($3);
+};
 
 
 // =======================
 // =  Bloco de comandos  =
 // =======================
-command_block: '{' '}' {  };
-command_block: '{' simple_command_list '}' {  };
-simple_command_list: simple_command {  };
-simple_command_list: simple_command simple_command_list {};
+command_block: '{' '}' { 
+    $$ = NULL;
+    freeLexicalValue($1);
+    freeLexicalValue($2);
+ };
+command_block: '{' simple_command_list '}' { 
+    $$ = $2;
+    freeLexicalValue($1);
+    freeLexicalValue($3);
+ };
+simple_command_list: simple_command { 
+    $$ = $1;
+};
+simple_command_list: simple_command simple_command_list {
+    $$ = $1;
+};
 
 
 // =======================
 // =  Comandos simples   =
 // =======================
-simple_command: var_declaration ';' {  };
-simple_command: attribution ';' {  };
-simple_command: function_call ';' {  };
-simple_command: return_command ';' {  };
-simple_command: flow_control_commands ';' {  };
-simple_command: command_block ';' {  };
+simple_command: var_declaration ';' { 
+    freeLexicalValue($2);
+ };
+simple_command: attribution ';' { 
+    freeLexicalValue($2);
+ };
+simple_command: function_call ';' { 
+    freeLexicalValue($2);
+ };
+simple_command: return_command ';' { 
+    freeLexicalValue($2);
+ };
+simple_command: flow_control_commands ';' { 
+    freeLexicalValue($2);
+ };
+simple_command: command_block ';' { 
+    freeLexicalValue($2);
+ };
 
 // Declaracao de variavel
-var_declaration: type var_decl_list {};
+var_declaration: type var_decl_list { };
 var_decl_list: TK_IDENTIFICADOR {  };
 var_decl_list: TK_IDENTIFICADOR TK_OC_LE literal { };
-var_decl_list: TK_IDENTIFICADOR ',' var_decl_list {  };
-var_decl_list: TK_IDENTIFICADOR TK_OC_LE literal ',' var_decl_list {};
+var_decl_list: TK_IDENTIFICADOR ',' var_decl_list { 
+    freeLexicalValue($2);
+ };
+var_decl_list: TK_IDENTIFICADOR TK_OC_LE literal ',' var_decl_list { 
+    freeLexicalValue($4);
+};
 
 // Atribuicao
-attribution: TK_IDENTIFICADOR '=' expression {  };
-attribution: TK_IDENTIFICADOR '[' attr_array ']' '=' expression {};
+attribution: TK_IDENTIFICADOR '=' expression { 
+    freeLexicalValue($2);
+ };
+attribution: TK_IDENTIFICADOR '[' attr_array ']' '=' expression {
+    freeLexicalValue($2);
+    freeLexicalValue($4);
+    freeLexicalValue($5);
+};
 attr_array: expression {  };
-attr_array: expression '^' attr_array { };
+attr_array: expression '^' attr_array { 
+    freeLexicalValue($2);
+};
 
 // Chamada de funcao
-function_call: TK_IDENTIFICADOR '(' ')' {  };
-function_call: TK_IDENTIFICADOR '(' arg_fn_list ')' {  };
+function_call: TK_IDENTIFICADOR '(' ')' { 
+    freeLexicalValue($2);
+    freeLexicalValue($3);
+ };
+function_call: TK_IDENTIFICADOR '(' arg_fn_list ')' { 
+    freeLexicalValue($2);
+    freeLexicalValue($4);
+ };
 arg_fn_list: expression {  };
-arg_fn_list: expression ',' arg_fn_list {  };
+arg_fn_list: expression ',' arg_fn_list { 
+    freeLexicalValue($2);
+ };
 
 // Comando de retorno
 return_command: TK_PR_RETURN expression {  };
 
 // Comando de controle de fluxo
-flow_control_commands: TK_PR_IF '(' expression ')' TK_PR_THEN command_block { };
-flow_control_commands: TK_PR_IF '(' expression ')' TK_PR_THEN command_block TK_PR_ELSE command_block {  };
-flow_control_commands: TK_PR_WHILE '(' expression ')' command_block {  };
+flow_control_commands: TK_PR_IF '(' expression ')' TK_PR_THEN command_block { 
+    freeLexicalValue($2);
+    freeLexicalValue($4);
+};
+flow_control_commands: TK_PR_IF '(' expression ')' TK_PR_THEN command_block TK_PR_ELSE command_block { 
+    freeLexicalValue($2);
+    freeLexicalValue($4);
+ };
+flow_control_commands: TK_PR_WHILE '(' expression ')' command_block { 
+    freeLexicalValue($2);
+    freeLexicalValue($4);
+ };
 
 
 // =======================
@@ -202,32 +326,58 @@ expression_grade_six: expression_grade_six TK_OC_EQ expression_grade_five {  };
 expression_grade_six: expression_grade_six TK_OC_NE expression_grade_five {  };
 expression_grade_six: expression_grade_five { };
 
-expression_grade_five: expression_grade_five '>' expression_grade_four {  };
-expression_grade_five: expression_grade_five '<' expression_grade_four {  };
+expression_grade_five: expression_grade_five '>' expression_grade_four { 
+    freeLexicalValue($2);
+ };
+expression_grade_five: expression_grade_five '<' expression_grade_four { 
+    freeLexicalValue($2);
+ };
 expression_grade_five: expression_grade_five TK_OC_LE expression_grade_four {  };
 expression_grade_five: expression_grade_five TK_OC_GE expression_grade_four {  };
 expression_grade_five: expression_grade_four { };
 
-expression_grade_four: expression_grade_four '+' expression_grade_three {  };
-expression_grade_four: expression_grade_four '-' expression_grade_three {  };
+expression_grade_four: expression_grade_four '+' expression_grade_three { 
+    freeLexicalValue($2);
+};
+expression_grade_four: expression_grade_four '-' expression_grade_three { 
+    freeLexicalValue($2); 
+};
 expression_grade_four: expression_grade_three { };
 
-expression_grade_three: expression_grade_three '*' expression_grade_two { };
-expression_grade_three: expression_grade_three '/' expression_grade_two {  };
-expression_grade_three: expression_grade_three '%' expression_grade_two {  };
+expression_grade_three: expression_grade_three '*' expression_grade_two {
+    freeLexicalValue($2);
+};
+expression_grade_three: expression_grade_three '/' expression_grade_two { 
+    freeLexicalValue($2);
+};
+expression_grade_three: expression_grade_three '%' expression_grade_two { 
+    freeLexicalValue($2);
+};
 expression_grade_three: expression_grade_two { } ;
 
-expression_grade_two: '!' expression_grade_one { };
-expression_grade_two: '-' expression_grade_one {  };
+expression_grade_two: '!' expression_grade_one { 
+    freeLexicalValue($1);
+};
+expression_grade_two: '-' expression_grade_one { 
+    freeLexicalValue($1);
+};
 expression_grade_two: expression_grade_one { };
 
 expression_grade_one: TK_IDENTIFICADOR {  };
-expression_grade_one: TK_IDENTIFICADOR '[' expression_list ']' {  };
+expression_grade_one: TK_IDENTIFICADOR '[' expression_list ']' {
+    freeLexicalValue($2);
+    freeLexicalValue($4);
+ };
 expression_grade_one: literal { };
 expression_grade_one: function_call { };
-expression_grade_one: '(' expression ')' {  };
+expression_grade_one: '(' expression ')' { 
+    freeLexicalValue($1);
+    freeLexicalValue($3);
+ };
 
-expression_list: expression_list '^' expression {  };
+expression_list: expression_list '^' expression { 
+    freeLexicalValue($2);
+ };
 expression_list: expression { };
 %%
 

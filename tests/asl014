@@ -1,7 +1,0 @@
-//CORRECT
-int main ()
-{
-  int a;
-  a = true + false;
-  return 0;
-}

@@ -25,38 +25,38 @@ float_literal ([0-9]+)[.]([0-9]+)(((e|E))((\+|\-)?[0-9]+))?
 %%
 {espaco} {} /* Todo espaço ou \n vai ser ignorado */
 
-"int"    { yylval.valor_lexico = createLexicalValue(yytext, RESERVED_WORD, IS_NOT_LITERAL, yylineno); return TK_PR_INT; }
-"float"  { yylval.valor_lexico = createLexicalValue(yytext, RESERVED_WORD, IS_NOT_LITERAL, yylineno); return TK_PR_FLOAT; }
-"bool"   { yylval.valor_lexico = createLexicalValue(yytext, RESERVED_WORD, IS_NOT_LITERAL, yylineno); return TK_PR_BOOL; }
-"char"   { yylval.valor_lexico = createLexicalValue(yytext, RESERVED_WORD, IS_NOT_LITERAL, yylineno); return TK_PR_CHAR; }
-"if"     { yylval.valor_lexico = createLexicalValue(yytext, RESERVED_WORD, IS_NOT_LITERAL, yylineno); return TK_PR_IF; }
-"then"   { yylval.valor_lexico = createLexicalValue(yytext, RESERVED_WORD, IS_NOT_LITERAL, yylineno); return TK_PR_THEN; }
-"else"   { yylval.valor_lexico = createLexicalValue(yytext, RESERVED_WORD, IS_NOT_LITERAL, yylineno); return TK_PR_ELSE; }
-"while"  { yylval.valor_lexico = createLexicalValue(yytext, RESERVED_WORD, IS_NOT_LITERAL, yylineno); return TK_PR_WHILE; }
-"input"  { yylval.valor_lexico = createLexicalValue(yytext, RESERVED_WORD, IS_NOT_LITERAL, yylineno); return TK_PR_INPUT; }
-"output" { yylval.valor_lexico = createLexicalValue(yytext, RESERVED_WORD, IS_NOT_LITERAL, yylineno); return TK_PR_OUTPUT; }
-"return" { yylval.valor_lexico = createLexicalValue(yytext, RESERVED_WORD, IS_NOT_LITERAL, yylineno); return TK_PR_RETURN; }
-"for"    { yylval.valor_lexico = createLexicalValue(yytext, RESERVED_WORD, IS_NOT_LITERAL, yylineno); return TK_PR_FOR; }
+"int"    { yylval.LexicalValue = createLexicalValue(yytext, RESERVED_WORD, IS_NOT_LITERAL, yylineno); return TK_PR_INT; }
+"float"  { yylval.LexicalValue = createLexicalValue(yytext, RESERVED_WORD, IS_NOT_LITERAL, yylineno); return TK_PR_FLOAT; }
+"bool"   { yylval.LexicalValue = createLexicalValue(yytext, RESERVED_WORD, IS_NOT_LITERAL, yylineno); return TK_PR_BOOL; }
+"char"   { yylval.LexicalValue = createLexicalValue(yytext, RESERVED_WORD, IS_NOT_LITERAL, yylineno); return TK_PR_CHAR; }
+"if"     { yylval.LexicalValue = createLexicalValue(yytext, RESERVED_WORD, IS_NOT_LITERAL, yylineno); return TK_PR_IF; }
+"then"   { yylval.LexicalValue = createLexicalValue(yytext, RESERVED_WORD, IS_NOT_LITERAL, yylineno); return TK_PR_THEN; }
+"else"   { yylval.LexicalValue = createLexicalValue(yytext, RESERVED_WORD, IS_NOT_LITERAL, yylineno); return TK_PR_ELSE; }
+"while"  { yylval.LexicalValue = createLexicalValue(yytext, RESERVED_WORD, IS_NOT_LITERAL, yylineno); return TK_PR_WHILE; }
+"input"  { yylval.LexicalValue = createLexicalValue(yytext, RESERVED_WORD, IS_NOT_LITERAL, yylineno); return TK_PR_INPUT; }
+"output" { yylval.LexicalValue = createLexicalValue(yytext, RESERVED_WORD, IS_NOT_LITERAL, yylineno); return TK_PR_OUTPUT; }
+"return" { yylval.LexicalValue = createLexicalValue(yytext, RESERVED_WORD, IS_NOT_LITERAL, yylineno); return TK_PR_RETURN; }
+"for"    { yylval.LexicalValue = createLexicalValue(yytext, RESERVED_WORD, IS_NOT_LITERAL, yylineno); return TK_PR_FOR; }
 
-"true"   { yylval.valor_lexico = createLexicalValue(yytext, LITERAL, BOOL, yylineno); return TK_LIT_TRUE; }
-"false"  { yylval.valor_lexico = createLexicalValue(yytext, LITERAL, BOOL, yylineno); return TK_LIT_FALSE; }
+"true"   { yylval.LexicalValue = createLexicalValue(yytext, LITERAL, BOOL, yylineno); return TK_LIT_TRUE; }
+"false"  { yylval.LexicalValue = createLexicalValue(yytext, LITERAL, BOOL, yylineno); return TK_LIT_FALSE; }
 
-"<="     { yylval.valor_lexico = createLexicalValue(yytext, COMPOUND_OPERATOR, IS_NOT_LITERAL, yylineno); return TK_OC_LE; }
-">="     { yylval.valor_lexico = createLexicalValue(yytext, COMPOUND_OPERATOR, IS_NOT_LITERAL, yylineno); return TK_OC_GE; }
-"=="     { yylval.valor_lexico = createLexicalValue(yytext, COMPOUND_OPERATOR, IS_NOT_LITERAL, yylineno); return TK_OC_EQ; }
-"!="     { yylval.valor_lexico = createLexicalValue(yytext, COMPOUND_OPERATOR, IS_NOT_LITERAL, yylineno); return TK_OC_NE; }
-"&&"     { yylval.valor_lexico = createLexicalValue(yytext, COMPOUND_OPERATOR, IS_NOT_LITERAL, yylineno); return TK_OC_AND; }
-"||"     { yylval.valor_lexico = createLexicalValue(yytext, COMPOUND_OPERATOR, IS_NOT_LITERAL, yylineno); return TK_OC_OR; }
+"<="     { yylval.LexicalValue = createLexicalValue(yytext, COMPOUND_OPERATOR, IS_NOT_LITERAL, yylineno); return TK_OC_LE; }
+">="     { yylval.LexicalValue = createLexicalValue(yytext, COMPOUND_OPERATOR, IS_NOT_LITERAL, yylineno); return TK_OC_GE; }
+"=="     { yylval.LexicalValue = createLexicalValue(yytext, COMPOUND_OPERATOR, IS_NOT_LITERAL, yylineno); return TK_OC_EQ; }
+"!="     { yylval.LexicalValue = createLexicalValue(yytext, COMPOUND_OPERATOR, IS_NOT_LITERAL, yylineno); return TK_OC_NE; }
+"&&"     { yylval.LexicalValue = createLexicalValue(yytext, COMPOUND_OPERATOR, IS_NOT_LITERAL, yylineno); return TK_OC_AND; }
+"||"     { yylval.LexicalValue = createLexicalValue(yytext, COMPOUND_OPERATOR, IS_NOT_LITERAL, yylineno); return TK_OC_OR; }
 
 
-[a-zA-Z]+ { yylval.valor_lexico = createLexicalValue(yytext, IDENTIFIER, IS_NOT_LITERAL, yylineno); return TK_IDENTIFICADOR; }
-[0-9]+ { yylval.valor_lexico = createLexicalValue(yytext, LITERAL, INT, yylineno); return TK_LIT_INT; }
-{float_literal} { yylval.valor_lexico = createLexicalValue(yytext, LITERAL, FLOAT, yylineno); return TK_LIT_FLOAT; }
-'.?' { yylval.valor_lexico = createLexicalValue(yytext, LITERAL, CHAR, yylineno); return TK_LIT_CHAR; }
+[a-zA-Z]+ { yylval.LexicalValue = createLexicalValue(yytext, IDENTIFIER, IS_NOT_LITERAL, yylineno); return TK_IDENTIFICADOR; }
+[0-9]+ { yylval.LexicalValue = createLexicalValue(yytext, LITERAL, INT, yylineno); return TK_LIT_INT; }
+{float_literal} { yylval.LexicalValue = createLexicalValue(yytext, LITERAL, FLOAT, yylineno); return TK_LIT_FLOAT; }
+'.?' { yylval.LexicalValue = createLexicalValue(yytext, LITERAL, CHAR, yylineno); return TK_LIT_CHAR; }
 {inline_comment} {}
 {multiline_comment} {} 
 
-{special_char} {yylval.valor_lexico = createLexicalValue(yytext, SPECIAL_CHARACTER, IS_NOT_LITERAL, yylineno); return yytext[0];}
+{special_char} { yylval.LexicalValue = createLexicalValue(yytext, SPECIAL_CHARACTER, IS_NOT_LITERAL, yylineno); return yytext[0]; }
 
 . {return TK_ERRO;} /* reconhece todos os outros tokens que não se enquadraram nas outras regras */
 %%

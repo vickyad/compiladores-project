@@ -1,5 +1,0 @@
-//INCORRECT
-int f()
-{
-  f(3)=f(2);
-}
