@@ -23,7 +23,7 @@ char* getLabelName(char* text) {
     if (strcmp(text, "[") || strcmp(text, "]")) {
         return "[]";
     }
-    
+    return text;
 }
 
 void defineLiteralValue(LexicalValue* lexicalValue, char* text, LiteralType literalType) {

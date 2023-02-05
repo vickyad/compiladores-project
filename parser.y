@@ -357,6 +357,16 @@ attribution: TK_IDENTIFICADOR '=' expression {
 };
 
 attribution: TK_IDENTIFICADOR '[' attr_array ']' '=' expression {
+    $$ = createNode($5);
+    
+    Node* array = createNode($2);
+    addChild(array, createNode($1));
+    addChild(array, $3);
+
+    addChild($$, array);
+    addChild($$, $6);
+
+    freeLexicalValue($4);
 };
 
 attr_array: expression { 
