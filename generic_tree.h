@@ -21,5 +21,6 @@ void printTreeRecursively(Node* node, int level);
 Node* getRoot(Node* node);
 Node* getLastChild(Node* parent);
 void freeNode(Node* node);
+void libera(Node* node);
 
 #endif

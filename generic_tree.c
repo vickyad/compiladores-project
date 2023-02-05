@@ -109,6 +109,11 @@ Node* getLastChild(Node* parent)
     return currentLastChild;
 }
 
+void libera(Node* node)
+{
+    freeNode(node);
+}
+
 void freeNode(Node* node)
 {
     if (!node) return;
