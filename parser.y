@@ -161,23 +161,29 @@ global_declaration: type var_list ';' {
 var_list: TK_IDENTIFICADOR { 
     $$ = createNode($1); 
 };
-var_list: array { };
+var_list: array { 
+    // TODO
+};
 var_list: TK_IDENTIFICADOR ',' var_list {
+    // TODO
     freeLexicalValue($2);
  };
 var_list: array ',' var_list { 
+    // TODO
     freeLexicalValue($2);
  } ;
 
 // Arranjos
 array: TK_IDENTIFICADOR '[' dimension ']' {
+    // TODO
     freeLexicalValue($2);
     freeLexicalValue($4);
 }; 
 dimension: TK_LIT_INT {
-    
- };
+    // TODO    
+};
 dimension: TK_LIT_INT '^' dimension {
+    // TODO
     freeLexicalValue($2);
 };
 
@@ -196,7 +202,7 @@ header: type TK_IDENTIFICADOR arguments {
 };
 body: command_block { 
     $$ = $1;
- };
+};
 
 // Lista de argumentos
 arguments: '(' ')' { 
@@ -244,8 +250,7 @@ simple_command_list: simple_command simple_command_list {
         addChild($$, $2);
     }
     else
-    {
-        
+    {        
         $$ = $2;
     }
 };
@@ -259,17 +264,19 @@ simple_command: var_declaration ';' {
     freeLexicalValue($2);
  };
 simple_command: attribution ';' { 
-
+    // TODO
     freeLexicalValue($2);
  };
 simple_command: function_call ';' { 
     $$ = $1;
     freeLexicalValue($2);
  };
-simple_command: return_command ';' { 
+simple_command: return_command ';' {
+    // TODO 
     freeLexicalValue($2);
  };
 simple_command: flow_control_commands ';' { 
+    // TODO
     freeLexicalValue($2);
  };
 simple_command: command_block ';' { 
@@ -306,15 +313,20 @@ var_decl_list: TK_IDENTIFICADOR TK_OC_LE literal ',' var_decl_list {
 
 // Atribuicao
 attribution: TK_IDENTIFICADOR '=' expression { 
+    // TODO
     freeLexicalValue($2);
  };
 attribution: TK_IDENTIFICADOR '[' attr_array ']' '=' expression {
+    // TODO
     freeLexicalValue($2);
     freeLexicalValue($4);
     freeLexicalValue($5);
 };
-attr_array: expression {  };
+attr_array: expression { 
+    $$ = $1;
+ };
 attr_array: expression '^' attr_array { 
+    // TODO
     freeLexicalValue($2);
 };
 
@@ -341,18 +353,23 @@ arg_fn_list: expression ',' arg_fn_list {
  };
 
 // Comando de retorno
-return_command: TK_PR_RETURN expression {  };
+return_command: TK_PR_RETURN expression { 
+    // TODO
+ };
 
 // Comando de controle de fluxo
 flow_control_commands: TK_PR_IF '(' expression ')' TK_PR_THEN command_block { 
+    // TODO
     freeLexicalValue($2);
     freeLexicalValue($4);
 };
 flow_control_commands: TK_PR_IF '(' expression ')' TK_PR_THEN command_block TK_PR_ELSE command_block { 
+    // TODO
     freeLexicalValue($2);
     freeLexicalValue($4);
  };
 flow_control_commands: TK_PR_WHILE '(' expression ')' command_block { 
+    // TODO
     freeLexicalValue($2);
     freeLexicalValue($4);
  };
