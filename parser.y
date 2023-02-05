@@ -131,11 +131,21 @@ type: TK_PR_CHAR {
 // =======================
 // =      Literais       =
 // =======================
-literal: TK_LIT_INT {  };
-literal: TK_LIT_FLOAT {  };
-literal: TK_LIT_FALSE {  };
-literal: TK_LIT_TRUE {  };
-literal: TK_LIT_CHAR {  };
+literal: TK_LIT_INT { 
+    $$ = createNode($1);
+ };
+literal: TK_LIT_FLOAT { 
+    $$ = createNode($1);
+ };
+literal: TK_LIT_FALSE { 
+    $$ = createNode($1);
+ };
+literal: TK_LIT_TRUE { 
+    $$ = createNode($1);
+ };
+literal: TK_LIT_CHAR { 
+    $$ = createNode($1);
+ };
 
 
 // =======================
@@ -228,7 +238,16 @@ simple_command_list: simple_command {
     $$ = $1;
 };
 simple_command_list: simple_command simple_command_list {
-    $$ = $1;
+    if ($1)
+    {
+        $$ = $1;
+        addChild($$, $2);
+    }
+    else
+    {
+        
+        $$ = $2;
+    }
 };
 
 
@@ -236,12 +255,15 @@ simple_command_list: simple_command simple_command_list {
 // =  Comandos simples   =
 // =======================
 simple_command: var_declaration ';' { 
+    $$ = $1;
     freeLexicalValue($2);
  };
 simple_command: attribution ';' { 
+
     freeLexicalValue($2);
  };
 simple_command: function_call ';' { 
+    $$ = $1;
     freeLexicalValue($2);
  };
 simple_command: return_command ';' { 
@@ -251,17 +273,34 @@ simple_command: flow_control_commands ';' {
     freeLexicalValue($2);
  };
 simple_command: command_block ';' { 
+    $$ = $1;
     freeLexicalValue($2);
  };
 
 // Declaracao de variavel
-var_declaration: type var_decl_list { };
-var_decl_list: TK_IDENTIFICADOR {  };
-var_decl_list: TK_IDENTIFICADOR TK_OC_LE literal { };
+var_declaration: type var_decl_list { 
+    $$ = $2;
+    addChild($$, $1);
+};
+var_decl_list: TK_IDENTIFICADOR { 
+    $$ = NULL;
+    freeLexicalValue($1);
+};
+var_decl_list: TK_IDENTIFICADOR TK_OC_LE literal {
+    $$ = createNode($2);
+    addChild($$, createNode($1));
+    addChild($$, $3);
+};
 var_decl_list: TK_IDENTIFICADOR ',' var_decl_list { 
+    $$ = $3;
+    freeLexicalValue($1);
     freeLexicalValue($2);
  };
 var_decl_list: TK_IDENTIFICADOR TK_OC_LE literal ',' var_decl_list { 
+    $$ = createNode($2);
+    addChild($$, createNode($1));
+    addChild($$, $3);
+    addChild($$, $5);
     freeLexicalValue($4);
 };
 
@@ -281,15 +320,23 @@ attr_array: expression '^' attr_array {
 
 // Chamada de funcao
 function_call: TK_IDENTIFICADOR '(' ')' { 
+    $$ = NULL;
+    freeLexicalValue($1);
     freeLexicalValue($2);
     freeLexicalValue($3);
  };
 function_call: TK_IDENTIFICADOR '(' arg_fn_list ')' { 
+    $$ = createNode($1);
+    addChild($$, $3);
     freeLexicalValue($2);
     freeLexicalValue($4);
  };
-arg_fn_list: expression {  };
+arg_fn_list: expression { 
+    $$ = $1;
+ };
 arg_fn_list: expression ',' arg_fn_list { 
+    $$ = $1;
+    addChild($$, $3);
     freeLexicalValue($2);
  };
 
@@ -314,71 +361,140 @@ flow_control_commands: TK_PR_WHILE '(' expression ')' command_block {
 // =======================
 // =     Expressoes      =
 // =======================
-expression: expression_grade_eight {  };
+expression: expression_grade_eight { 
+    $$ = $1;
+};
 
-expression_grade_eight: expression_grade_eight TK_OC_OR expression_grade_seven {  };
-expression_grade_eight: expression_grade_seven { };
+expression_grade_eight: expression_grade_eight TK_OC_OR expression_grade_seven { 
+    $$ = createNode($2);
+    addChild($$, $1);
+    addChild($$, $3);
+};
+expression_grade_eight: expression_grade_seven { 
+    $$ = $1;
+};
 
-expression_grade_seven: expression_grade_seven TK_OC_AND expression_grade_six {  };
-expression_grade_seven: expression_grade_six { };
+expression_grade_seven: expression_grade_seven TK_OC_AND expression_grade_six { 
+    $$ = createNode($2);
+    addChild($$, $1);
+    addChild($$, $3);
+};
+expression_grade_seven: expression_grade_six { 
+    $$ = $1;
+};
 
-expression_grade_six: expression_grade_six TK_OC_EQ expression_grade_five {  };
-expression_grade_six: expression_grade_six TK_OC_NE expression_grade_five {  };
-expression_grade_six: expression_grade_five { };
+expression_grade_six: expression_grade_six TK_OC_EQ expression_grade_five { 
+    $$ = createNode($2);
+    addChild($$, $1);
+    addChild($$, $3);
+};
+expression_grade_six: expression_grade_six TK_OC_NE expression_grade_five { 
+    $$ = createNode($2);
+    addChild($$, $1);
+    addChild($$, $3);    
+};
+expression_grade_six: expression_grade_five { 
+    $$ = $1;
+};
 
 expression_grade_five: expression_grade_five '>' expression_grade_four { 
-    freeLexicalValue($2);
- };
+    $$ = createNode($2);
+    addChild($$, $1);
+    addChild($$, $3);
+};
 expression_grade_five: expression_grade_five '<' expression_grade_four { 
-    freeLexicalValue($2);
- };
-expression_grade_five: expression_grade_five TK_OC_LE expression_grade_four {  };
-expression_grade_five: expression_grade_five TK_OC_GE expression_grade_four {  };
-expression_grade_five: expression_grade_four { };
+    $$ = createNode($2);
+    addChild($$, $1);
+    addChild($$, $3);
+};
+expression_grade_five: expression_grade_five TK_OC_LE expression_grade_four { 
+    $$ = createNode($2);
+    addChild($$, $1);
+    addChild($$, $3);
+};
+expression_grade_five: expression_grade_five TK_OC_GE expression_grade_four { 
+    $$ = createNode($2);
+    addChild($$, $1);
+    addChild($$, $3);
+};
+expression_grade_five: expression_grade_four { 
+    $$ = $1;
+};
 
 expression_grade_four: expression_grade_four '+' expression_grade_three { 
-    freeLexicalValue($2);
+    $$ = createNode($2);
+    addChild($$, $1);
+    addChild($$, $3);
 };
 expression_grade_four: expression_grade_four '-' expression_grade_three { 
-    freeLexicalValue($2); 
+    $$ = createNode($2);
+    addChild($$, $1);
+    addChild($$, $3);
 };
-expression_grade_four: expression_grade_three { };
+expression_grade_four: expression_grade_three {
+    $$ = $1;
+};
 
 expression_grade_three: expression_grade_three '*' expression_grade_two {
-    freeLexicalValue($2);
+    $$ = createNode($2);
+    addChild($$, $1);
+    addChild($$, $3);
 };
 expression_grade_three: expression_grade_three '/' expression_grade_two { 
-    freeLexicalValue($2);
+    $$ = createNode($2);
+    addChild($$, $1);
+    addChild($$, $3);
 };
 expression_grade_three: expression_grade_three '%' expression_grade_two { 
-    freeLexicalValue($2);
+    $$ = createNode($2);
+    addChild($$, $1);
+    addChild($$, $3);
 };
-expression_grade_three: expression_grade_two { } ;
+expression_grade_three: expression_grade_two {
+    $$ = $1;
+};
 
 expression_grade_two: '!' expression_grade_one { 
-    freeLexicalValue($1);
+    $$ = createNode($1);
+    addChild($$, $2);
 };
 expression_grade_two: '-' expression_grade_one { 
-    freeLexicalValue($1);
+    $$ = createNode($1);
+    addChild($$, $2);
 };
-expression_grade_two: expression_grade_one { };
+expression_grade_two: expression_grade_one {
+    $$ = $1;
+};
 
-expression_grade_one: TK_IDENTIFICADOR {  };
+expression_grade_one: TK_IDENTIFICADOR { 
+    $$ = createNode($1);
+};
 expression_grade_one: TK_IDENTIFICADOR '[' expression_list ']' {
-    freeLexicalValue($2);
+    $$ = createNode($2);
+    addChild($$, createNode($1));
+    addChild($$, $3);
     freeLexicalValue($4);
- };
-expression_grade_one: literal { };
-expression_grade_one: function_call { };
+};
+expression_grade_one: literal { 
+    $$ = $1;
+};
+expression_grade_one: function_call {
+    $$ = $1;
+};
 expression_grade_one: '(' expression ')' { 
+    $$ = $2;
     freeLexicalValue($1);
     freeLexicalValue($3);
- };
+};
 
 expression_list: expression_list '^' expression { 
-    freeLexicalValue($2);
- };
-expression_list: expression { };
+    $$ = $3;
+    addChild($$, $1);
+    freeLexicalValue($2);           
+};
+expression_list: expression { 
+    $$ = $1;
+};
 %%
 
 void yyerror (const char *message) {

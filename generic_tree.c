@@ -29,6 +29,11 @@ void addChild(Node* parent, Node* child)
 {
     if (!child) return;
 
+    if (!parent) {
+        freeNode(child);
+        return;
+    }
+
     Node* lastChild = getLastChild(parent);
     if (lastChild)
     {

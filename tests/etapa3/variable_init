@@ -1,0 +1,5 @@
+int three() { 
+    int ignored;
+    int varOne <= 10;
+    int varTwo <= 20, varThree <= 30, ignored, varFour <= 40;
+}
