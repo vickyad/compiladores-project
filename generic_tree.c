@@ -13,14 +13,19 @@ Node* createNode(LexicalValue lexicalValue)
 }
 
 
-Node* createNodeFromLabel(char* label, int lineNumber)
+Node* createNodeFromFunctionCall(LexicalValue lexicalValue)
 {
-    Node* node = malloc(sizeof(Node));
+    Node* node = createNode(lexicalValue);
 
-    node->lexicalValue = createLexicalValue(label, SPECIAL_CHARACTER, IS_NOT_LITERAL, lineNumber);
-    node->brother = NULL;
-    node->child = NULL;
-    node->parent = NULL;
+    char* prefix = "call ";
+    char* newLabel = malloc(strlen(prefix)+strlen(node->lexicalValue.label)+1);
+
+    strcpy(newLabel, prefix);
+    strcat(newLabel, node->lexicalValue.label);
+
+    free(node->lexicalValue.label);
+
+    node->lexicalValue.label = newLabel;
 
     return node;
 }

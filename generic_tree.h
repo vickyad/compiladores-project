@@ -13,7 +13,7 @@ typedef struct Node {
 } Node;
 
 Node* createNode(LexicalValue lexicalValue);
-Node* createNodeFromLabel(char* label, int lineNumber);
+Node* createNodeFromFunctionCall(LexicalValue lexicalValue);
 void addChild(Node* parent, Node* child);
 void printTree(Node* node);
 void printNonNullTree(Node* node);

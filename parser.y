@@ -388,7 +388,7 @@ function_call: TK_IDENTIFICADOR '(' ')' {
 };
 
 function_call: TK_IDENTIFICADOR '(' arg_fn_list ')' { 
-    $$ = createNode($1);
+    $$ = createNodeFromFunctionCall($1);
     addChild($$, $3);
     freeLexicalValue($2);
     freeLexicalValue($4);
