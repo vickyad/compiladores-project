@@ -12,7 +12,6 @@ void *arvore = NULL;
 int main (int argc, char **argv)
 {
   int ret = yyparse(); 
-  printTree(arvore);
   exporta(arvore);
   libera(arvore);
   arvore = NULL;
