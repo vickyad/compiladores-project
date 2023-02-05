@@ -164,8 +164,8 @@ literal: TK_LIT_CHAR {
 // =======================
 global_declaration: type var_list ';' { 
     $$ = NULL;
-    freeNode($1);
-    freeNode($2);
+    libera($1);
+    libera($2);
     freeLexicalValue($3);
 };
 
