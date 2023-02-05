@@ -41,5 +41,6 @@ LexicalValue createLexicalValue(char* text, TokenType type, LiteralType literalT
 void defineLiteralValue(LexicalValue* lexicalValue, char* text, LiteralType literalType);
 int isTextEqualTrue(char* text);
 void freeLexicalValue(LexicalValue lexicalValue);
+char* getLabelName(char* text);
 
 #endif

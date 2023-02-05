@@ -5,7 +5,7 @@ LexicalValue createLexicalValue(char* text, TokenType type, LiteralType literalT
     LexicalValue lexicalValue;
     lexicalValue.lineNumber = lineNumber;
     lexicalValue.type = type;
-    lexicalValue.label = strdup(text);
+    lexicalValue.label = strdup(getLabelName(text));
     
     if (literalType) 
     {
@@ -17,6 +17,13 @@ LexicalValue createLexicalValue(char* text, TokenType type, LiteralType literalT
     }
 
     return lexicalValue;
+}
+
+char* getLabelName(char* text) {
+    if (strcmp(text, "[") || strcmp(text, "]")) {
+        return "[]";
+    }
+    
 }
 
 void defineLiteralValue(LexicalValue* lexicalValue, char* text, LiteralType literalType) {
