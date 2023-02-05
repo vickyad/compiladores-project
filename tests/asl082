@@ -1,5 +1,0 @@
-//INCORRECT
-int f()
-{
-  case 245:
-}

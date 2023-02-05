@@ -1,5 +1,0 @@
-//INCORRECT
-int func(char param)
-{
-    char teste = 'a';
-}

@@ -1,5 +1,0 @@
-//INCORRECT
-int f ()
-{
-  int v[100];
-}

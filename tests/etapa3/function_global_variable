@@ -1,0 +1,5 @@
+int varOne;
+int functionOne(int argOne) { }
+int varTwo;
+int varThree;
+int functionTwo() { }

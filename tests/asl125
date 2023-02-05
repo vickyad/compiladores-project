@@ -1,5 +1,0 @@
-//INCORRECT
-int main() {
-  int x;
-  x = +x;
-}

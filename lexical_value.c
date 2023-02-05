@@ -99,3 +99,9 @@ char* getBooleanFromLexicalValue(LexicalValue lexicalValue)
     }
     return stringBoolean;
 }
+
+void freeLexicalValue(LexicalValue lexicalValue)
+{
+    if (!lexicalValue.label) return;
+    free(lexicalValue.label);
+}

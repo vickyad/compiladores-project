@@ -1,6 +1,0 @@
-//CORRECT
-int main()
-{
-  if (true) then { {}; {}; };
-  if (true) then { x = 2; } else { x = 3; };
-}

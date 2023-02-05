@@ -1,7 +1,0 @@
-//INCORRECT
-int main()
-{
-  int func() {
-
-  };
-}

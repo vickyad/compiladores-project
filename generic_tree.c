@@ -5,21 +5,21 @@ Node* createNode(LexicalValue lexicalValue)
     Node* node = malloc(sizeof(Node));
 
     node->lexicalValue = lexicalValue;
-    node->nextBrother = NULL;
-    node->firstChild = NULL;
+    node->brother = NULL;
+    node->child = NULL;
     node->parent = NULL;
 
     return node;
 }
 
 
-Node* createNodeFromSpecialCharacter(char* specialCharacter, int lineNumber)
+Node* createNodeFromLabel(char* label, int lineNumber)
 {
     Node* node = malloc(sizeof(Node));
 
-    node->lexicalValue = createLexicalValue(specialCharacter, SPECIAL_CHARACTER, IS_NOT_LITERAL, lineNumber);
-    node->nextBrother = NULL;
-    node->firstChild = NULL;
+    node->lexicalValue = createLexicalValue(label, SPECIAL_CHARACTER, IS_NOT_LITERAL, lineNumber);
+    node->brother = NULL;
+    node->child = NULL;
     node->parent = NULL;
 
     return node;
@@ -27,21 +27,24 @@ Node* createNodeFromSpecialCharacter(char* specialCharacter, int lineNumber)
 
 void addChild(Node* parent, Node* child) 
 {
+    if (!child) return;
+
     Node* lastChild = getLastChild(parent);
-    if (lastChild != NULL) 
+    if (lastChild)
     {
-        lastChild->nextBrother = child;
+        lastChild->brother = child;
     } 
     else 
     {
-        parent->firstChild = child;
+        parent->child = child;
     }
     child->parent = parent;
 }
 
 void printTree(Node* node) 
 {
-    if (node != NULL) {
+    if (node) 
+    {
         printNonNullTree(node);
     }
 }
@@ -54,35 +57,69 @@ void printNonNullTree(Node* node)
 
 void printTreeRecursively(Node* node, int level) 
 {
-    Node *child = node->firstChild;
-    while(child != NULL)
+    int i = 0;
+
+    if (!node) return;
+
+    for(i = 0; i < level - 1; i++) 
     {
-        printTreeRecursively(child, level + 1);
-        child = child->nextBrother;
+        printf("    ");
     }
 
-    printf("Nível %d %s", level, node->lexicalValue.label);
+    if (level == 0)
+    {
+        printf("%s", node->lexicalValue.label);
+    }
+    else 
+    {
+        printf("●---");
+        printf("%s", node->lexicalValue.label);
+    }
     printf("\n");
+
+    Node *nodo_f = node->child;
+    while(nodo_f)
+    {
+        printTreeRecursively(nodo_f, level+1);
+        nodo_f = nodo_f->brother;
+    }
 }
 
-Node* getRoot(Node* node) 
+Node* getRoot(Node* node)
 {
-    Node* currentParent = NULL;
+    Node* currentParent = node;
     Node* possibleParent = node->parent;
-    while(possibleParent != NULL) {
+    while(possibleParent) 
+    {
         currentParent = possibleParent;
         possibleParent = possibleParent->parent;
     }
     return currentParent;
 }
 
-Node* getLastChild(Node* parent) {
+Node* getLastChild(Node* parent) 
+{
     Node* currentLastChild = NULL;
-    Node* possibleLastChild = parent->firstChild;
-    while (possibleLastChild != NULL) 
+    Node* possibleLastChild = parent->child;
+    while (possibleLastChild)
     {
         currentLastChild = possibleLastChild;
-        possibleLastChild = possibleLastChild->firstChild;
+        possibleLastChild = possibleLastChild->brother;
     }
     return currentLastChild;
+}
+
+void freeNode(Node* node)
+{
+    if (!node) return;
+    
+    freeLexicalValue(node->lexicalValue);
+
+    Node* child = node->child;
+    freeNode(child);
+
+    Node* brother = node->brother;
+    freeNode(brother);
+
+    free(node);
 }

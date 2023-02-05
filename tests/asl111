@@ -1,5 +1,0 @@
-//INCORRECT
-int func(char param) {
-    float a;
-    a <= 3.5;
-}

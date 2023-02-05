@@ -1,8 +1,0 @@
-//CORRECT
-int var;
-int fun (float k, int l) 
-{
-  int a;
-}
-int vet[ 100 ];
-char vchar;

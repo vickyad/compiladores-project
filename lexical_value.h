@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "debug.h"
 
 typedef enum TokenType {
     SPECIAL_CHARACTER,
@@ -44,5 +45,6 @@ char* getIntFromLexicalValue(LexicalValue lexicalValue);
 char* getCharFromLexicalValue(LexicalValue lexicalValue);
 char* getFloatFromLexicalValue(LexicalValue lexicalValue);
 char* getBooleanFromLexicalValue(LexicalValue lexicalValue);
+void freeLexicalValue(LexicalValue lexicalValue);
 
 #endif
