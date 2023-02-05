@@ -1,0 +1,8 @@
+//CORRECT
+int a[10^20];
+int f()
+{
+  int c;
+  c = 2;
+  a[c+c^c] = 2;
+}

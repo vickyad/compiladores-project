@@ -1,0 +1,8 @@
+//CORRECT
+int f()
+{
+  if (c[10]) then
+	 {
+	 }else{
+  };
+}

@@ -1,0 +1,4 @@
+//INCORRECT
+int f ()
+{
+};

@@ -1,0 +1,4 @@
+//INCORRECT
+int main(){
+   a = (( b * 1) + c) and 1;
+}

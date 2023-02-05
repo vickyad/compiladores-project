@@ -1,0 +1,8 @@
+//CORRECT
+int main()
+{
+  int a;
+  if (a) then {
+    int x;
+  };
+}

@@ -1,0 +1,5 @@
+//CORRECT
+int f(int a)
+{
+  c[5^a] = 3 * f(a) + a;
+}

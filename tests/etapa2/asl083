@@ -1,0 +1,6 @@
+//CORRECT
+int f()
+{
+  int c;
+  if (c) then { };
+}

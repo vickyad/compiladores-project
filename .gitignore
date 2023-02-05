@@ -1,6 +1,6 @@
 *.tab.*
 *.yy.*
 *.o
-etapa2
-etapa3
+/etapa2
+/etapa3
 .vscode

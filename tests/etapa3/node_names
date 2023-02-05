@@ -1,0 +1,21 @@
+int functionOne() { 
+    int varOne <= 10;
+    varTwo = 10;
+    varThree[10 ^ 20 ^ 30] = 10;
+    functionTwo(varThree, 41);
+    if (true) then { x = 2 * 10 + 20; } else { x = 3 + 20 * 3; };
+    while (true && false) { };
+    while (false || true) { 
+        y = 44;
+    };
+    char varChar <= 'a';
+    return varFour;
+}
+
+char functionTwo() {
+
+}
+
+int functionThree() {
+    
+}

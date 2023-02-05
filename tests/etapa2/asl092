@@ -1,0 +1,6 @@
+//CORRECT
+int f()
+{
+  if (a == 2) then { };
+  if ((a+b) <= 10) then { };
+}

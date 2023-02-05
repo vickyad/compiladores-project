@@ -35,7 +35,7 @@ void addChild(Node* parent, Node* child)
     if (!child) return;
 
     if (!parent) {
-        freeNode(child);
+        libera(child);
         return;
     }
 
@@ -121,20 +121,25 @@ Node* getLastChild(Node* parent)
 
 void libera(Node* node)
 {
-    freeNode(node);
-}
-
-void freeNode(Node* node)
-{
     if (!node) return;
     
     freeLexicalValue(node->lexicalValue);
 
     Node* child = node->child;
-    freeNode(child);
+    libera(child);
 
     Node* brother = node->brother;
-    freeNode(brother);
+    libera(brother);
 
     free(node);
+}
+
+void exporta(Node* node)
+{
+
+}
+
+void getNodeLabel(Node* node)
+{
+    
 }

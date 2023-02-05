@@ -1,0 +1,8 @@
+//CORRECT
+int main ()
+{
+  int a;
+  bool b;
+  a = 2 + b;
+  return 0;
+}

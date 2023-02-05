@@ -20,7 +20,9 @@ void printNonNullTree(Node* node);
 void printTreeRecursively(Node* node, int level);
 Node* getRoot(Node* node);
 Node* getLastChild(Node* parent);
-void freeNode(Node* node);
 void libera(Node* node);
+void libera(Node* node);
+void exporta(Node* node);
+void getNodeLabel(Node* node);
 
 #endif

@@ -1,0 +1,5 @@
+//INCORRECT
+int f ()
+{
+  {}
+}

@@ -1,0 +1,8 @@
+//INCORRECT
+int f()
+{
+  int a;
+}
+a = 10;
+}
+char c;

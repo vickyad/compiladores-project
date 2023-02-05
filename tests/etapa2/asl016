@@ -1,0 +1,5 @@
+//CORRECT
+int main ()
+{
+  if (true) then { {}; {}; };
+}

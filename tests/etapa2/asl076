@@ -1,0 +1,6 @@
+//INCORRECT
+int f()
+{
+  int x;
+  x << 2;
+}
