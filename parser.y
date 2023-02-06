@@ -369,14 +369,14 @@ attribution: TK_IDENTIFICADOR '[' attr_array ']' '=' expression {
     freeLexicalValue($4);
 };
 
-attr_array: expression { 
-    $$ = $1;
-};
-
-attr_array: expression '^' attr_array {    
+attr_array: attr_array '^' expression {  
     $$ = createNode($2);
     addChild($$, $1);
     addChild($$, $3);
+};
+
+attr_array: expression { 
+    $$ = $1;
 };
 
 // Chamada de funcao
