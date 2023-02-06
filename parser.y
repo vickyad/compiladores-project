@@ -373,10 +373,10 @@ attr_array: expression {
     $$ = $1;
 };
 
-attr_array: expression '^' attr_array { 
-    $$ = $1;
+attr_array: expression '^' attr_array {    
+    $$ = createNode($2);
+    addChild($$, $1);
     addChild($$, $3);
-    freeLexicalValue($2);
 };
 
 // Chamada de funcao
