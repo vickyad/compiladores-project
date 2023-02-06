@@ -119,19 +119,19 @@ elements_list: global_declaration {
 // =        Tipos        =
 // =======================
 type: TK_PR_INT { 
-    $$ = createNode($1); 
+    $$ = NULL; 
 };
 
 type: TK_PR_FLOAT { 
-    $$ = createNode($1); 
+    $$ = NULL; 
 };
 
 type: TK_PR_BOOL { 
-    $$ = createNode($1); 
+    $$ = NULL; 
 };
 
 type: TK_PR_CHAR { 
-    $$ = createNode($1); 
+    $$ = NULL; 
 };
 
 
@@ -164,7 +164,6 @@ literal: TK_LIT_CHAR {
 // =======================
 global_declaration: type var_list ';' { 
     $$ = NULL;
-    libera($1);
     libera($2);
     freeLexicalValue($3);
 };
@@ -219,7 +218,6 @@ function: header body {
 
 header: type TK_IDENTIFICADOR arguments {
     $$ = createNode($2);
-    libera($1);
 };
 
 body: command_block { 
@@ -241,13 +239,11 @@ arguments: '(' arg_list ')' {
 
 arg_list: type TK_IDENTIFICADOR {
     $$ = NULL;
-    libera($1);
     freeLexicalValue($2);
 };
 
 arg_list: type TK_IDENTIFICADOR ',' arg_list {
     $$ = NULL;
-    libera($1);
     freeLexicalValue($2);
     freeLexicalValue($3);
 };
@@ -321,7 +317,6 @@ simple_command: command_block ';' {
 // Declaracao de variavel
 var_declaration: type var_decl_list { 
     $$ = $2;
-    addChild($$, $1);
 };
 
 var_decl_list: TK_IDENTIFICADOR { 
