@@ -219,8 +219,7 @@ function: header body {
 
 header: type TK_IDENTIFICADOR arguments {
     $$ = createNode($2);
-    addChild($$, $1);
-    addChild($$, $3);
+    libera(type);
 };
 
 body: command_block { 
@@ -235,20 +234,21 @@ arguments: '(' ')' {
 };
 
 arguments: '(' arg_list ')' { 
-    $$ = $2;
+    $$ = NULL;
     freeLexicalValue($1);
     freeLexicalValue($3);
 };
 
 arg_list: type TK_IDENTIFICADOR {
-    $$ = createNode($2);
-    addChild($$, $1);
+    $$ = NULL;
+    libera($1);
+    freeLexicalValue($2);
 };
 
 arg_list: type TK_IDENTIFICADOR ',' arg_list {
-    $$ = createNode($2);
-    addChild($$, $1);
-    addChild($$, $4);
+    $$ = NULL;
+    libera($1);
+    freeLexicalValue($2);
     freeLexicalValue($3);
 };
 
