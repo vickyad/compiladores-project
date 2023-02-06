@@ -381,8 +381,7 @@ attr_array: expression '^' attr_array {
 
 // Chamada de funcao
 function_call: TK_IDENTIFICADOR '(' ')' { 
-    $$ = NULL;
-    freeLexicalValue($1);
+    $$ = createNodeFromFunctionCall($1);
     freeLexicalValue($2);
     freeLexicalValue($3);
 };
