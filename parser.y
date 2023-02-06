@@ -219,7 +219,7 @@ function: header body {
 
 header: type TK_IDENTIFICADOR arguments {
     $$ = createNode($2);
-    libera(type);
+    libera($1);
 };
 
 body: command_block { 
@@ -588,9 +588,9 @@ expression_grade_one: '(' expression ')' {
 };
 
 expression_list: expression_list '^' expression { 
-    $$ = $3;
+    $$ = createNode($2);
     addChild($$, $1);
-    freeLexicalValue($2);           
+    addChild($$, $3);        
 };
 
 expression_list: expression { 

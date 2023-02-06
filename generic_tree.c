@@ -169,8 +169,3 @@ void printBody(Node* node)
         printBody(node->brother);
     }
 }
-
-void getNodeLabel(Node* node)
-{
-
-}

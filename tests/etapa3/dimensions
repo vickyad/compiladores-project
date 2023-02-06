@@ -1,0 +1,3 @@
+int functionOne() { 
+    varOne = varTwo[10 ^ 20 + 20 ^ a + b];
+}
