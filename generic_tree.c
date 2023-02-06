@@ -144,7 +144,7 @@ void exporta(Node* node)
 
 void printHeader(Node* node)
 {
-    printf("%p [label=\"%s\"]\n", node, node->lexicalValue.label);
+    printf("%p [label=\"%s\"];\n", node, node->lexicalValue.label);
     if (node->child) 
     {
         printHeader(node->child);
