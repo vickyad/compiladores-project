@@ -120,18 +120,22 @@ elements_list: global_declaration {
 // =======================
 type: TK_PR_INT { 
     $$ = NULL; 
+    freeLexicalValue($1);
 };
 
 type: TK_PR_FLOAT { 
     $$ = NULL; 
+    freeLexicalValue($1);
 };
 
 type: TK_PR_BOOL { 
     $$ = NULL; 
+    freeLexicalValue($1);
 };
 
 type: TK_PR_CHAR { 
     $$ = NULL; 
+    freeLexicalValue($1);
 };
 
 

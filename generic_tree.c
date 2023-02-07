@@ -51,50 +51,6 @@ void addChild(Node* parent, Node* child)
     child->parent = parent;
 }
 
-void printTree(Node* node) 
-{
-    if (node) 
-    {
-        printNonNullTree(node);
-    }
-}
-
-void printNonNullTree(Node* node) 
-{
-    Node* rootNode = getRoot(node);
-    printTreeRecursively(rootNode, 1);
-}
-
-void printTreeRecursively(Node* node, int level) 
-{
-    int i = 0;
-
-    if (!node) return;
-
-    for(i = 0; i < level - 1; i++) 
-    {
-        printf("    ");
-    }
-
-    if (level == 0)
-    {
-        printf("%s", node->lexicalValue.label);
-    }
-    else 
-    {
-        printf("●---");
-        printf("%s", node->lexicalValue.label);
-    }
-    printf("\n");
-
-    Node *nodo_f = node->child;
-    while(nodo_f)
-    {
-        printTreeRecursively(nodo_f, level+1);
-        nodo_f = nodo_f->brother;
-    }
-}
-
 Node* getRoot(Node* node)
 {
     Node* currentParent = node;

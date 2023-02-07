@@ -15,9 +15,6 @@ typedef struct Node {
 Node* createNode(LexicalValue lexicalValue);
 Node* createNodeFromFunctionCall(LexicalValue lexicalValue);
 void addChild(Node* parent, Node* child);
-void printTree(Node* node);
-void printNonNullTree(Node* node);
-void printTreeRecursively(Node* node, int level);
 Node* getRoot(Node* node);
 Node* getLastChild(Node* parent);
 void libera(Node* node);
