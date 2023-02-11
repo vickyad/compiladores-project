@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "generic_tree.h"
 #include "lexical_value.h"
-#include "debug.h"
+#include "print.h"
 
 int yylex(void);
 void yyerror (char const *message);

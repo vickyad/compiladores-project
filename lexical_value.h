@@ -4,22 +4,22 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "debug.h"
+#include "print.h"
 
 typedef enum TokenType {
-    SPECIAL_CHARACTER,
-    RESERVED_WORD,
-    COMPOUND_OPERATOR,
-    IDENTIFIER,
-    LITERAL
+    TOKEN_TYPE_SPECIAL_CHARACTER,
+    TOKEN_TYPE_RESERVED_WORD,
+    TOKEN_TYPE_COMPOUND_OPERATOR,
+    TOKEN_TYPE_IDENTIFIER,
+    TOKEN_TYPE_LITERAL
 } TokenType;
 
 typedef enum LiteralType {
-    INT,
-    FLOAT,
-    CHAR,
-    BOOL,
-    IS_NOT_LITERAL
+    LITERAL_TYPE_INT,
+    LITERAL_TYPE_FLOAT,
+    LITERAL_TYPE_CHAR,
+    LITERAL_TYPE_BOOL,
+    LITERAL_TYPE_IS_NOT_LITERAL
 } LiteralType;
 
 typedef struct LexicalValue {

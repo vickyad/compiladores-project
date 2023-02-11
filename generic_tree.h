@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 #include "lexical_value.h"
-#include "debug.h"
+#include "print.h"
 
 typedef struct Node {
     LexicalValue lexicalValue;
