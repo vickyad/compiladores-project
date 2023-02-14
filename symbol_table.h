@@ -41,16 +41,33 @@ typedef struct SymbolTable {
     SymbolTableEntry* entries;
 } SymbolTable;
 
-SymbolTable* createTable();
+typedef struct SymbolTableStack {
+    SymbolTable* symbolTable;
+    struct SymbolTableStack* nextItem;
+} SymbolTableStack;
 
-void destroyTable(SymbolTable* table);
+SymbolTable* createSymbolTable();
 
-SymbolTableValue getValue(SymbolTable* table, char* key);
+void destroySymbolTable(SymbolTable* table);
 
-SymbolTableValue createTableValue(SymbolType symbolType, LexicalValue lexicalValue);
+SymbolTableValue getSymbolTableValueByKey(SymbolTable* table, char* key);
 
-void addSymbol(SymbolTable* table, SymbolTableValue value);
+SymbolTableValue createSymbolTableValue(SymbolType symbolType, LexicalValue lexicalValue);
 
-int expandTable(SymbolTable* table);
+void addValueToSymbolTable(SymbolTable* table, SymbolTableValue value);
+
+int expandSymbolTable(SymbolTable* table);
+
+SymbolTableStack* createSymbolTableStack();
+
+void destroySymbolTableStack(SymbolTableStack* symbolTableStack);
+
+SymbolTable* getFirstTableFromSymbolTableStack(SymbolTableStack* symbolTableStack);
+
+SymbolTableStack* destroyFirstTableFromSymbolTableStack(SymbolTableStack* symbolTableStack);
+
+SymbolTableStack* addTableToSymbolTableStack(SymbolTableStack* symbolTableStack, SymbolTable* symbolTable);
+
+SymbolTableValue getByKeyOnSymbolTableStack(SymbolTableStack* symbolTableStack, char* key);
 
 #endif

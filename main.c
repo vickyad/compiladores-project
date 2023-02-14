@@ -11,13 +11,9 @@ void *arvore = NULL;
 void exporta (void *arvore);
 void libera (void *arvore);
 
-int main (int argc, char **argv)
+SymbolTable* getSymbolTableWithItems()
 {
-  // Testing symbol table
-  SymbolTable* symbolTable = createTable();
-
-  printf("Table size: %d \n", symbolTable->size);
-  printf("Table capacity: %d \n", symbolTable->capacity);
+  SymbolTable* symbolTable = createSymbolTable();
 
   LexicalValue lexicalValue1 = createLexicalValue("1", TOKEN_TYPE_LITERAL, LITERAL_TYPE_INT, 10);
   LexicalValue lexicalValue2 = createLexicalValue("2", TOKEN_TYPE_LITERAL, LITERAL_TYPE_INT, 10);
@@ -28,50 +24,73 @@ int main (int argc, char **argv)
   LexicalValue lexicalValue7 = createLexicalValue("7", TOKEN_TYPE_LITERAL, LITERAL_TYPE_INT, 10);
   LexicalValue lexicalValue8 = createLexicalValue("8", TOKEN_TYPE_LITERAL, LITERAL_TYPE_INT, 10);
 
-  SymbolTableValue value1 = createTableValue(SYMBOL_TYPE_LITERAL, lexicalValue1);
-  SymbolTableValue value2 = createTableValue(SYMBOL_TYPE_LITERAL, lexicalValue2);
-  SymbolTableValue value3 = createTableValue(SYMBOL_TYPE_LITERAL, lexicalValue3);
-  SymbolTableValue value4 = createTableValue(SYMBOL_TYPE_LITERAL, lexicalValue4);
-  SymbolTableValue value5 = createTableValue(SYMBOL_TYPE_LITERAL, lexicalValue5);
-  SymbolTableValue value6 = createTableValue(SYMBOL_TYPE_LITERAL, lexicalValue6);
-  SymbolTableValue value7 = createTableValue(SYMBOL_TYPE_LITERAL, lexicalValue7);
-  SymbolTableValue value8 = createTableValue(SYMBOL_TYPE_LITERAL, lexicalValue8);
+  SymbolTableValue value1 = createSymbolTableValue(SYMBOL_TYPE_LITERAL, lexicalValue1);
+  SymbolTableValue value2 = createSymbolTableValue(SYMBOL_TYPE_LITERAL, lexicalValue2);
+  SymbolTableValue value3 = createSymbolTableValue(SYMBOL_TYPE_LITERAL, lexicalValue3);
+  SymbolTableValue value4 = createSymbolTableValue(SYMBOL_TYPE_LITERAL, lexicalValue4);
+  SymbolTableValue value5 = createSymbolTableValue(SYMBOL_TYPE_LITERAL, lexicalValue5);
+  SymbolTableValue value6 = createSymbolTableValue(SYMBOL_TYPE_LITERAL, lexicalValue6);
+  SymbolTableValue value7 = createSymbolTableValue(SYMBOL_TYPE_LITERAL, lexicalValue7);
+  SymbolTableValue value8 = createSymbolTableValue(SYMBOL_TYPE_LITERAL, lexicalValue8);
 
-  addSymbol(symbolTable, value1);
-  addSymbol(symbolTable, value2);
-  addSymbol(symbolTable, value3);
-  addSymbol(symbolTable, value4);
-  addSymbol(symbolTable, value5);
-  addSymbol(symbolTable, value6);
-  addSymbol(symbolTable, value7);
-  addSymbol(symbolTable, value8);
+  addValueToSymbolTable(symbolTable, value1);
+  addValueToSymbolTable(symbolTable, value2);
+  addValueToSymbolTable(symbolTable, value3);
+  addValueToSymbolTable(symbolTable, value4);
+  addValueToSymbolTable(symbolTable, value5);
+  addValueToSymbolTable(symbolTable, value6);
+  addValueToSymbolTable(symbolTable, value7);
+  addValueToSymbolTable(symbolTable, value8);
 
-  SymbolTableValue retrievedValue = getValue(symbolTable, lexicalValue1.label);
-  printDebug(retrievedValue.lexicalValue.label);
+  return symbolTable;
+}
 
-  retrievedValue = getValue(symbolTable, lexicalValue2.label);
-  printDebug(retrievedValue.lexicalValue.label);
+int main (int argc, char **argv)
+{
+  SymbolTableStack* stack = createSymbolTableStack();
+  
+  SymbolTable* tableOne = createSymbolTable();
+  LexicalValue lexicalValueOne = createLexicalValue("1", TOKEN_TYPE_LITERAL, LITERAL_TYPE_INT, 10);
+  SymbolTableValue valueOne = createSymbolTableValue(SYMBOL_TYPE_LITERAL, lexicalValueOne);
+  addValueToSymbolTable(tableOne, valueOne);
+  stack = addTableToSymbolTableStack(stack, tableOne);
 
-  retrievedValue = getValue(symbolTable, lexicalValue3.label);
-  printDebug(retrievedValue.lexicalValue.label);
+  SymbolTable* tableTwo = createSymbolTable();
+  LexicalValue lexicalValueTwo = createLexicalValue("2", TOKEN_TYPE_LITERAL, LITERAL_TYPE_INT, 20);
+  SymbolTableValue valueTwo = createSymbolTableValue(SYMBOL_TYPE_LITERAL, lexicalValueTwo);
+  addValueToSymbolTable(tableTwo, valueTwo);
+  stack = addTableToSymbolTableStack(stack, tableTwo);
 
-  retrievedValue = getValue(symbolTable, lexicalValue4.label);
-  printDebug(retrievedValue.lexicalValue.label);
+  SymbolTable* tableThree = createSymbolTable();
+  LexicalValue lexicalValueThree = createLexicalValue("3", TOKEN_TYPE_LITERAL, LITERAL_TYPE_INT, 33);
+  SymbolTableValue valueThree = createSymbolTableValue(SYMBOL_TYPE_LITERAL, lexicalValueThree);
+  addValueToSymbolTable(tableThree, valueThree);
+  stack = addTableToSymbolTableStack(stack, tableThree);
 
-  retrievedValue = getValue(symbolTable, lexicalValue5.label);
-  printDebug(retrievedValue.lexicalValue.label);
+  SymbolTable* tableFour = createSymbolTable();
+  LexicalValue lexicalValueFour = createLexicalValue("3", TOKEN_TYPE_LITERAL, LITERAL_TYPE_INT, 15);
+  SymbolTableValue valueFour = createSymbolTableValue(SYMBOL_TYPE_LITERAL, lexicalValueFour);
+  addValueToSymbolTable(tableFour, valueFour);
+  stack = addTableToSymbolTableStack(stack, tableFour);
 
-  retrievedValue = getValue(symbolTable, lexicalValue6.label);
-  printDebug(retrievedValue.lexicalValue.label);
+  SymbolTableValue value = getByKeyOnSymbolTableStack(stack, "3");
+  printf("%d", value.lexicalValue.lineNumber);
 
-  retrievedValue = getValue(symbolTable, lexicalValue7.label);
-  printDebug(retrievedValue.lexicalValue.label);
+  value = getByKeyOnSymbolTableStack(stack, "2");
+  printf("%d", value.lexicalValue.lineNumber);
 
-  retrievedValue = getValue(symbolTable, lexicalValue8.label);
-  printDebug(retrievedValue.lexicalValue.label);
+  value = getByKeyOnSymbolTableStack(stack, "1");
+  printf("%d", value.lexicalValue.lineNumber);
 
-  printf("Table size: %d \n", symbolTable->size);
-  printf("Table capacity: %d \n", symbolTable->capacity);
+  stack = destroyFirstTableFromSymbolTableStack(stack);
+
+  value = getByKeyOnSymbolTableStack(stack, "3");
+  printf("%d", value.lexicalValue.lineNumber);
+
+  stack = destroyFirstTableFromSymbolTableStack(stack);
+
+  value = getByKeyOnSymbolTableStack(stack, "3");
+  printf("%d", value.symbolType == SYMBOL_TYPE_NON_EXISTENT);
 
   return 1;
   // int ret = yyparse(); 

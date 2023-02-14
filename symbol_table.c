@@ -1,6 +1,6 @@
 #include "symbol_table.h"
 
-SymbolTable* createTable() 
+SymbolTable* createSymbolTable() 
 {
     SymbolTable* table = malloc(sizeof(SymbolTable));
     if (!table) 
@@ -13,7 +13,7 @@ SymbolTable* createTable()
     table->entries = calloc(table->capacity, sizeof(SymbolTableEntry));
     if (!table->entries) 
     {
-        destroyTable(table);
+        destroySymbolTable(table);
         printError("[SymbolTable] Fail to initialize entries for symbol table!");
         return NULL;
     }
@@ -49,7 +49,7 @@ void destroyTableEntries(SymbolTable* table)
     free(table->entries);
 }
 
-void destroyTable(SymbolTable* table) 
+void destroySymbolTable(SymbolTable* table) 
 {
     if (!table) return;
 
@@ -83,8 +83,10 @@ SymbolTableValue getEmptyValue()
     return value;
 }
 
-SymbolTableValue getValue(SymbolTable* table, char* key) 
+SymbolTableValue getSymbolTableValueByKey(SymbolTable* table, char* key) 
 {
+    if (!table) return getEmptyValue();
+
     size_t index = getIndex(table->capacity, key);
 
     SymbolTableEntry possibleEntry = table->entries[index];
@@ -144,7 +146,7 @@ void addEntryOnList(SymbolTableEntry* entries, int capacity, char* key, int* siz
     }
 }
 
-SymbolTableValue createTableValue(SymbolType symbolType, LexicalValue lexicalValue)
+SymbolTableValue createSymbolTableValue(SymbolType symbolType, LexicalValue lexicalValue)
 {
     SymbolTableValue value;
     value.lexicalValue = lexicalValue;
@@ -154,7 +156,7 @@ SymbolTableValue createTableValue(SymbolType symbolType, LexicalValue lexicalVal
     return value;
 }
 
-void addSymbol(SymbolTable* table, SymbolTableValue value)
+void addValueToSymbolTable(SymbolTable* table, SymbolTableValue value)
 {
     if (!table)
     {
@@ -170,7 +172,7 @@ void addSymbol(SymbolTable* table, SymbolTableValue value)
     if (table->size >= table->capacity / TABLE_EXPAND_FACTOR)
     {
         printDebug("Expanding table");
-        if (!expandTable(table)) {
+        if (!expandSymbolTable(table)) {
             printError("Fail to expand the table, symbol will not be added");
             return;
         }
@@ -179,7 +181,7 @@ void addSymbol(SymbolTable* table, SymbolTableValue value)
     addEntryOnList(table->entries, table->capacity, value.lexicalValue.label, &table->size, value);
 }
 
-int expandTable(SymbolTable* table) 
+int expandSymbolTable(SymbolTable* table) 
 {
     int newCapacity = table->capacity * 2;
     if (newCapacity < table->capacity)
@@ -206,4 +208,79 @@ int expandTable(SymbolTable* table)
     table->entries = newEntries;
     table->capacity = newCapacity;
     return 1;
+}
+
+SymbolTableStack* createSymbolTableStack() 
+{
+    SymbolTableStack* tableStack = malloc(sizeof(SymbolTableStack));
+    if (!tableStack) 
+    {
+        printError("[SymbolTableStack] Fail to create symbol table stack!");
+        return NULL;
+    }
+    tableStack->symbolTable = NULL;
+    tableStack->nextItem = NULL;
+    return tableStack;
+}
+
+void destroySymbolTableStack(SymbolTableStack* symbolTableStack)
+{
+    if (!symbolTableStack) return;
+
+    destroySymbolTableStack(symbolTableStack->nextItem);
+
+    destroySymbolTable(symbolTableStack->symbolTable);
+
+    free(symbolTableStack);
+}
+
+SymbolTable* getFirstTableFromSymbolTableStack(SymbolTableStack* symbolTableStack) 
+{
+    if (!symbolTableStack) return NULL;
+
+    return symbolTableStack->symbolTable;
+}
+
+SymbolTableStack* destroyFirstTableFromSymbolTableStack(SymbolTableStack* symbolTableStack)
+{
+    if (!symbolTableStack) return NULL;
+
+    destroySymbolTable(symbolTableStack->symbolTable);
+
+    SymbolTableStack* nextItem = symbolTableStack->nextItem;
+
+    free(symbolTableStack);
+
+    return nextItem;
+}
+
+SymbolTableStack* addTableToSymbolTableStack(SymbolTableStack* currentFirstTable, SymbolTable* symbolTable)
+{
+    if (!currentFirstTable) return NULL;
+
+    if (!symbolTable) return NULL;
+
+    SymbolTableStack* newFirstTable = createSymbolTableStack();
+    newFirstTable->symbolTable = symbolTable;
+    newFirstTable->nextItem = currentFirstTable;
+
+    return newFirstTable;
+}
+
+SymbolTableValue getByKeyOnSymbolTableStack(SymbolTableStack* symbolTableStack, char* key)
+{
+    if (!symbolTableStack) 
+    {
+        return getEmptyValue();
+    }
+    
+    SymbolTableValue value = getSymbolTableValueByKey(symbolTableStack->symbolTable, key);
+    if (value.symbolType == SYMBOL_TYPE_NON_EXISTENT) 
+    {
+        return getByKeyOnSymbolTableStack(symbolTableStack->nextItem, key);
+    }
+    else
+    {
+        return value;
+    }
 }
