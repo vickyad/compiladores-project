@@ -284,3 +284,29 @@ SymbolTableValue getByKeyOnSymbolTableStack(SymbolTableStack* symbolTableStack, 
         return value;
     }
 }
+
+void addValueToSymbolTableStack(SymbolTableStack* stack, SymbolTableValue value) 
+{
+	if (!stack) return;
+
+	addValueToSymbolTable(stack->symbolTable, value);
+}
+
+int checkValueIsOnFirstSymbolTable(SymbolTableStack* symbolTableStack, char* key)
+{
+	if (!symbolTableStack) return 0;
+
+	SymbolTable* firstSymbolTable = getFirstTableFromSymbolTableStack(symbolTableStack);
+
+	SymbolTableValue value = getSymbolTableValueByKey(firstSymbolTable, key);
+    if (value.symbolType == SYMBOL_TYPE_NON_EXISTENT) 
+    {
+		return 0;
+	}
+	else
+	{
+		return 1;
+	}
+}
+
+

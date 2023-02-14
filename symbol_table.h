@@ -62,6 +62,8 @@ SymbolTableStack* createSymbolTableStack();
 
 void destroySymbolTableStack(SymbolTableStack* symbolTableStack);
 
+void addValueToSymbolTableStack(SymbolTableStack* stack, SymbolTableValue value);
+
 SymbolTable* getFirstTableFromSymbolTableStack(SymbolTableStack* symbolTableStack);
 
 SymbolTableStack* destroyFirstTableFromSymbolTableStack(SymbolTableStack* symbolTableStack);
@@ -69,5 +71,7 @@ SymbolTableStack* destroyFirstTableFromSymbolTableStack(SymbolTableStack* symbol
 SymbolTableStack* addTableToSymbolTableStack(SymbolTableStack* symbolTableStack, SymbolTable* symbolTable);
 
 SymbolTableValue getByKeyOnSymbolTableStack(SymbolTableStack* symbolTableStack, char* key);
+
+int checkValueIsOnFirstSymbolTable(SymbolTableStack* symbolTableStack, char* key);
 
 #endif

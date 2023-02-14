@@ -1,5 +1,25 @@
 #include "generic_tree.h"
 
+NodeType getNodeTypeFromLexicalValue(LexicalValue lexicalValue) 
+{
+	if (lexicalValue.literalType == LITERAL_TYPE_INT) 
+    {
+		return NODE_TYPE_INT;
+    }
+	else if (lexicalValue.literalType == LITERAL_TYPE_FLOAT)
+    {
+		return NODE_TYPE_FLOAT;
+    }
+    else if (lexicalValue.literalType == LITERAL_TYPE_CHAR)
+    {
+		return NODE_TYPE_CHAR;
+    }
+	else 
+    {
+		return NODE_TYPE_BOOL;
+    }
+}
+
 Node* createNode(LexicalValue lexicalValue) 
 {
     Node* node = malloc(sizeof(Node));
@@ -8,6 +28,11 @@ Node* createNode(LexicalValue lexicalValue)
     node->brother = NULL;
     node->child = NULL;
     node->parent = NULL;
+
+	if (node->lexicalValue != LITERAL_TYPE_IS_NOT_LITERAL)
+    {
+		node->nodeType = getNodeTypeFromLexicalValue(node->lexicalValue);
+    }
 
     return node;
 }
@@ -28,6 +53,12 @@ Node* createNodeFromFunctionCall(LexicalValue lexicalValue)
     node->lexicalValue.label = newLabel;
 
     return node;
+}
+
+Node* createNodeWithType(LexicalValue lexicalValue, NodeType nodeType)
+{
+	Node* node = createNode(lexicalValue);
+	node->nodeType = nodeType;
 }
 
 void addChild(Node* parent, Node* child) 
