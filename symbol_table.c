@@ -146,15 +146,20 @@ void addEntryOnList(SymbolTableEntry* entries, int capacity, char* key, int* siz
     }
 }
 
-SymbolTableValue createSymbolTableValue(SymbolType symbolType, LexicalValue lexicalValue)
+SymbolTableValue createSymbolTableValue(SymbolType symbolType, Node* node)
+{
+    return createSymbolTableValueWithType(symbolType, node->lexicalValue, node->dataType);
+}
+
+SymbolTableValue createSymbolTableValueWithType(SymbolType symbolType, LexicalValue lexicalValue, DataType dataType)
 {
     SymbolTableValue value;
     value.lexicalValue = lexicalValue;
     value.symbolType = symbolType;
     value.lineNumber = lexicalValue.lineNumber;
-    // value.symbolDataType = 0; // TODO
-    // value.size = 0; // TODO
-    value.firstArgument = NULL; // TODO
+    value.dataType = dataType;
+    value.size = 0; // TODO: Definir tamanho
+    value.firstArgument = NULL; // TODO Adicionar argumentos quando symbolType for FUNTION
     return value;
 }
 
@@ -247,8 +252,6 @@ SymbolTableStack* destroyFirstTableFromSymbolTableStack(SymbolTableStack* symbol
 {
     if (!symbolTableStack) return NULL;
 
-    printf("Destroying table from stack... \n");
-
     destroySymbolTable(symbolTableStack->symbolTable);
 
     SymbolTableStack* nextItem = symbolTableStack->nextItem;
@@ -275,8 +278,6 @@ SymbolTableStack* addTableToSymbolTableStack(SymbolTableStack* currentFirstTable
         return NULL;
     }
 
-    printf("Adding new table to stack... \n");
-
     SymbolTableStack* newFirstTable = createSymbolTableStack();
     newFirstTable->symbolTable = symbolTable;
     newFirstTable->nextItem = currentFirstTable;
@@ -284,17 +285,19 @@ SymbolTableStack* addTableToSymbolTableStack(SymbolTableStack* currentFirstTable
     return newFirstTable;
 }
 
-SymbolTableValue getByKeyOnSymbolTableStack(SymbolTableStack* symbolTableStack, char* key)
+SymbolTableValue getByLexicalValueOnSymbolTableStack(SymbolTableStack* symbolTableStack, LexicalValue lexicalValue)
 {
     if (!symbolTableStack) 
     {
+        printf("ERRO! Variável %s não foi declarada na linha %d", lexicalValue.label, lexicalValue.lineNumber);
+        exit(ERR_UNDECLARED);
         return getEmptyValue();
     }
     
-    SymbolTableValue value = getSymbolTableValueByKey(symbolTableStack->symbolTable, key);
+    SymbolTableValue value = getSymbolTableValueByKey(symbolTableStack->symbolTable, lexicalValue.label);
     if (value.symbolType == SYMBOL_TYPE_NON_EXISTENT) 
     {
-        return getByKeyOnSymbolTableStack(symbolTableStack->nextItem, key);
+        return getByLexicalValueOnSymbolTableStack(symbolTableStack->nextItem, lexicalValue);
     }
     else
     {
@@ -336,7 +339,7 @@ void printSymbolTableStack(SymbolTableStack* symbolTableStack) {
     for (size_t index = 0; index < table->capacity; index++) {
         SymbolTableEntry entry = table->entries[index];
         if (entry.key) {
-            printf("%s | %s \n", entry.key, entry.value.lexicalValue.label);
+            printf("%s => %s \n", entry.key, getDataTypeName(entry.value.dataType));
         }
     }
     printf("=============END============= \n \n");

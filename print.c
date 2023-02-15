@@ -11,5 +11,5 @@ void printDebug(char* text)
 }
 
 void printError(char* text) {
-    printf("ERROR: %s", text);
+    printf("ERRO: %s", text);
 }

@@ -1,25 +1,5 @@
 #include "generic_tree.h"
 
-NodeType getNodeTypeFromLexicalValue(LexicalValue lexicalValue) 
-{
-	if (lexicalValue.literalType == LITERAL_TYPE_INT) 
-    {
-		return NODE_TYPE_INT;
-    }
-	else if (lexicalValue.literalType == LITERAL_TYPE_FLOAT)
-    {
-		return NODE_TYPE_FLOAT;
-    }
-    else if (lexicalValue.literalType == LITERAL_TYPE_CHAR)
-    {
-		return NODE_TYPE_CHAR;
-    }
-	else 
-    {
-		return NODE_TYPE_BOOL;
-    }
-}
-
 Node* createNode(LexicalValue lexicalValue) 
 {
     Node* node = malloc(sizeof(Node));
@@ -28,17 +8,13 @@ Node* createNode(LexicalValue lexicalValue)
     node->brother = NULL;
     node->child = NULL;
     node->parent = NULL;
-
-	if (node->lexicalValue.literalType != LITERAL_TYPE_IS_NOT_LITERAL)
-    {
-		node->nodeType = getNodeTypeFromLexicalValue(node->lexicalValue);
-    }
+    node->dataType = DATA_TYPE_NON_DECLARED;
 
     return node;
 }
 
 
-Node* createNodeFromFunctionCall(LexicalValue lexicalValue)
+Node* createNodeForFunctionCall(LexicalValue lexicalValue)
 {
     Node* node = createNode(lexicalValue);
 
@@ -55,10 +31,119 @@ Node* createNodeFromFunctionCall(LexicalValue lexicalValue)
     return node;
 }
 
-Node* createNodeWithType(LexicalValue lexicalValue, NodeType nodeType)
+Node* createNodeForFunctionCallFromSymbol(LexicalValue lexicalValue, SymbolTableValue symbol)
+{
+    Node* node = createNodeForFunctionCall(lexicalValue);
+    node->dataType = symbol.dataType;
+    return node;
+}
+
+Node* createNodeWithType(LexicalValue lexicalValue, DataType dataType)
 {
 	Node* node = createNode(lexicalValue);
-	node->nodeType = nodeType;
+	node->dataType = dataType;
+    return node;
+}
+
+int dataTypesAreIntAndFloat(DataType typeOne, DataType typeTwo)
+{
+    if (typeOne == DATA_TYPE_INT && typeTwo == DATA_TYPE_FLOAT) 
+    {
+        return 1;
+    }
+    if (typeOne == DATA_TYPE_FLOAT && typeTwo == DATA_TYPE_INT)
+    {
+        return 1;
+    }
+    return 0;
+}
+
+int dataTypesAreBooleanAndInt(DataType typeOne, DataType typeTwo)
+{
+    if (typeOne == DATA_TYPE_INT && typeTwo == DATA_TYPE_BOOL) 
+    {
+        return 1;
+    }
+    if (typeOne == DATA_TYPE_BOOL && typeTwo == DATA_TYPE_INT)
+    {
+        return 1;
+    }
+    return 0;
+}
+
+int dataTypesAreBooleanAndFloat(DataType typeOne, DataType typeTwo)
+{
+    if (typeOne == DATA_TYPE_FLOAT && typeTwo == DATA_TYPE_BOOL) 
+    {
+        return 1;
+    }
+    if (typeOne == DATA_TYPE_BOOL && typeTwo == DATA_TYPE_FLOAT)
+    {
+        return 1;
+    }
+    return 0;
+}
+
+void throwCharConversionError(Node* nodeOne, Node* nodeTwo)
+{
+    Node* nonCharNode;
+    if (nodeOne->dataType == DATA_TYPE_CHAR) 
+    {
+        nonCharNode = nodeTwo;
+    } 
+    else 
+    {
+        nonCharNode = nodeOne;
+    }
+
+    printf("ERRO! Tentativa de converter %s de tipo %s para char na linha %d.", 
+        nonCharNode->lexicalValue.label, 
+        getDataTypeName(nonCharNode->dataType), 
+        nonCharNode->lexicalValue.lineNumber
+    );
+
+    if (nonCharNode->dataType == DATA_TYPE_BOOL) {
+        exit(ERR_CHAR_TO_BOOL);
+    } else if (nonCharNode->dataType == DATA_TYPE_FLOAT) {
+        exit(ERR_CHAR_TO_FLOAT);
+    } else if (nonCharNode->dataType == DATA_TYPE_INT) {
+        exit(ERR_CHAR_TO_INT);
+    }    
+}
+
+DataType typeInference(Node* nodeOne, Node* nodeTwo)
+{
+    if (nodeOne->dataType == nodeTwo->dataType) return nodeOne->dataType;
+
+    if (dataTypesAreIntAndFloat(nodeOne->dataType, nodeTwo->dataType)) return DATA_TYPE_FLOAT;
+
+    if (dataTypesAreBooleanAndInt(nodeOne->dataType, nodeTwo->dataType)) return DATA_TYPE_INT;
+
+    if (dataTypesAreBooleanAndFloat(nodeOne->dataType, nodeTwo->dataType)) return DATA_TYPE_FLOAT;
+
+    throwCharConversionError(nodeOne, nodeTwo);
+
+    return DATA_TYPE_NON_DECLARED;
+}
+
+Node* createNodeFromTwoChildren(LexicalValue lexicalValue, Node* leftChild, Node* rightChild) 
+{
+    Node* node = createNode(lexicalValue);
+	node->dataType = typeInference(leftChild, rightChild);
+    return node;
+}
+
+Node* createNodeFromChild(LexicalValue lexicalValue, Node* leftChild)
+{
+    Node* node = createNode(lexicalValue);
+	node->dataType = leftChild->dataType;
+    return node;
+}
+
+Node* createNodeFromSymbol(LexicalValue lexicalValue, SymbolTableValue symbol)
+{
+    Node* node = createNode(lexicalValue);
+    node->dataType = symbol.dataType;
     return node;
 }
 
@@ -171,12 +256,12 @@ void printTreeRecursively(Node* node, int level)
 
     if (level == 0)
     {
-        printf("%s", node->lexicalValue.label);
+        printf("%s [%s]", node->lexicalValue.label, getDataTypeName(node->dataType));
     }
     else 
     {
         printf("●---");
-        printf("%s", node->lexicalValue.label);
+        printf("%s [%s]", node->lexicalValue.label, getDataTypeName(node->dataType));
     }
     printf("\n");
 

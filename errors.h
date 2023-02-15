@@ -1,0 +1,10 @@
+#define ERR_UNDECLARED 10
+#define ERR_DECLARED 11
+#define ERR_VARIABLE 20
+#define ERR_ARRAY 21
+#define ERR_FUNCTION 22
+#define ERR_CHAR_TO_INT 31
+#define ERR_CHAR_TO_FLOAT 32
+#define ERR_CHAR_TO_BOOL 33
+#define ERR_CHAR_VECTOR 34
+#define ERR_X_TO_CHAR 35

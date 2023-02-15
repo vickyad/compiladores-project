@@ -1,8 +1,13 @@
 %{
 #include <stdio.h>
+#include "types.h"
+#include "data_type.h"
 #include "generic_tree.h"
 #include "lexical_value.h"
+#include "symbol_table.h"
 #include "print.h"
+
+DataType declaredType = DATA_TYPE_NON_DECLARED;
 
 int yylex(void);
 void yyerror (char const *message);
@@ -125,21 +130,25 @@ elements_list: global_declaration {
 type: TK_PR_INT { 
     $$ = NULL; 
     freeLexicalValue($1);
+    declaredType = DATA_TYPE_INT;
 };
 
 type: TK_PR_FLOAT { 
     $$ = NULL; 
     freeLexicalValue($1);
+    declaredType = DATA_TYPE_FLOAT;
 };
 
 type: TK_PR_BOOL { 
     $$ = NULL; 
     freeLexicalValue($1);
+    declaredType = DATA_TYPE_BOOL;
 };
 
 type: TK_PR_CHAR { 
     $$ = NULL; 
     freeLexicalValue($1);
+    declaredType = DATA_TYPE_CHAR;
 };
 
 
@@ -147,23 +156,23 @@ type: TK_PR_CHAR {
 // =      Literais       =
 // =======================
 literal: TK_LIT_INT { 
-    $$ = createNode($1);
+    $$ = createNodeWithType($1, DATA_TYPE_INT);
 };
 
 literal: TK_LIT_FLOAT { 
-    $$ = createNode($1);
+    $$ = createNodeWithType($1, DATA_TYPE_FLOAT);
 };
 
 literal: TK_LIT_FALSE { 
-    $$ = createNode($1);
+    $$ = createNodeWithType($1, DATA_TYPE_BOOL);
 };
 
 literal: TK_LIT_TRUE { 
-    $$ = createNode($1);
+    $$ = createNodeWithType($1, DATA_TYPE_BOOL);
 };
 
 literal: TK_LIT_CHAR { 
-    $$ = createNode($1);
+    $$ = createNodeWithType($1, DATA_TYPE_CHAR);
 };
 
 
@@ -172,13 +181,14 @@ literal: TK_LIT_CHAR {
 // =======================
 global_declaration: type var_list ';' { 
     $$ = NULL;
-    libera($2);
     freeLexicalValue($3);
 };
 
 var_list: TK_IDENTIFICADOR { 
     $$ = NULL; 
-    freeLexicalValue($1);
+
+    SymbolTableValue symbol = createSymbolTableValueWithType(SYMBOL_TYPE_VARIABLE, $1, declaredType);
+    addValueToSymbolTableStack(symbolTableStack, symbol);
 };
 
 var_list: array { 
@@ -187,8 +197,10 @@ var_list: array {
 
 var_list: TK_IDENTIFICADOR ',' var_list {
     $$ = NULL;
-    freeLexicalValue($1);
     freeLexicalValue($2);
+
+    SymbolTableValue symbol = createSymbolTableValueWithType(SYMBOL_TYPE_VARIABLE, $1, declaredType);
+    addValueToSymbolTableStack(symbolTableStack, symbol);
 };
 
 var_list: array ',' var_list { 
@@ -199,9 +211,11 @@ var_list: array ',' var_list {
 // Arranjos
 array: TK_IDENTIFICADOR '[' dimension ']' {
     $$ = NULL;
-    freeLexicalValue($1);
     freeLexicalValue($2);
     freeLexicalValue($4);
+
+    SymbolTableValue symbol = createSymbolTableValueWithType(SYMBOL_TYPE_ARRAY, $1, declaredType);
+    addValueToSymbolTableStack(symbolTableStack, symbol);
 }; 
 
 dimension: TK_LIT_INT {
@@ -225,7 +239,13 @@ function: header arguments body {
 };
 
 header: type TK_IDENTIFICADOR {
-    $$ = createNode($2);
+    $$ = createNodeWithType($2, declaredType);
+
+    // First create function symbol on external context
+    SymbolTableValue symbol = createSymbolTableValueWithType(SYMBOL_TYPE_FUNCTION, $2, declaredType);
+    addValueToSymbolTableStack(symbolTableStack, symbol);
+
+    // Then create a new internal context
     symbolTableStack = createNewTableOnSymbolTableStack(symbolTableStack);
 };
 
@@ -248,13 +268,17 @@ arguments: '(' arg_list ')' {
 
 arg_list: type TK_IDENTIFICADOR {
     $$ = NULL;
-    freeLexicalValue($2);
+
+    SymbolTableValue symbol = createSymbolTableValueWithType(SYMBOL_TYPE_VARIABLE, $2, declaredType);
+    addValueToSymbolTableStack(symbolTableStack, symbol);
 };
 
 arg_list: type TK_IDENTIFICADOR ',' arg_list {
     $$ = NULL;
-    freeLexicalValue($2);
     freeLexicalValue($3);
+
+    SymbolTableValue symbol = createSymbolTableValueWithType(SYMBOL_TYPE_VARIABLE, $2, declaredType);
+    addValueToSymbolTableStack(symbolTableStack, symbol);
 };
 
 
@@ -332,43 +356,60 @@ var_declaration: type var_decl_list {
 
 var_decl_list: TK_IDENTIFICADOR { 
     $$ = NULL;
-    freeLexicalValue($1);
+
+    SymbolTableValue symbol = createSymbolTableValueWithType(SYMBOL_TYPE_VARIABLE, $1, declaredType);
+    addValueToSymbolTableStack(symbolTableStack, symbol);
 };
 
 var_decl_list: TK_IDENTIFICADOR TK_OC_LE literal {
-    $$ = createNode($2);
-    addChild($$, createNode($1));
+    $$ = createNodeWithType($2, declaredType);
+    addChild($$, createNodeWithType($1, declaredType));
     addChild($$, $3);
+
+    SymbolTableValue symbol = createSymbolTableValueWithType(SYMBOL_TYPE_VARIABLE, $1, declaredType);
+    addValueToSymbolTableStack(symbolTableStack, symbol);
 };
 
 var_decl_list: TK_IDENTIFICADOR ',' var_decl_list { 
     $$ = $3;
-    freeLexicalValue($1);
     freeLexicalValue($2);
+
+    SymbolTableValue symbol = createSymbolTableValueWithType(SYMBOL_TYPE_VARIABLE, $1, declaredType);
+    addValueToSymbolTableStack(symbolTableStack, symbol);
 };
 
 var_decl_list: TK_IDENTIFICADOR TK_OC_LE literal ',' var_decl_list { 
-    $$ = createNode($2);
-    addChild($$, createNode($1));
+    $$ = createNodeWithType($2, declaredType);
+    addChild($$, createNodeWithType($1, declaredType));
     addChild($$, $3);
     addChild($$, $5);
     freeLexicalValue($4);
+
+    SymbolTableValue symbol = createSymbolTableValueWithType(SYMBOL_TYPE_VARIABLE, $1, declaredType);
+    addValueToSymbolTableStack(symbolTableStack, symbol);
 };
 
 // Atribuicao
 attribution: TK_IDENTIFICADOR '=' expression { 
-    $$ = createNode($2);
-    addChild($$, createNode($1));
+    SymbolTableValue symbol = getByLexicalValueOnSymbolTableStack(symbolTableStack, $1);
+
+    Node* variable = createNodeFromSymbol($1, symbol);
+
+    $$ = createNodeFromChild($2, variable); 
+    addChild($$, variable);
     addChild($$, $3);
 };
 
 attribution: TK_IDENTIFICADOR '[' attr_array ']' '=' expression {
-    $$ = createNode($5);
+    SymbolTableValue symbol = getByLexicalValueOnSymbolTableStack(symbolTableStack, $1);
+
+    Node* variable = createNodeFromSymbol($1, symbol);
     
-    Node* array = createNode($2);
-    addChild(array, createNode($1));
+    Node* array = createNodeFromChild($2, variable);
+    addChild(array, variable); 
     addChild(array, $3);
 
+    $$ = createNodeFromChild($5, array);
     addChild($$, array);
     addChild($$, $6);
 
@@ -376,7 +417,7 @@ attribution: TK_IDENTIFICADOR '[' attr_array ']' '=' expression {
 };
 
 attr_array: attr_array '^' expression {  
-    $$ = createNode($2);
+    $$ = createNodeFromTwoChildren($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);
 };
@@ -387,13 +428,17 @@ attr_array: expression {
 
 // Chamada de funcao
 function_call: TK_IDENTIFICADOR '(' ')' { 
-    $$ = createNodeFromFunctionCall($1);
+    SymbolTableValue symbol = getByLexicalValueOnSymbolTableStack(symbolTableStack, $1);
+
+    $$ = createNodeForFunctionCallFromSymbol($1, symbol);
     freeLexicalValue($2);
     freeLexicalValue($3);
 };
 
 function_call: TK_IDENTIFICADOR '(' arg_fn_list ')' { 
-    $$ = createNodeFromFunctionCall($1);
+    SymbolTableValue symbol = getByLexicalValueOnSymbolTableStack(symbolTableStack, $1);
+
+    $$ = createNodeForFunctionCallFromSymbol($1, symbol);
     addChild($$, $3);
     freeLexicalValue($2);
     freeLexicalValue($4);
@@ -411,13 +456,13 @@ arg_fn_list: expression ',' arg_fn_list {
 
 // Comando de retorno
 return_command: TK_PR_RETURN expression { 
-    $$ = createNode($1);
+    $$ = createNodeFromChild($1, $2);
     addChild($$, $2);
 };
 
 // Comando de controle de fluxo
 flow_control_commands: TK_PR_IF '(' expression start_flow_control_block TK_PR_THEN command_block { 
-    $$ = createNode($1);
+    $$ = createNodeFromChild($1, $3);
     addChild($$, $3);
     addChild($$, $6);
     freeLexicalValue($2);
@@ -425,7 +470,7 @@ flow_control_commands: TK_PR_IF '(' expression start_flow_control_block TK_PR_TH
 };
 
 flow_control_commands: TK_PR_IF '(' expression start_flow_control_block TK_PR_THEN command_block flow_control_else command_block { 
-    $$ = createNode($1);
+    $$ = createNodeFromChild($1, $3);
     addChild($$, $3);
     addChild($$, $6);
     addChild($$, $8);
@@ -434,7 +479,7 @@ flow_control_commands: TK_PR_IF '(' expression start_flow_control_block TK_PR_TH
 };
 
 flow_control_commands: TK_PR_WHILE '(' expression start_flow_control_block command_block { 
-    $$ = createNode($1);
+    $$ = createNodeFromChild($1, $3);
     addChild($$, $3);
     addChild($$, $5);
     freeLexicalValue($2);
@@ -460,7 +505,7 @@ expression: expression_grade_eight {
 };
 
 expression_grade_eight: expression_grade_eight TK_OC_OR expression_grade_seven { 
-    $$ = createNode($2);
+    $$ = createNodeFromTwoChildren($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);
 };
@@ -470,7 +515,7 @@ expression_grade_eight: expression_grade_seven {
 };
 
 expression_grade_seven: expression_grade_seven TK_OC_AND expression_grade_six { 
-    $$ = createNode($2);
+    $$ = createNodeFromTwoChildren($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);
 };
@@ -480,13 +525,13 @@ expression_grade_seven: expression_grade_six {
 };
 
 expression_grade_six: expression_grade_six TK_OC_EQ expression_grade_five { 
-    $$ = createNode($2);
+    $$ = createNodeFromTwoChildren($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);
 };
 
 expression_grade_six: expression_grade_six TK_OC_NE expression_grade_five { 
-    $$ = createNode($2);
+    $$ = createNodeFromTwoChildren($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);    
 };
@@ -496,25 +541,25 @@ expression_grade_six: expression_grade_five {
 };
 
 expression_grade_five: expression_grade_five '>' expression_grade_four { 
-    $$ = createNode($2);
+    $$ = createNodeFromTwoChildren($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);
 };
 
 expression_grade_five: expression_grade_five '<' expression_grade_four { 
-    $$ = createNode($2);
+    $$ = createNodeFromTwoChildren($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);
 };
 
 expression_grade_five: expression_grade_five TK_OC_LE expression_grade_four { 
-    $$ = createNode($2);
+    $$ = createNodeFromTwoChildren($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);
 };
 
 expression_grade_five: expression_grade_five TK_OC_GE expression_grade_four { 
-    $$ = createNode($2);
+    $$ = createNodeFromTwoChildren($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);
 };
@@ -524,13 +569,13 @@ expression_grade_five: expression_grade_four {
 };
 
 expression_grade_four: expression_grade_four '+' expression_grade_three { 
-    $$ = createNode($2);
+    $$ = createNodeFromTwoChildren($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);
 };
 
 expression_grade_four: expression_grade_four '-' expression_grade_three { 
-    $$ = createNode($2);
+    $$ = createNodeFromTwoChildren($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);
 };
@@ -540,19 +585,19 @@ expression_grade_four: expression_grade_three {
 };
 
 expression_grade_three: expression_grade_three '*' expression_grade_two {
-    $$ = createNode($2);
+    $$ = createNodeFromTwoChildren($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);
 };
 
 expression_grade_three: expression_grade_three '/' expression_grade_two { 
-    $$ = createNode($2);
+    $$ = createNodeFromTwoChildren($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);
 };
 
 expression_grade_three: expression_grade_three '%' expression_grade_two { 
-    $$ = createNode($2);
+    $$ = createNodeFromTwoChildren($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);
 };
@@ -562,12 +607,12 @@ expression_grade_three: expression_grade_two {
 };
 
 expression_grade_two: '!' expression_grade_one { 
-    $$ = createNode($1);
+    $$ = createNodeFromChild($1, $2); 
     addChild($$, $2);
 };
 
 expression_grade_two: '-' expression_grade_one { 
-    $$ = createNode($1);
+    $$ = createNodeFromChild($1, $2); 
     addChild($$, $2);
 };
 
@@ -576,12 +621,18 @@ expression_grade_two: expression_grade_one {
 };
 
 expression_grade_one: TK_IDENTIFICADOR { 
-    $$ = createNode($1);
+    SymbolTableValue symbol = getByLexicalValueOnSymbolTableStack(symbolTableStack, $1);
+
+    $$ = createNodeFromSymbol($1, symbol);
 };
 
 expression_grade_one: TK_IDENTIFICADOR '[' expression_list ']' {
-    $$ = createNode($2);
-    addChild($$, createNode($1));
+    SymbolTableValue symbol = getByLexicalValueOnSymbolTableStack(symbolTableStack, $1);
+
+    Node* variable = createNodeFromSymbol($1, symbol);
+
+    $$ = createNodeFromChild($2, variable);
+    addChild($$, variable);
     addChild($$, $3);
     freeLexicalValue($4);
 };
@@ -601,7 +652,7 @@ expression_grade_one: '(' expression ')' {
 };
 
 expression_list: expression_list '^' expression { 
-    $$ = createNode($2);
+    $$ = createNodeFromTwoChildren($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);        
 };
