@@ -4,12 +4,12 @@
 */
 #include <stdio.h>
 #include "symbol_table.h"
+#include "generic_tree.h"
 extern int yyparse(void);
 extern int yylex_destroy(void);
 
-void *arvore = NULL;
-void exporta (void *arvore);
-void libera (void *arvore);
+Node* arvore = NULL;
+SymbolTableStack* symbolTableStack = NULL;
 
 SymbolTable* getSymbolTableWithItems()
 {
@@ -45,8 +45,7 @@ SymbolTable* getSymbolTableWithItems()
   return symbolTable;
 }
 
-int main (int argc, char **argv)
-{
+void tableStackTest() {
   SymbolTableStack* stack = createSymbolTableStack();
   
   SymbolTable* tableOne = createSymbolTable();
@@ -91,12 +90,32 @@ int main (int argc, char **argv)
 
   value = getByKeyOnSymbolTableStack(stack, "3");
   printf("%d", value.symbolType == SYMBOL_TYPE_NON_EXISTENT);
+}
 
-  return 1;
-  // int ret = yyparse(); 
-  // exporta (arvore);
-  // libera(arvore);
-  // arvore = NULL;
-  // yylex_destroy();
-  // return ret;
+void initSymbolStack() {
+  symbolTableStack = createSymbolTableStack();
+  SymbolTable* globalTable = createSymbolTable();
+  symbolTableStack = addTableToSymbolTableStack(symbolTableStack, globalTable);
+}
+
+void freeGlobalTree() {
+  libera(arvore);
+  arvore = NULL;
+}
+
+void freeGlobalSymbolTableStack() {
+  destroySymbolTableStack(symbolTableStack);
+  symbolTableStack = NULL;
+}
+
+int main (int argc, char **argv)
+{
+  initSymbolStack();
+  int ret = yyparse(); 
+  // exporta(arvore);
+  printTree(arvore);
+  freeGlobalTree();
+  freeGlobalSymbolTableStack();
+  yylex_destroy();
+  return ret;
 }

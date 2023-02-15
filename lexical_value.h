@@ -36,7 +36,6 @@ typedef struct LexicalValue {
     char* label;
 } LexicalValue;
 
-char* getLexicalValueLabel(LexicalValue value);
 LexicalValue createLexicalValue(char* text, TokenType type, LiteralType literalType, int lineNumber);
 void defineLiteralValue(LexicalValue* lexicalValue, char* text, LiteralType literalType);
 int isTextEqualTrue(char* text);

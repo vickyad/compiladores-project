@@ -10,7 +10,7 @@ typedef enum NodeType {
     NODE_TYPE_FLOAT,
     NODE_TYPE_CHAR,
     NODE_TYPE_BOOL
-} LiteralType;
+} NodeType;
 
 typedef struct Node {
     LexicalValue lexicalValue;
@@ -30,5 +30,6 @@ void libera(Node* node);
 void exporta(Node* node);
 void printHeader(Node* node);
 void printBody(Node* node);
+void printTree(Node* node);
 
 #endif

@@ -8,11 +8,13 @@ int yylex(void);
 void yyerror (char const *message);
 int get_line_number();
 extern void *arvore;
+extern void *symbolTableStack;
 %}
 
 %code requires {
     #include "generic_tree.h"
     #include "lexical_value.h"
+    #include "symbol_table.h"
 }
 
 %union {
@@ -73,6 +75,8 @@ extern void *arvore;
 %type<Node> arg_fn_list
 %type<Node> return_command
 %type<Node> flow_control_commands
+%type<Node> start_flow_control_block
+%type<Node> flow_control_else
 %type<Node> expression
 %type<Node> expression_grade_eight
 %type<Node> expression_grade_seven
@@ -215,13 +219,14 @@ dimension: TK_LIT_INT '^' dimension {
 // =======================
 // =       Funcoes       =
 // =======================
-function: header body {
+function: header arguments body {
     $$ = $1;
-    addChild($$, $2);
+    addChild($$, $3);
 };
 
-header: type TK_IDENTIFICADOR arguments {
+header: type TK_IDENTIFICADOR {
     $$ = createNode($2);
+    symbolTableStack = createNewTableOnSymbolTableStack(symbolTableStack);
 };
 
 body: command_block { 
@@ -260,12 +265,14 @@ command_block: '{' '}' {
     $$ = NULL;
     freeLexicalValue($1);
     freeLexicalValue($2);
+    symbolTableStack = destroyFirstTableFromSymbolTableStack(symbolTableStack);
 };
 
 command_block: '{' simple_command_list '}' { 
     $$ = $2;
     freeLexicalValue($1);
     freeLexicalValue($3);
+    symbolTableStack = destroyFirstTableFromSymbolTableStack(symbolTableStack);
 };
 
 simple_command_list: simple_command { 
@@ -409,35 +416,42 @@ return_command: TK_PR_RETURN expression {
 };
 
 // Comando de controle de fluxo
-flow_control_commands: TK_PR_IF '(' expression ')' TK_PR_THEN command_block { 
+flow_control_commands: TK_PR_IF '(' expression start_flow_control_block TK_PR_THEN command_block { 
     $$ = createNode($1);
     addChild($$, $3);
     addChild($$, $6);
     freeLexicalValue($2);
-    freeLexicalValue($4);
     freeLexicalValue($5);
 };
 
-flow_control_commands: TK_PR_IF '(' expression ')' TK_PR_THEN command_block TK_PR_ELSE command_block { 
+flow_control_commands: TK_PR_IF '(' expression start_flow_control_block TK_PR_THEN command_block flow_control_else command_block { 
     $$ = createNode($1);
     addChild($$, $3);
     addChild($$, $6);
     addChild($$, $8);
     freeLexicalValue($2);
-    freeLexicalValue($4);
     freeLexicalValue($5);
-    freeLexicalValue($7);
 };
 
-flow_control_commands: TK_PR_WHILE '(' expression ')' command_block { 
+flow_control_commands: TK_PR_WHILE '(' expression start_flow_control_block command_block { 
     $$ = createNode($1);
     addChild($$, $3);
     addChild($$, $5);
     freeLexicalValue($2);
-    freeLexicalValue($4);
 };
 
+start_flow_control_block: ')' {
+    $$ = NULL;
+    freeLexicalValue($1);
+    symbolTableStack = createNewTableOnSymbolTableStack(symbolTableStack);
+};
 
+flow_control_else: TK_PR_ELSE {
+    $$ = NULL;
+    freeLexicalValue($1);
+    symbolTableStack = createNewTableOnSymbolTableStack(symbolTableStack);
+}
+ 
 // =======================
 // =     Expressoes      =
 // =======================

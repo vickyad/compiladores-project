@@ -151,8 +151,10 @@ SymbolTableValue createSymbolTableValue(SymbolType symbolType, LexicalValue lexi
     SymbolTableValue value;
     value.lexicalValue = lexicalValue;
     value.symbolType = symbolType;
-    value.size = 0; // TODO: Calculate size
-    value.firstArgument = NULL; // TODO: Method to add arguments
+    value.lineNumber = lexicalValue.lineNumber;
+    // value.symbolDataType = 0; // TODO
+    // value.size = 0; // TODO
+    value.firstArgument = NULL; // TODO
     return value;
 }
 
@@ -245,6 +247,8 @@ SymbolTableStack* destroyFirstTableFromSymbolTableStack(SymbolTableStack* symbol
 {
     if (!symbolTableStack) return NULL;
 
+    printf("Destroying table from stack... \n");
+
     destroySymbolTable(symbolTableStack->symbolTable);
 
     SymbolTableStack* nextItem = symbolTableStack->nextItem;
@@ -254,11 +258,24 @@ SymbolTableStack* destroyFirstTableFromSymbolTableStack(SymbolTableStack* symbol
     return nextItem;
 }
 
+SymbolTableStack* createNewTableOnSymbolTableStack(SymbolTableStack* symbolTableStack) {
+    SymbolTable* newTable = createSymbolTable();
+    return addTableToSymbolTableStack(symbolTableStack, newTable);
+}
+
 SymbolTableStack* addTableToSymbolTableStack(SymbolTableStack* currentFirstTable, SymbolTable* symbolTable)
 {
-    if (!currentFirstTable) return NULL;
+    if (!currentFirstTable) {
+        printf("Adding table to null stack \n");
+        return NULL;
+    }
 
-    if (!symbolTable) return NULL;
+    if (!symbolTable) {
+        printf("Adding null table to stack \n");
+        return NULL;
+    }
+
+    printf("Adding new table to stack... \n");
 
     SymbolTableStack* newFirstTable = createSymbolTableStack();
     newFirstTable->symbolTable = symbolTable;
@@ -309,4 +326,20 @@ int checkValueIsOnFirstSymbolTable(SymbolTableStack* symbolTableStack, char* key
 	}
 }
 
+void printSymbolTableStack(SymbolTableStack* symbolTableStack) {
+    if (!symbolTableStack) return;
+    if (!symbolTableStack->symbolTable) return;
 
+    SymbolTable* table = symbolTableStack->symbolTable;
+
+    printf("============TABLE============ \n");
+    for (size_t index = 0; index < table->capacity; index++) {
+        SymbolTableEntry entry = table->entries[index];
+        if (entry.key) {
+            printf("%s | %s \n", entry.key, entry.value.lexicalValue.label);
+        }
+    }
+    printf("=============END============= \n \n");
+
+    printSymbolTableStack(symbolTableStack->nextItem);
+}

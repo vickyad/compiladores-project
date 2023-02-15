@@ -29,7 +29,7 @@ Node* createNode(LexicalValue lexicalValue)
     node->child = NULL;
     node->parent = NULL;
 
-	if (node->lexicalValue != LITERAL_TYPE_IS_NOT_LITERAL)
+	if (node->lexicalValue.literalType != LITERAL_TYPE_IS_NOT_LITERAL)
     {
 		node->nodeType = getNodeTypeFromLexicalValue(node->lexicalValue);
     }
@@ -59,6 +59,7 @@ Node* createNodeWithType(LexicalValue lexicalValue, NodeType nodeType)
 {
 	Node* node = createNode(lexicalValue);
 	node->nodeType = nodeType;
+    return node;
 }
 
 void addChild(Node* parent, Node* child) 
@@ -154,5 +155,49 @@ void printBody(Node* node)
     if (node->brother)
     {
         printBody(node->brother);
+    }
+}
+
+void printTreeRecursively(Node* node, int level) 
+{
+    int i = 0;
+
+    if (!node) return;
+
+    for(i = 0; i < level - 1; i++) 
+    {
+        printf("    ");
+    }
+
+    if (level == 0)
+    {
+        printf("%s", node->lexicalValue.label);
+    }
+    else 
+    {
+        printf("●---");
+        printf("%s", node->lexicalValue.label);
+    }
+    printf("\n");
+
+    Node *nodo_f = node->child;
+    while(nodo_f)
+    {
+        printTreeRecursively(nodo_f, level+1);
+        nodo_f = nodo_f->brother;
+    }
+}
+
+void printNonNullTree(Node* node) 
+{
+    Node* rootNode = getRoot(node);
+    printTreeRecursively(rootNode, 1);
+}
+
+void printTree(Node* node) 
+{
+    if (node) 
+    {
+        printNonNullTree(node);
     }
 }

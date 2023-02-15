@@ -15,6 +15,13 @@ typedef struct FunctionArgument {
     struct FunctionArgument* nextArgument;
 } FunctionArgument;
 
+typedef enum SymbolDataType {
+    SYMBOL_DATA_TYPE_INT,
+    SYMBOL_DATA_TYPE_FLOAT,
+    SYMBOL_DATA_TYPE_CHAR,
+    SYMBOL_DATA_TYPE_BOOL,
+} SymbolDataType;
+
 typedef enum SymbolType {
     SYMBOL_TYPE_LITERAL,
     SYMBOL_TYPE_VARIABLE,
@@ -25,7 +32,9 @@ typedef enum SymbolType {
 
 typedef struct SymbolTableValue {
     int size;
+    int lineNumber;
     SymbolType symbolType;
+    SymbolDataType symbolDataType;
     LexicalValue lexicalValue;
     FunctionArgument* firstArgument;
 } SymbolTableValue;
@@ -68,10 +77,14 @@ SymbolTable* getFirstTableFromSymbolTableStack(SymbolTableStack* symbolTableStac
 
 SymbolTableStack* destroyFirstTableFromSymbolTableStack(SymbolTableStack* symbolTableStack);
 
+SymbolTableStack* createNewTableOnSymbolTableStack(SymbolTableStack* symbolTableStack);
+
 SymbolTableStack* addTableToSymbolTableStack(SymbolTableStack* symbolTableStack, SymbolTable* symbolTable);
 
 SymbolTableValue getByKeyOnSymbolTableStack(SymbolTableStack* symbolTableStack, char* key);
 
 int checkValueIsOnFirstSymbolTable(SymbolTableStack* symbolTableStack, char* key);
+
+void printSymbolTableStack(SymbolTableStack* symbolTableStack);
 
 #endif
