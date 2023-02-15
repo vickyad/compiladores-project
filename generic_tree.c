@@ -256,12 +256,12 @@ void printTreeRecursively(Node* node, int level)
 
     if (level == 0)
     {
-        printf("%s [%s]", node->lexicalValue.label, getDataTypeName(node->dataType));
+        printf("%s [type=%s]", node->lexicalValue.label, getDataTypeName(node->dataType));
     }
     else 
     {
         printf("●---");
-        printf("%s [%s]", node->lexicalValue.label, getDataTypeName(node->dataType));
+        printf("%s [type=%s]", node->lexicalValue.label, getDataTypeName(node->dataType));
     }
     printf("\n");
 

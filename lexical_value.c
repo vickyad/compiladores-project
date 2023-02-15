@@ -7,13 +7,9 @@ LexicalValue createLexicalValue(char* text, TokenType type, LiteralType literalT
     lexicalValue.type = type;
     lexicalValue.label = getLabelName(text, literalType);
     
-    if (literalType) 
+    if (literalType != LITERAL_TYPE_IS_NOT_LITERAL) 
     {
         defineLiteralValue(&lexicalValue, text, literalType);
-    }
-    else
-    {
-        lexicalValue.literalType = LITERAL_TYPE_IS_NOT_LITERAL;
     }
 
     return lexicalValue;
@@ -62,4 +58,27 @@ void freeLexicalValue(LexicalValue lexicalValue)
 {
     if (!lexicalValue.label) return;
     free(lexicalValue.label);
+}
+
+Dimension getDimension(LexicalValue lexicalValue)
+{
+    Dimension dimension;
+    if (lexicalValue.type != TOKEN_TYPE_LITERAL && lexicalValue.literalType != LITERAL_TYPE_INT) 
+    {
+        printf("Calculating dimension with value different than integer");
+        dimension.value = 0;
+        return dimension;
+    } 
+
+    dimension.value = lexicalValue.value.value_int;
+
+    return dimension;
+}
+
+Dimension getDimensionMultipling(LexicalValue lexicalValue, Dimension previousDimension)
+{
+    Dimension dimensionFromLexicalValue = getDimension(lexicalValue);
+    Dimension newDimension;
+    newDimension.value = dimensionFromLexicalValue.value * previousDimension.value;
+    return newDimension;
 }

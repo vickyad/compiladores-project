@@ -12,5 +12,7 @@ void defineLiteralValue(LexicalValue* lexicalValue, char* text, LiteralType lite
 int isTextEqualTrue(char* text);
 void freeLexicalValue(LexicalValue lexicalValue);
 char* getLabelName(char* text, LiteralType literalType);
+Dimension getDimension(LexicalValue lexicalValue);
+Dimension getDimensionMultipling(LexicalValue lexicalValue, Dimension dimension);
 
 #endif

@@ -24,7 +24,7 @@ SymbolTableValue createSymbolTableValue(SymbolType symbolType, Node* node);
 
 SymbolTableValue createSymbolTableValueWithType(SymbolType symbolType, LexicalValue lexicalValue, DataType dataType);
 
-void addValueToSymbolTable(SymbolTable* table, SymbolTableValue value);
+SymbolTableValue createSymbolTableValueWithTypeAndSize(SymbolType symbolType, LexicalValue lexicalValue, DataType dataType, Dimension dimension);
 
 int expandSymbolTable(SymbolTable* table);
 

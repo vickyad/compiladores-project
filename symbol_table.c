@@ -151,6 +151,25 @@ SymbolTableValue createSymbolTableValue(SymbolType symbolType, Node* node)
     return createSymbolTableValueWithType(symbolType, node->lexicalValue, node->dataType);
 }
 
+int calculateSymbolSize(SymbolType symbolType, DataType dataType)
+{
+    if (symbolType == SYMBOL_TYPE_LITERAL || symbolType == SYMBOL_TYPE_VARIABLE) 
+    {
+        if (dataType == DATA_TYPE_BOOL) return 1;
+        if (dataType == DATA_TYPE_CHAR) return 1;
+        if (dataType == DATA_TYPE_INT) return 4;
+        if (dataType == DATA_TYPE_FLOAT) return 8;
+    } 
+
+    if (symbolType == SYMBOL_TYPE_ARRAY || symbolType == SYMBOL_TYPE_FUNCTION || symbolType == SYMBOL_TYPE_NON_EXISTENT)
+    {
+        return 0;
+    }
+
+    printf("Trying to calculate size of invalid symbol or data type");
+    return 0;
+}
+
 SymbolTableValue createSymbolTableValueWithType(SymbolType symbolType, LexicalValue lexicalValue, DataType dataType)
 {
     SymbolTableValue value;
@@ -158,22 +177,49 @@ SymbolTableValue createSymbolTableValueWithType(SymbolType symbolType, LexicalVa
     value.symbolType = symbolType;
     value.lineNumber = lexicalValue.lineNumber;
     value.dataType = dataType;
-    value.size = 0; // TODO: Definir tamanho
+    value.size = calculateSymbolSize(symbolType, dataType);
     value.firstArgument = NULL; // TODO Adicionar argumentos quando symbolType for FUNTION
     return value;
 }
 
-void addValueToSymbolTable(SymbolTable* table, SymbolTableValue value)
+SymbolTableValue createSymbolTableValueWithTypeAndSize(SymbolType symbolType, LexicalValue lexicalValue, DataType dataType, Dimension dimension) 
 {
+    SymbolTableValue value = createSymbolTableValueWithType(symbolType, lexicalValue, dataType);
+    value.size = dimension.value;
+    return value;
+}
+
+void addValueToSymbolTableStack(SymbolTableStack* stack, SymbolTableValue value)
+{
+    if (!stack) {
+        printError("Trying to add symbol on null stack");
+        return;
+    }
+
+    SymbolTable* table = stack->symbolTable;
+
     if (!table)
     {
         printError("Trying to add symbol on null table");
         return;
     }
+
     if (!value.lexicalValue.label)
     {
         printError("Trying to add symbol without label");
         return;
+    }
+
+    SymbolTableValue existentValue = getSymbolTableValueByKey(table, value.lexicalValue.label);
+
+    if (existentValue.symbolType != SYMBOL_TYPE_NON_EXISTENT) 
+    {
+        printf("ERRO! Falha ao declarar %s na linha %d. A declaração já foi feita na linha %d", 
+            value.lexicalValue.label, 
+            value.lineNumber,
+            existentValue.lineNumber
+        );
+        exit(ERR_DECLARED);
     }
 
     if (table->size >= table->capacity / TABLE_EXPAND_FACTOR)
@@ -289,9 +335,8 @@ SymbolTableValue getByLexicalValueOnSymbolTableStack(SymbolTableStack* symbolTab
 {
     if (!symbolTableStack) 
     {
-        printf("ERRO! Variável %s não foi declarada na linha %d", lexicalValue.label, lexicalValue.lineNumber);
+        printf("ERRO! Variável %s não foi declarada antes do seu uso na linha %d", lexicalValue.label, lexicalValue.lineNumber);
         exit(ERR_UNDECLARED);
-        return getEmptyValue();
     }
     
     SymbolTableValue value = getSymbolTableValueByKey(symbolTableStack->symbolTable, lexicalValue.label);
@@ -303,13 +348,6 @@ SymbolTableValue getByLexicalValueOnSymbolTableStack(SymbolTableStack* symbolTab
     {
         return value;
     }
-}
-
-void addValueToSymbolTableStack(SymbolTableStack* stack, SymbolTableValue value) 
-{
-	if (!stack) return;
-
-	addValueToSymbolTable(stack->symbolTable, value);
 }
 
 int checkValueIsOnFirstSymbolTable(SymbolTableStack* symbolTableStack, char* key)
@@ -339,7 +377,7 @@ void printSymbolTableStack(SymbolTableStack* symbolTableStack) {
     for (size_t index = 0; index < table->capacity; index++) {
         SymbolTableEntry entry = table->entries[index];
         if (entry.key) {
-            printf("%s => %s \n", entry.key, getDataTypeName(entry.value.dataType));
+            printf("[key=%s] [type=%s] [size=%d] \n", entry.key, getDataTypeName(entry.value.dataType), entry.value.size);
         }
     }
     printf("=============END============= \n \n");

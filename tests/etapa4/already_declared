@@ -1,0 +1,6 @@
+float globalVar;
+int functionOne() { 
+    int globalVar <= 10;
+    float globalVar <= 10.0;
+    return globalVar;
+}

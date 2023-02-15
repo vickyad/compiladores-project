@@ -25,6 +25,7 @@ extern void *symbolTableStack;
 %union {
    LexicalValue LexicalValue;
    struct Node* Node;
+   Dimension Dimension;
 }
 
 %define parse.error verbose
@@ -63,7 +64,7 @@ extern void *symbolTableStack;
 %type<Node> global_declaration
 %type<Node> var_list
 %type<Node> array
-%type<Node> dimension
+%type<Dimension> dimension
 %type<Node> function
 %type<Node> header
 %type<Node> body
@@ -214,17 +215,17 @@ array: TK_IDENTIFICADOR '[' dimension ']' {
     freeLexicalValue($2);
     freeLexicalValue($4);
 
-    SymbolTableValue symbol = createSymbolTableValueWithType(SYMBOL_TYPE_ARRAY, $1, declaredType);
+    SymbolTableValue symbol = createSymbolTableValueWithTypeAndSize(SYMBOL_TYPE_ARRAY, $1, declaredType, $3);
     addValueToSymbolTableStack(symbolTableStack, symbol);
 }; 
 
 dimension: TK_LIT_INT {
-    $$ = NULL;
+    $$ = getDimension($1);
     freeLexicalValue($1);
 };
 
 dimension: TK_LIT_INT '^' dimension {
-    $$ = NULL;
+    $$ = getDimensionMultipling($1, $3);
     freeLexicalValue($1);
     freeLexicalValue($2);
 };

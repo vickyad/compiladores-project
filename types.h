@@ -2,6 +2,14 @@
 #define TYPES_HEADER
 
 // ==============================
+// Dimension
+// ==============================
+typedef struct Dimension
+{
+    int value;
+} Dimension;
+
+// ==============================
 // Data type
 // ==============================
 typedef enum DataType {
