@@ -1,0 +1,5 @@
+int varOne;
+int functionOne() { 
+    varOne = 'a';
+    return 0;
+}

@@ -1,5 +1,12 @@
 #include "symbol_table.h"
 
+void initGlobalSymbolStack() 
+{
+  symbolTableStack = createSymbolTableStack();
+  SymbolTable* globalTable = createSymbolTable();
+  symbolTableStack = addTableToSymbolTableStack(symbolTableStack, globalTable);
+}
+
 char* getSymbolTypeName(SymbolType symbolType)
 {
     if (symbolType == SYMBOL_TYPE_ARRAY) return "arranjo";
@@ -23,49 +30,11 @@ SymbolTable* createSymbolTable()
     table->entries = calloc(table->capacity, sizeof(SymbolTableEntry));
     if (!table->entries) 
     {
-        destroySymbolTable(table);
+        freeSymbolTable(table);
         printError("[SymbolTable] Fail to initialize entries for symbol table!");
         return NULL;
     }
     return table;
-}
-
-void destroyTableValueArguments(FunctionArgument* argument) 
-{
-    if (argument == NULL) return;
-
-    destroyTableValueArguments(argument->nextArgument);
-
-    free(argument);
-}
-
-void destroyTableValue(SymbolTableValue value)
-{
-    destroyTableValueArguments(value.arguments);
-}
-
-void destroyTableEntry(SymbolTableEntry entry) 
-{
-    destroyTableValue(entry.value);
-    free(entry.key);
-}
-
-void destroyTableEntries(SymbolTable* table) 
-{
-    for (size_t index = 0; index < table->capacity; index++) 
-    {
-        destroyTableEntry(table->entries[index]);
-    }
-    free(table->entries);
-}
-
-void destroySymbolTable(SymbolTable* table) 
-{
-    if (!table) return;
-
-    destroyTableEntries(table);
-
-    free(table);
 }
 
 // Fowler–Noll–Vo-1a hash: https://en.wikipedia.org/wiki/Fowler–Noll–Vo_hash_function
@@ -127,10 +96,6 @@ void addEntryOnList(SymbolTableEntry* entries, int capacity, char* key, int* siz
 
     SymbolTableEntry possibleAlreadyExistentEntry = entries[index];
     while (possibleAlreadyExistentEntry.key) {
-        printDebug("Colision between: ");
-        printDebug(key);
-        printDebug(possibleAlreadyExistentEntry.key);
-        printDebug("==================");
         if(isSameKey(possibleAlreadyExistentEntry, key))
         {
             possibleAlreadyExistentEntry.value = value;
@@ -231,6 +196,8 @@ void addValueToSymbolTableStack(SymbolTableStack* stack, SymbolTableValue value)
 
     SymbolTableValue existentValue = getSymbolTableValueByKey(table, value.lexicalValue.label);
 
+    if (existentValue.symbolType == SYMBOL_TYPE_LITERAL) return;
+
     if (existentValue.symbolType != SYMBOL_TYPE_NON_EXISTENT) 
     {
         printf("ERRO! Falha ao declarar %s na linha %d. A declaração já foi feita na linha %d", 
@@ -238,6 +205,7 @@ void addValueToSymbolTableStack(SymbolTableStack* stack, SymbolTableValue value)
             value.lineNumber,
             existentValue.lineNumber
         );
+        freeGlobalVariables();
         exit(ERR_DECLARED);
     }
 
@@ -275,7 +243,7 @@ int expandSymbolTable(SymbolTable* table)
         }
     }
 
-    destroyTableEntries(table);
+    freeTableEntries(table);
 
     table->entries = newEntries;
     table->capacity = newCapacity;
@@ -295,35 +263,11 @@ SymbolTableStack* createSymbolTableStack()
     return tableStack;
 }
 
-void destroySymbolTableStack(SymbolTableStack* symbolTableStack)
-{
-    if (!symbolTableStack) return;
-
-    destroySymbolTableStack(symbolTableStack->nextItem);
-
-    destroySymbolTable(symbolTableStack->symbolTable);
-
-    free(symbolTableStack);
-}
-
 SymbolTable* getFirstTableFromSymbolTableStack(SymbolTableStack* symbolTableStack) 
 {
     if (!symbolTableStack) return NULL;
 
     return symbolTableStack->symbolTable;
-}
-
-SymbolTableStack* destroyFirstTableFromSymbolTableStack(SymbolTableStack* symbolTableStack)
-{
-    if (!symbolTableStack) return NULL;
-
-    destroySymbolTable(symbolTableStack->symbolTable);
-
-    SymbolTableStack* nextItem = symbolTableStack->nextItem;
-
-    free(symbolTableStack);
-
-    return nextItem;
 }
 
 SymbolTableStack* createNewTableOnSymbolTableStack(SymbolTableStack* symbolTableStack) {
@@ -355,6 +299,7 @@ SymbolTableValue getByLexicalValueOnSymbolTableStack(SymbolTableStack* symbolTab
     if (!symbolTableStack) 
     {
         printf("ERRO! Variável %s não foi declarada antes do seu uso na linha %d", lexicalValue.label, lexicalValue.lineNumber);
+        freeGlobalVariables();
         exit(ERR_UNDECLARED);
     }
     
@@ -417,6 +362,7 @@ void validateFunctionCall(SymbolTableValue symbol, LexicalValue lexicalValue, No
             getSymbolTypeName(symbol.symbolType), 
             lexicalValue.lineNumber
         );
+        freeGlobalVariables();
         if (symbol.symbolType == SYMBOL_TYPE_VARIABLE) exit(ERR_VARIABLE);
         if (symbol.symbolType == SYMBOL_TYPE_ARRAY) exit(ERR_ARRAY);    
     }
@@ -431,6 +377,7 @@ void validateArrayUse(SymbolTableValue symbol, LexicalValue lexicalValue)
             getSymbolTypeName(symbol.symbolType), 
             lexicalValue.lineNumber
         );
+        freeGlobalVariables();
         if (symbol.symbolType == SYMBOL_TYPE_VARIABLE) exit(ERR_VARIABLE);
         if (symbol.symbolType == SYMBOL_TYPE_FUNCTION) exit(ERR_FUNCTION);    
     }
@@ -445,8 +392,22 @@ void validateVariableUse(SymbolTableValue symbol, LexicalValue lexicalValue)
             getSymbolTypeName(symbol.symbolType), 
             lexicalValue.lineNumber
         );
+        freeGlobalVariables();
         if (symbol.symbolType == SYMBOL_TYPE_ARRAY) exit(ERR_ARRAY);
         if (symbol.symbolType == SYMBOL_TYPE_FUNCTION) exit(ERR_FUNCTION);    
+    }
+}
+
+void validateArrayDeclaration(SymbolTableValue symbol)
+{
+    if (symbol.dataType == DATA_TYPE_CHAR)
+    {
+        printf("ERRO! Declaração inválida de array %s com o tipo char na linha %d", 
+            symbol.lexicalValue.label, 
+            symbol.lexicalValue.lineNumber
+        );
+        freeGlobalVariables();
+        exit(ERR_CHAR_VECTOR);
     }
 }
 

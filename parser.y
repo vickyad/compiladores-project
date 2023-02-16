@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "types.h"
 #include "data_type.h"
+#include "global_declarations.h"
 #include "generic_tree.h"
 #include "lexical_value.h"
 #include "symbol_table.h"
@@ -12,8 +13,8 @@ DataType declaredType = DATA_TYPE_NON_DECLARED;
 int yylex(void);
 void yyerror (char const *message);
 int get_line_number();
-extern void *arvore;
-extern void *symbolTableStack;
+extern Node* tree;
+extern SymbolTableStack* symbolTableStack;
 %}
 
 %code requires {
@@ -101,12 +102,12 @@ extern void *symbolTableStack;
 %%
 program:  { 
     $$ = NULL; 
-    arvore = NULL; 
+    tree = NULL; 
 };
 
 program: elements_list { 
     $$ = $1; 
-    arvore = $$;
+    tree = $$;
 };
 
 elements_list: function elements_list { 
@@ -159,23 +160,38 @@ type: TK_PR_CHAR {
 // =      Literais       =
 // =======================
 literal: TK_LIT_INT { 
-    $$ = createNodeWithType($1, DATA_TYPE_INT);
+    SymbolTableValue symbol = createSymbolTableValueWithType(SYMBOL_TYPE_LITERAL, $1, DATA_TYPE_INT);
+    addValueToSymbolTableStack(symbolTableStack, symbol);
+
+    $$ = createNodeFromSymbol($1, symbol);
 };
 
-literal: TK_LIT_FLOAT { 
-    $$ = createNodeWithType($1, DATA_TYPE_FLOAT);
+literal: TK_LIT_FLOAT {     
+    SymbolTableValue symbol = createSymbolTableValueWithType(SYMBOL_TYPE_LITERAL, $1, DATA_TYPE_FLOAT);
+    addValueToSymbolTableStack(symbolTableStack, symbol);
+
+    $$ = createNodeFromSymbol($1, symbol);
 };
 
 literal: TK_LIT_FALSE { 
-    $$ = createNodeWithType($1, DATA_TYPE_BOOL);
+    SymbolTableValue symbol = createSymbolTableValueWithType(SYMBOL_TYPE_LITERAL, $1, DATA_TYPE_BOOL);
+    addValueToSymbolTableStack(symbolTableStack, symbol);
+
+    $$ = createNodeFromSymbol($1, symbol);
 };
 
 literal: TK_LIT_TRUE { 
-    $$ = createNodeWithType($1, DATA_TYPE_BOOL);
+    SymbolTableValue symbol = createSymbolTableValueWithType(SYMBOL_TYPE_LITERAL, $1, DATA_TYPE_BOOL);
+    addValueToSymbolTableStack(symbolTableStack, symbol);
+
+    $$ = createNodeFromSymbol($1, symbol);
 };
 
 literal: TK_LIT_CHAR { 
-    $$ = createNodeWithType($1, DATA_TYPE_CHAR);
+    SymbolTableValue symbol = createSymbolTableValueWithType(SYMBOL_TYPE_LITERAL, $1, DATA_TYPE_CHAR);
+    addValueToSymbolTableStack(symbolTableStack, symbol);
+
+    $$ = createNodeFromSymbol($1, symbol);
 };
 
 
@@ -219,6 +235,8 @@ array: TK_IDENTIFICADOR '[' dimension ']' {
 
     SymbolTableValue symbol = createSymbolTableValueWithTypeAndDimension(SYMBOL_TYPE_ARRAY, $1, declaredType, $3);
     addValueToSymbolTableStack(symbolTableStack, symbol);
+
+    validateArrayDeclaration(symbol);
 }; 
 
 dimension: TK_LIT_INT {
@@ -295,14 +313,14 @@ command_block: '{' '}' {
     $$ = NULL;
     freeLexicalValue($1);
     freeLexicalValue($2);
-    symbolTableStack = destroyFirstTableFromSymbolTableStack(symbolTableStack);
+    symbolTableStack = freeFirstTableFromSymbolTableStack(symbolTableStack);
 };
 
 command_block: '{' simple_command_list '}' { 
     $$ = $2;
     freeLexicalValue($1);
     freeLexicalValue($3);
-    symbolTableStack = destroyFirstTableFromSymbolTableStack(symbolTableStack);
+    symbolTableStack = freeFirstTableFromSymbolTableStack(symbolTableStack);
 };
 
 simple_command_list: simple_command { 
@@ -403,7 +421,7 @@ attribution: TK_IDENTIFICADOR '=' expression {
 
     Node* variable = createNodeFromSymbol($1, symbol);
 
-    $$ = createNodeFromChild($2, variable); 
+    $$ = createNodeFromAttribution($2, variable, $3); 
     addChild($$, variable);
     addChild($$, $3);
 };
@@ -415,11 +433,11 @@ attribution: TK_IDENTIFICADOR '[' attr_array ']' '=' expression {
 
     Node* variable = createNodeFromSymbol($1, symbol);
     
-    Node* array = createNodeFromChild($2, variable);
+    Node* array = createNodeFromUnaryOperator($2, variable);
     addChild(array, variable); 
     addChild(array, $3);
 
-    $$ = createNodeFromChild($5, array);
+    $$ = createNodeFromAttribution($5, array, $6);
     addChild($$, array);
     addChild($$, $6);
 
@@ -427,7 +445,7 @@ attribution: TK_IDENTIFICADOR '[' attr_array ']' '=' expression {
 };
 
 attr_array: attr_array '^' expression {  
-    $$ = createNodeFromTwoChildren($2, $1, $3);
+    $$ = createNodeFromBinaryOperator($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);
 };
@@ -470,13 +488,13 @@ arg_fn_list: expression ',' arg_fn_list {
 
 // Comando de retorno
 return_command: TK_PR_RETURN expression { 
-    $$ = createNodeFromChild($1, $2);
+    $$ = createNodeFromUnaryOperator($1, $2);
     addChild($$, $2);
 };
 
 // Comando de controle de fluxo
 flow_control_commands: TK_PR_IF '(' expression start_flow_control_block TK_PR_THEN command_block { 
-    $$ = createNodeFromChild($1, $3);
+    $$ = createNodeFromUnaryOperator($1, $3);
     addChild($$, $3);
     addChild($$, $6);
     freeLexicalValue($2);
@@ -484,7 +502,7 @@ flow_control_commands: TK_PR_IF '(' expression start_flow_control_block TK_PR_TH
 };
 
 flow_control_commands: TK_PR_IF '(' expression start_flow_control_block TK_PR_THEN command_block flow_control_else command_block { 
-    $$ = createNodeFromChild($1, $3);
+    $$ = createNodeFromUnaryOperator($1, $3);
     addChild($$, $3);
     addChild($$, $6);
     addChild($$, $8);
@@ -493,7 +511,7 @@ flow_control_commands: TK_PR_IF '(' expression start_flow_control_block TK_PR_TH
 };
 
 flow_control_commands: TK_PR_WHILE '(' expression start_flow_control_block command_block { 
-    $$ = createNodeFromChild($1, $3);
+    $$ = createNodeFromUnaryOperator($1, $3);
     addChild($$, $3);
     addChild($$, $5);
     freeLexicalValue($2);
@@ -519,7 +537,7 @@ expression: expression_grade_eight {
 };
 
 expression_grade_eight: expression_grade_eight TK_OC_OR expression_grade_seven { 
-    $$ = createNodeFromTwoChildren($2, $1, $3);
+    $$ = createNodeFromBinaryOperator($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);
 };
@@ -529,7 +547,7 @@ expression_grade_eight: expression_grade_seven {
 };
 
 expression_grade_seven: expression_grade_seven TK_OC_AND expression_grade_six { 
-    $$ = createNodeFromTwoChildren($2, $1, $3);
+    $$ = createNodeFromBinaryOperator($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);
 };
@@ -539,13 +557,13 @@ expression_grade_seven: expression_grade_six {
 };
 
 expression_grade_six: expression_grade_six TK_OC_EQ expression_grade_five { 
-    $$ = createNodeFromTwoChildren($2, $1, $3);
+    $$ = createNodeFromBinaryOperator($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);
 };
 
 expression_grade_six: expression_grade_six TK_OC_NE expression_grade_five { 
-    $$ = createNodeFromTwoChildren($2, $1, $3);
+    $$ = createNodeFromBinaryOperator($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);    
 };
@@ -555,25 +573,25 @@ expression_grade_six: expression_grade_five {
 };
 
 expression_grade_five: expression_grade_five '>' expression_grade_four { 
-    $$ = createNodeFromTwoChildren($2, $1, $3);
+    $$ = createNodeFromBinaryOperator($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);
 };
 
 expression_grade_five: expression_grade_five '<' expression_grade_four { 
-    $$ = createNodeFromTwoChildren($2, $1, $3);
+    $$ = createNodeFromBinaryOperator($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);
 };
 
 expression_grade_five: expression_grade_five TK_OC_LE expression_grade_four { 
-    $$ = createNodeFromTwoChildren($2, $1, $3);
+    $$ = createNodeFromBinaryOperator($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);
 };
 
 expression_grade_five: expression_grade_five TK_OC_GE expression_grade_four { 
-    $$ = createNodeFromTwoChildren($2, $1, $3);
+    $$ = createNodeFromBinaryOperator($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);
 };
@@ -583,13 +601,13 @@ expression_grade_five: expression_grade_four {
 };
 
 expression_grade_four: expression_grade_four '+' expression_grade_three { 
-    $$ = createNodeFromTwoChildren($2, $1, $3);
+    $$ = createNodeFromBinaryOperator($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);
 };
 
 expression_grade_four: expression_grade_four '-' expression_grade_three { 
-    $$ = createNodeFromTwoChildren($2, $1, $3);
+    $$ = createNodeFromBinaryOperator($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);
 };
@@ -599,19 +617,19 @@ expression_grade_four: expression_grade_three {
 };
 
 expression_grade_three: expression_grade_three '*' expression_grade_two {
-    $$ = createNodeFromTwoChildren($2, $1, $3);
+    $$ = createNodeFromBinaryOperator($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);
 };
 
 expression_grade_three: expression_grade_three '/' expression_grade_two { 
-    $$ = createNodeFromTwoChildren($2, $1, $3);
+    $$ = createNodeFromBinaryOperator($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);
 };
 
 expression_grade_three: expression_grade_three '%' expression_grade_two { 
-    $$ = createNodeFromTwoChildren($2, $1, $3);
+    $$ = createNodeFromBinaryOperator($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);
 };
@@ -621,12 +639,12 @@ expression_grade_three: expression_grade_two {
 };
 
 expression_grade_two: '!' expression_grade_one { 
-    $$ = createNodeFromChild($1, $2); 
+    $$ = createNodeFromUnaryOperator($1, $2); 
     addChild($$, $2);
 };
 
 expression_grade_two: '-' expression_grade_one { 
-    $$ = createNodeFromChild($1, $2); 
+    $$ = createNodeFromUnaryOperator($1, $2); 
     addChild($$, $2);
 };
 
@@ -649,7 +667,7 @@ expression_grade_one: TK_IDENTIFICADOR '[' expression_list ']' {
 
     Node* variable = createNodeFromSymbol($1, symbol);
 
-    $$ = createNodeFromChild($2, variable);
+    $$ = createNodeFromUnaryOperator($2, variable);
     addChild($$, variable);
     addChild($$, $3);
     freeLexicalValue($4);
@@ -670,7 +688,7 @@ expression_grade_one: '(' expression ')' {
 };
 
 expression_list: expression_list '^' expression { 
-    $$ = createNodeFromTwoChildren($2, $1, $3);
+    $$ = createNodeFromBinaryOperator($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);        
 };

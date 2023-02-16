@@ -96,17 +96,19 @@ void throwCharConversionError(Node* nodeOne, Node* nodeTwo)
         nonCharNode = nodeOne;
     }
 
-    printf("ERRO! Tentativa de converter %s de tipo %s para char na linha %d.", 
-        nonCharNode->lexicalValue.label, 
+    printf("ERRO! Tipo %s não é compatível com char na linha %d.", 
         getDataTypeName(nonCharNode->dataType), 
         nonCharNode->lexicalValue.lineNumber
     );
 
     if (nonCharNode->dataType == DATA_TYPE_BOOL) {
+        freeGlobalVariables();
         exit(ERR_CHAR_TO_BOOL);
     } else if (nonCharNode->dataType == DATA_TYPE_FLOAT) {
+        freeGlobalVariables();
         exit(ERR_CHAR_TO_FLOAT);
     } else if (nonCharNode->dataType == DATA_TYPE_INT) {
+        freeGlobalVariables();
         exit(ERR_CHAR_TO_INT);
     }    
 }
@@ -126,17 +128,45 @@ DataType typeInference(Node* nodeOne, Node* nodeTwo)
     return DATA_TYPE_NON_DECLARED;
 }
 
-Node* createNodeFromTwoChildren(LexicalValue lexicalValue, Node* leftChild, Node* rightChild) 
+Node* createNodeFromBinaryOperator(LexicalValue lexicalValue, Node* leftChild, Node* rightChild) 
 {
     Node* node = createNode(lexicalValue);
 	node->dataType = typeInference(leftChild, rightChild);
     return node;
 }
 
-Node* createNodeFromChild(LexicalValue lexicalValue, Node* leftChild)
+Node* createNodeFromUnaryOperator(LexicalValue lexicalValue, Node* child)
+{
+    Node* node = createNode(lexicalValue);
+	node->dataType = child->dataType;
+    return node;
+}
+
+void validateAttributionTypes(Node* leftChild, Node* rightChild)
+{
+    if (leftChild->dataType == DATA_TYPE_CHAR && rightChild->dataType != DATA_TYPE_CHAR)
+    {
+        printf("ERRO! Tentativa de atribuir o tipo %s para %s do tipo char na linha %d",
+            getDataTypeName(rightChild->dataType),
+            leftChild->lexicalValue.label,
+            leftChild->lexicalValue.lineNumber
+        );
+        freeGlobalVariables();
+        exit(ERR_X_TO_CHAR);
+    }
+    else if (rightChild->dataType == DATA_TYPE_CHAR && leftChild->dataType != DATA_TYPE_CHAR)
+    {
+        throwCharConversionError(rightChild, leftChild);
+    }
+}
+
+Node* createNodeFromAttribution(LexicalValue lexicalValue, Node* leftChild, Node* rightChild)
 {
     Node* node = createNode(lexicalValue);
 	node->dataType = leftChild->dataType;
+
+    validateAttributionTypes(leftChild, rightChild);
+
     return node;
 }
 
@@ -152,7 +182,7 @@ void addChild(Node* parent, Node* child)
     if (!child) return;
 
     if (!parent) {
-        libera(child);
+        freeTree(child);
         return;
     }
 
@@ -192,22 +222,7 @@ Node* getLastChild(Node* parent)
     return currentLastChild;
 }
 
-void libera(Node* node)
-{
-    if (!node) return;
-    
-    freeLexicalValue(node->lexicalValue);
-
-    Node* child = node->child;
-    libera(child);
-
-    Node* brother = node->brother;
-    libera(brother);
-
-    free(node);
-}
-
-void exporta(Node* node)
+void exportTree(Node* node)
 {
     if (!node) return;
 

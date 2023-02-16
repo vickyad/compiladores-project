@@ -1,7 +1,7 @@
 float globalVar;
 int functionOne() { 
     int varOne <= 10;
-    float varTwo,varThree <= 10,varFour <= 20;
+    float varTwo,varThree <= 20.0,varFour <= 20.0;
     globalVar = varOne * varTwo;
     return globalVar;
 }

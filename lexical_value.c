@@ -54,12 +54,6 @@ int isTextEqualTrue(char* text)
     return strncmp(text, "true", 4) == 0;
 }
 
-void freeLexicalValue(LexicalValue lexicalValue)
-{
-    if (!lexicalValue.label) return;
-    free(lexicalValue.label);
-}
-
 Dimension getDimension(LexicalValue lexicalValue)
 {
     Dimension dimension;
