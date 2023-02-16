@@ -1,0 +1,4 @@
+int globalArray;
+char functionOne(int argOne, float argTwo, bool argThree) { 
+    return globalArray;
+}

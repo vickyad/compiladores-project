@@ -31,7 +31,7 @@ void destroyTableValueArguments(FunctionArgument* argument)
 
 void destroyTableValue(SymbolTableValue value)
 {
-    destroyTableValueArguments(value.firstArgument);
+    destroyTableValueArguments(value.arguments);
 }
 
 void destroyTableEntry(SymbolTableEntry entry) 
@@ -178,14 +178,23 @@ SymbolTableValue createSymbolTableValueWithType(SymbolType symbolType, LexicalVa
     value.lineNumber = lexicalValue.lineNumber;
     value.dataType = dataType;
     value.size = calculateSymbolSize(symbolType, dataType);
-    value.firstArgument = NULL; // TODO Adicionar argumentos quando symbolType for FUNTION
+    value.numberOfDimensions = 0;
+    value.arguments = NULL; // TODO Adicionar argumentos quando symbolType for FUNTION
     return value;
 }
 
-SymbolTableValue createSymbolTableValueWithTypeAndSize(SymbolType symbolType, LexicalValue lexicalValue, DataType dataType, Dimension dimension) 
+SymbolTableValue createSymbolTableValueWithTypeAndDimension(SymbolType symbolType, LexicalValue lexicalValue, DataType dataType, Dimension dimension) 
 {
     SymbolTableValue value = createSymbolTableValueWithType(symbolType, lexicalValue, dataType);
-    value.size = dimension.value;
+    value.size = dimension.size;
+    value.numberOfDimensions = dimension.quantity;
+    return value;
+}
+
+SymbolTableValue createSymbolTableValueWithTypeAndArguments(SymbolType symbolType, LexicalValue lexicalValue, DataType dataType, FunctionArgument* arguments) 
+{
+    SymbolTableValue value = createSymbolTableValueWithType(symbolType, lexicalValue, dataType);
+    value.arguments = arguments;
     return value;
 }
 
@@ -377,10 +386,39 @@ void printSymbolTableStack(SymbolTableStack* symbolTableStack) {
     for (size_t index = 0; index < table->capacity; index++) {
         SymbolTableEntry entry = table->entries[index];
         if (entry.key) {
-            printf("[key=%s] [type=%s] [size=%d] \n", entry.key, getDataTypeName(entry.value.dataType), entry.value.size);
+            printf("[key=%s] [type=%s] [size=%d]", entry.key, getDataTypeName(entry.value.dataType), entry.value.size);
+            FunctionArgument* currentArgument = entry.value.arguments;
+            while(currentArgument) 
+            {
+                printf("\n=> argument %s [type=%s]", currentArgument->lexicalValue.label, getDataTypeName(currentArgument->type));
+                currentArgument = currentArgument->nextArgument;
+            }
+            printf("\n");
         }
     }
     printf("=============END============= \n \n");
 
     printSymbolTableStack(symbolTableStack->nextItem);
+}
+
+FunctionArgument* createFunctionArgument(LexicalValue lexicalValue, DataType dataType) 
+{
+    FunctionArgument* functionArgument = malloc(sizeof(FunctionArgument));
+    if (!functionArgument) 
+    {
+        printf("Fail to create function argument.");
+    }
+
+    functionArgument->nextArgument = NULL;
+    functionArgument->type = dataType;
+    functionArgument->lexicalValue = lexicalValue;
+
+    return functionArgument;
+}
+
+FunctionArgument* addFunctionArgument(FunctionArgument* functionArgument, LexicalValue lexicalValue, DataType dataType)
+{
+    FunctionArgument* newFunctionArgument = createFunctionArgument(lexicalValue, dataType);
+    newFunctionArgument->nextArgument = functionArgument;
+    return newFunctionArgument;
 }

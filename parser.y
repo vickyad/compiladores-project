@@ -23,9 +23,11 @@ extern void *symbolTableStack;
 }
 
 %union {
-   LexicalValue LexicalValue;
-   struct Node* Node;
-   Dimension Dimension;
+    LexicalValue LexicalValue;
+    Dimension Dimension;
+    DataType DataType;
+    struct Node* Node;
+    struct FunctionArgument* FunctionArgument;
 }
 
 %define parse.error verbose
@@ -59,7 +61,7 @@ extern void *symbolTableStack;
 
 %type<Node> program
 %type<Node> elements_list
-%type<Node> type
+%type<DataType> type
 %type<Node> literal
 %type<Node> global_declaration
 %type<Node> var_list
@@ -68,8 +70,8 @@ extern void *symbolTableStack;
 %type<Node> function
 %type<Node> header
 %type<Node> body
-%type<Node> arguments
-%type<Node> arg_list
+%type<FunctionArgument> arguments
+%type<FunctionArgument> arg_list
 %type<Node> command_block
 %type<Node> simple_command_list
 %type<Node> simple_command
@@ -129,25 +131,25 @@ elements_list: global_declaration {
 // =        Tipos        =
 // =======================
 type: TK_PR_INT { 
-    $$ = NULL; 
+    $$ = DATA_TYPE_INT; 
     freeLexicalValue($1);
     declaredType = DATA_TYPE_INT;
 };
 
 type: TK_PR_FLOAT { 
-    $$ = NULL; 
+    $$ = DATA_TYPE_FLOAT; 
     freeLexicalValue($1);
     declaredType = DATA_TYPE_FLOAT;
 };
 
 type: TK_PR_BOOL { 
-    $$ = NULL; 
+    $$ = DATA_TYPE_BOOL; 
     freeLexicalValue($1);
     declaredType = DATA_TYPE_BOOL;
 };
 
 type: TK_PR_CHAR { 
-    $$ = NULL; 
+    $$ = DATA_TYPE_CHAR; 
     freeLexicalValue($1);
     declaredType = DATA_TYPE_CHAR;
 };
@@ -215,7 +217,7 @@ array: TK_IDENTIFICADOR '[' dimension ']' {
     freeLexicalValue($2);
     freeLexicalValue($4);
 
-    SymbolTableValue symbol = createSymbolTableValueWithTypeAndSize(SYMBOL_TYPE_ARRAY, $1, declaredType, $3);
+    SymbolTableValue symbol = createSymbolTableValueWithTypeAndDimension(SYMBOL_TYPE_ARRAY, $1, declaredType, $3);
     addValueToSymbolTableStack(symbolTableStack, symbol);
 }; 
 
@@ -234,16 +236,16 @@ dimension: TK_LIT_INT '^' dimension {
 // =======================
 // =       Funcoes       =
 // =======================
-function: header arguments body {
+function: header body {
     $$ = $1;
-    addChild($$, $3);
+    addChild($$, $2);
 };
 
-header: type TK_IDENTIFICADOR {
-    $$ = createNodeWithType($2, declaredType);
+header: type TK_IDENTIFICADOR arguments {
+    $$ = createNodeWithType($2, $1);
 
     // First create function symbol on external context
-    SymbolTableValue symbol = createSymbolTableValueWithType(SYMBOL_TYPE_FUNCTION, $2, declaredType);
+    SymbolTableValue symbol = createSymbolTableValueWithTypeAndArguments(SYMBOL_TYPE_FUNCTION, $2, $1, $3);
     addValueToSymbolTableStack(symbolTableStack, symbol);
 
     // Then create a new internal context
@@ -257,28 +259,31 @@ body: command_block {
 // Lista de argumentos
 arguments: '(' ')' { 
     $$ = NULL;
+
     freeLexicalValue($1);
     freeLexicalValue($2);
 };
 
 arguments: '(' arg_list ')' { 
-    $$ = NULL;
+    $$ = $2;
+
     freeLexicalValue($1);
     freeLexicalValue($3);
 };
 
 arg_list: type TK_IDENTIFICADOR {
-    $$ = NULL;
+    $$ = createFunctionArgument($2, $1);
 
-    SymbolTableValue symbol = createSymbolTableValueWithType(SYMBOL_TYPE_VARIABLE, $2, declaredType);
+    SymbolTableValue symbol = createSymbolTableValueWithType(SYMBOL_TYPE_VARIABLE, $2, $1);
     addValueToSymbolTableStack(symbolTableStack, symbol);
 };
 
 arg_list: type TK_IDENTIFICADOR ',' arg_list {
-    $$ = NULL;
+    $$ = addFunctionArgument($4, $2, $1);
+    
     freeLexicalValue($3);
 
-    SymbolTableValue symbol = createSymbolTableValueWithType(SYMBOL_TYPE_VARIABLE, $2, declaredType);
+    SymbolTableValue symbol = createSymbolTableValueWithType(SYMBOL_TYPE_VARIABLE, $2, $1);
     addValueToSymbolTableStack(symbolTableStack, symbol);
 };
 

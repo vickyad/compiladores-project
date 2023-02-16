@@ -24,7 +24,9 @@ SymbolTableValue createSymbolTableValue(SymbolType symbolType, Node* node);
 
 SymbolTableValue createSymbolTableValueWithType(SymbolType symbolType, LexicalValue lexicalValue, DataType dataType);
 
-SymbolTableValue createSymbolTableValueWithTypeAndSize(SymbolType symbolType, LexicalValue lexicalValue, DataType dataType, Dimension dimension);
+SymbolTableValue createSymbolTableValueWithTypeAndDimension(SymbolType symbolType, LexicalValue lexicalValue, DataType dataType, Dimension dimension);
+
+SymbolTableValue createSymbolTableValueWithTypeAndArguments(SymbolType symbolType, LexicalValue lexicalValue, DataType dataType, FunctionArgument* arguments);
 
 int expandSymbolTable(SymbolTable* table);
 
@@ -45,6 +47,10 @@ SymbolTableStack* addTableToSymbolTableStack(SymbolTableStack* symbolTableStack,
 SymbolTableValue getByLexicalValueOnSymbolTableStack(SymbolTableStack* symbolTableStack, LexicalValue lexicalValue);
 
 int checkValueIsOnFirstSymbolTable(SymbolTableStack* symbolTableStack, char* key);
+
+FunctionArgument* createFunctionArgument(LexicalValue lexicalValue, DataType dataType);
+
+FunctionArgument* addFunctionArgument(FunctionArgument* functionArgument, LexicalValue lexicalValue, DataType dataType);
 
 void printSymbolTableStack(SymbolTableStack* symbolTableStack);
 

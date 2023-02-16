@@ -6,7 +6,8 @@
 // ==============================
 typedef struct Dimension
 {
-    int value;
+    int size;
+    int quantity;
 } Dimension;
 
 // ==============================
@@ -68,7 +69,8 @@ typedef struct Node {
 // SYMBOL TABLE
 // ==============================
 typedef struct FunctionArgument {
-    LiteralType type;
+    DataType type;
+    LexicalValue lexicalValue;
     struct FunctionArgument* nextArgument;
 } FunctionArgument;
 
@@ -83,10 +85,11 @@ typedef enum SymbolType {
 typedef struct SymbolTableValue {
     int size;
     int lineNumber;
+    int numberOfDimensions;
     SymbolType symbolType;
     DataType dataType;
     LexicalValue lexicalValue;
-    FunctionArgument* firstArgument;
+    FunctionArgument* arguments;
 } SymbolTableValue;
 
 typedef struct SymbolTableEntry {

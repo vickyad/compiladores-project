@@ -63,14 +63,15 @@ void freeLexicalValue(LexicalValue lexicalValue)
 Dimension getDimension(LexicalValue lexicalValue)
 {
     Dimension dimension;
+    dimension.quantity = 0;
     if (lexicalValue.type != TOKEN_TYPE_LITERAL && lexicalValue.literalType != LITERAL_TYPE_INT) 
     {
         printf("Calculating dimension with value different than integer");
-        dimension.value = 0;
+        dimension.size = 0;
         return dimension;
     } 
 
-    dimension.value = lexicalValue.value.value_int;
+    dimension.size = lexicalValue.value.value_int;
 
     return dimension;
 }
@@ -79,6 +80,7 @@ Dimension getDimensionMultipling(LexicalValue lexicalValue, Dimension previousDi
 {
     Dimension dimensionFromLexicalValue = getDimension(lexicalValue);
     Dimension newDimension;
-    newDimension.value = dimensionFromLexicalValue.value * previousDimension.value;
+    newDimension.size = dimensionFromLexicalValue.size * previousDimension.size;
+    newDimension.quantity = previousDimension.quantity + 1;
     return newDimension;
 }
