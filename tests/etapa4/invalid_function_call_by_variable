@@ -1,0 +1,4 @@
+int globalVariable;
+int functionOne() { 
+    return globalVariable();
+}

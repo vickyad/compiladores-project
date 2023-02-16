@@ -1,0 +1,6 @@
+int globalArray[10];
+
+int functionOne() { 
+    globalArray = 10;
+    return 0;
+}

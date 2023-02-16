@@ -14,6 +14,8 @@
 #define FNV_OFFSET 14695981039346656037UL
 #define FNV_PRIME 1099511628211UL
 
+char* getSymbolTypeName(SymbolType symbolType);
+
 SymbolTable* createSymbolTable();
 
 void destroySymbolTable(SymbolTable* table);
@@ -51,6 +53,12 @@ int checkValueIsOnFirstSymbolTable(SymbolTableStack* symbolTableStack, char* key
 FunctionArgument* createFunctionArgument(LexicalValue lexicalValue, DataType dataType);
 
 FunctionArgument* addFunctionArgument(FunctionArgument* functionArgument, LexicalValue lexicalValue, DataType dataType);
+
+void validateFunctionCall(SymbolTableValue symbol, LexicalValue lexicalValue, Node* node);
+
+void validateArrayUse(SymbolTableValue symbol, LexicalValue lexicalValue);
+
+void validateVariableUse(SymbolTableValue symbol, LexicalValue lexicalValue);
 
 void printSymbolTableStack(SymbolTableStack* symbolTableStack);
 

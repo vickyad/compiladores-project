@@ -1,4 +1,4 @@
-int globalArray;
+int globalVariable;
 char functionOne(int argOne, float argTwo, bool argThree) { 
-    return globalArray;
+    return globalVariable;
 }

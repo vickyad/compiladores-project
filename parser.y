@@ -399,6 +399,8 @@ var_decl_list: TK_IDENTIFICADOR TK_OC_LE literal ',' var_decl_list {
 attribution: TK_IDENTIFICADOR '=' expression { 
     SymbolTableValue symbol = getByLexicalValueOnSymbolTableStack(symbolTableStack, $1);
 
+    validateVariableUse(symbol, $1);
+
     Node* variable = createNodeFromSymbol($1, symbol);
 
     $$ = createNodeFromChild($2, variable); 
@@ -408,6 +410,8 @@ attribution: TK_IDENTIFICADOR '=' expression {
 
 attribution: TK_IDENTIFICADOR '[' attr_array ']' '=' expression {
     SymbolTableValue symbol = getByLexicalValueOnSymbolTableStack(symbolTableStack, $1);
+
+    validateArrayUse(symbol, $1);
 
     Node* variable = createNodeFromSymbol($1, symbol);
     
@@ -436,6 +440,8 @@ attr_array: expression {
 function_call: TK_IDENTIFICADOR '(' ')' { 
     SymbolTableValue symbol = getByLexicalValueOnSymbolTableStack(symbolTableStack, $1);
 
+    validateFunctionCall(symbol, $1, NULL);
+
     $$ = createNodeForFunctionCallFromSymbol($1, symbol);
     freeLexicalValue($2);
     freeLexicalValue($3);
@@ -443,6 +449,8 @@ function_call: TK_IDENTIFICADOR '(' ')' {
 
 function_call: TK_IDENTIFICADOR '(' arg_fn_list ')' { 
     SymbolTableValue symbol = getByLexicalValueOnSymbolTableStack(symbolTableStack, $1);
+
+    validateFunctionCall(symbol, $1, $3);
 
     $$ = createNodeForFunctionCallFromSymbol($1, symbol);
     addChild($$, $3);
@@ -629,11 +637,15 @@ expression_grade_two: expression_grade_one {
 expression_grade_one: TK_IDENTIFICADOR { 
     SymbolTableValue symbol = getByLexicalValueOnSymbolTableStack(symbolTableStack, $1);
 
+    validateVariableUse(symbol, $1);
+
     $$ = createNodeFromSymbol($1, symbol);
 };
 
 expression_grade_one: TK_IDENTIFICADOR '[' expression_list ']' {
     SymbolTableValue symbol = getByLexicalValueOnSymbolTableStack(symbolTableStack, $1);
+
+    validateArrayUse(symbol, $1);
 
     Node* variable = createNodeFromSymbol($1, symbol);
 

@@ -1,0 +1,10 @@
+int globalVar;
+
+int functionOne() { 
+    return 0;
+}
+
+int functionTwo() { 
+    globalVar = functionOne;
+    return 0;
+}

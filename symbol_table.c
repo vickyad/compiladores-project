@@ -1,5 +1,15 @@
 #include "symbol_table.h"
 
+char* getSymbolTypeName(SymbolType symbolType)
+{
+    if (symbolType == SYMBOL_TYPE_ARRAY) return "arranjo";
+    if (symbolType == SYMBOL_TYPE_FUNCTION) return "função";
+    if (symbolType == SYMBOL_TYPE_LITERAL) return "literal";
+    if (symbolType == SYMBOL_TYPE_VARIABLE) return "variável";
+    
+    return "inválido";
+}
+
 SymbolTable* createSymbolTable() 
 {
     SymbolTable* table = malloc(sizeof(SymbolTable));
@@ -376,6 +386,70 @@ int checkValueIsOnFirstSymbolTable(SymbolTableStack* symbolTableStack, char* key
 	}
 }
 
+FunctionArgument* createFunctionArgument(LexicalValue lexicalValue, DataType dataType) 
+{
+    FunctionArgument* functionArgument = malloc(sizeof(FunctionArgument));
+    if (!functionArgument) 
+    {
+        printf("Fail to create function argument.");
+    }
+
+    functionArgument->nextArgument = NULL;
+    functionArgument->type = dataType;
+    functionArgument->lexicalValue = lexicalValue;
+
+    return functionArgument;
+}
+
+FunctionArgument* addFunctionArgument(FunctionArgument* functionArgument, LexicalValue lexicalValue, DataType dataType)
+{
+    FunctionArgument* newFunctionArgument = createFunctionArgument(lexicalValue, dataType);
+    newFunctionArgument->nextArgument = functionArgument;
+    return newFunctionArgument;
+}
+
+void validateFunctionCall(SymbolTableValue symbol, LexicalValue lexicalValue, Node* node)
+{
+    if (symbol.symbolType != SYMBOL_TYPE_FUNCTION) 
+    {
+        printf("ERRO! Utilização de %s do tipo %s como chamada de função na linha %d", 
+            symbol.lexicalValue.label, 
+            getSymbolTypeName(symbol.symbolType), 
+            lexicalValue.lineNumber
+        );
+        if (symbol.symbolType == SYMBOL_TYPE_VARIABLE) exit(ERR_VARIABLE);
+        if (symbol.symbolType == SYMBOL_TYPE_ARRAY) exit(ERR_ARRAY);    
+    }
+}
+
+void validateArrayUse(SymbolTableValue symbol, LexicalValue lexicalValue)
+{
+    if (symbol.symbolType != SYMBOL_TYPE_ARRAY)
+    {
+        printf("ERRO! Utilização de %s do tipo %s como arranjo na linha %d", 
+            symbol.lexicalValue.label, 
+            getSymbolTypeName(symbol.symbolType), 
+            lexicalValue.lineNumber
+        );
+        if (symbol.symbolType == SYMBOL_TYPE_VARIABLE) exit(ERR_VARIABLE);
+        if (symbol.symbolType == SYMBOL_TYPE_FUNCTION) exit(ERR_FUNCTION);    
+    }
+}
+
+void validateVariableUse(SymbolTableValue symbol, LexicalValue lexicalValue)
+{
+    if (symbol.symbolType != SYMBOL_TYPE_VARIABLE)
+    {
+        printf("ERRO! Utilização de %s do tipo %s como variável na linha %d", 
+            symbol.lexicalValue.label, 
+            getSymbolTypeName(symbol.symbolType), 
+            lexicalValue.lineNumber
+        );
+        if (symbol.symbolType == SYMBOL_TYPE_ARRAY) exit(ERR_ARRAY);
+        if (symbol.symbolType == SYMBOL_TYPE_FUNCTION) exit(ERR_FUNCTION);    
+    }
+}
+
 void printSymbolTableStack(SymbolTableStack* symbolTableStack) {
     if (!symbolTableStack) return;
     if (!symbolTableStack->symbolTable) return;
@@ -399,26 +473,4 @@ void printSymbolTableStack(SymbolTableStack* symbolTableStack) {
     printf("=============END============= \n \n");
 
     printSymbolTableStack(symbolTableStack->nextItem);
-}
-
-FunctionArgument* createFunctionArgument(LexicalValue lexicalValue, DataType dataType) 
-{
-    FunctionArgument* functionArgument = malloc(sizeof(FunctionArgument));
-    if (!functionArgument) 
-    {
-        printf("Fail to create function argument.");
-    }
-
-    functionArgument->nextArgument = NULL;
-    functionArgument->type = dataType;
-    functionArgument->lexicalValue = lexicalValue;
-
-    return functionArgument;
-}
-
-FunctionArgument* addFunctionArgument(FunctionArgument* functionArgument, LexicalValue lexicalValue, DataType dataType)
-{
-    FunctionArgument* newFunctionArgument = createFunctionArgument(lexicalValue, dataType);
-    newFunctionArgument->nextArgument = functionArgument;
-    return newFunctionArgument;
 }
