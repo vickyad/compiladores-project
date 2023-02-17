@@ -1,4 +1,4 @@
-int globalVariable;
-char functionOne(int argOne, float argTwo, bool argThree) { 
-   globalVariable = 10;
+int v;
+char functionOne(int one, int two, int three) { 
+   v = 10;
 }

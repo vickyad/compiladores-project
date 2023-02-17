@@ -413,12 +413,12 @@ var_decl_list: TK_IDENTIFICADOR TK_OC_LE literal ',' var_decl_list {
 };
 
 // Atribuicao
-attribution: TK_IDENTIFICADOR '=' expression { 
+attribution: TK_IDENTIFICADOR '=' expression {
     SymbolTableValue symbol = getByLexicalValueOnSymbolTableStack(symbolTableStack, $1);
 
     validateVariableUse(symbol, $1);
 
-    Node* variable = createNodeFromSymbol($1, symbol);
+    Node* variable = createNodeWithType($1, symbol.dataType);
 
     $$ = createNodeFromAttribution($2, variable, $3); 
     addChild($$, variable);
@@ -430,7 +430,7 @@ attribution: TK_IDENTIFICADOR '[' attr_array ']' '=' expression {
 
     validateArrayUse(symbol, $1);
 
-    Node* variable = createNodeFromSymbol($1, symbol);
+    Node* variable = createNodeWithType($1, symbol.dataType);
     
     Node* array = createNodeFromUnaryOperator($2, variable);
     addChild(array, variable); 
@@ -656,7 +656,7 @@ expression_grade_one: TK_IDENTIFICADOR {
 
     validateVariableUse(symbol, $1);
 
-    $$ = createNodeFromSymbol($1, symbol);
+    $$ = createNodeWithType($1, symbol.dataType);
 };
 
 expression_grade_one: TK_IDENTIFICADOR '[' expression_list ']' {
@@ -664,7 +664,7 @@ expression_grade_one: TK_IDENTIFICADOR '[' expression_list ']' {
 
     validateArrayUse(symbol, $1);
 
-    Node* variable = createNodeFromSymbol($1, symbol);
+    Node* variable = createNodeWithType($1, symbol.dataType);
 
     $$ = createNodeFromUnaryOperator($2, variable);
     addChild($$, variable);

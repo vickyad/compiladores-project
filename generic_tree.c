@@ -170,10 +170,23 @@ Node* createNodeFromAttribution(LexicalValue lexicalValue, Node* leftChild, Node
     return node;
 }
 
+LexicalValue copyLexicalValue(LexicalValue lexicalValue)
+{
+    LexicalValue copy;
+    copy.label = malloc(strlen(lexicalValue.label) + 1);
+    strcpy(copy.label, lexicalValue.label);
+    copy.lineNumber = lexicalValue.lineNumber;
+    copy.literalType = lexicalValue.literalType;
+    copy.type = lexicalValue.type;
+    copy.value = lexicalValue.value;
+    return copy;
+}
+
 Node* createNodeFromSymbol(LexicalValue lexicalValue, SymbolTableValue symbol)
 {
     Node* node = createNode(lexicalValue);
     node->dataType = symbol.dataType;
+    node->lexicalValue = copyLexicalValue(symbol.lexicalValue);
     return node;
 }
 
