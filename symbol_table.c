@@ -1,5 +1,8 @@
 #include "symbol_table.h"
 
+extern Node* tree;
+extern SymbolTableStack* symbolTableStack;
+
 void initGlobalSymbolStack() 
 {
   symbolTableStack = createSymbolTableStack();

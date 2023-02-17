@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include "types.h"
 #include "data_type.h"
-#include "global_declarations.h"
 #include "generic_tree.h"
 #include "lexical_value.h"
 #include "symbol_table.h"

@@ -1,5 +1,8 @@
 #include "free.h"
 
+extern Node* tree;
+extern SymbolTableStack* symbolTableStack;
+
 void freeTableValueArguments(FunctionArgument* argument) 
 {
     if (argument == NULL) return;

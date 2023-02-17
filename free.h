@@ -3,7 +3,6 @@
 
 #include <stdlib.h>
 #include "types.h"
-#include "global_declarations.h"
 
 void freeTree(Node* node);
 
