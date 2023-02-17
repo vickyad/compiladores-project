@@ -204,7 +204,7 @@ global_declaration: type var_list ';' {
 
 var_list: TK_IDENTIFICADOR { 
     $$ = NULL; 
-
+    
     SymbolTableValue symbol = createSymbolTableValueWithType(SYMBOL_TYPE_VARIABLE, $1, declaredType);
     addValueToSymbolTableStack(symbolTableStack, symbol);
 };
@@ -259,14 +259,14 @@ function: header body {
 };
 
 header: type TK_IDENTIFICADOR arguments {
-    $$ = createNodeWithType($2, $1);
+    // Then create a new internal context
+    symbolTableStack = createNewTableOnSymbolTableStack(symbolTableStack);
 
     // First create function symbol on external context
     SymbolTableValue symbol = createSymbolTableValueWithTypeAndArguments(SYMBOL_TYPE_FUNCTION, $2, $1, $3);
-    addValueToSymbolTableStack(symbolTableStack, symbol);
+    addValueToSecondSymbolTableOnStack(symbolTableStack, symbol);
 
-    // Then create a new internal context
-    symbolTableStack = createNewTableOnSymbolTableStack(symbolTableStack);
+    $$ = createNodeFromSymbol($2, symbol);
 };
 
 body: command_block { 
@@ -385,12 +385,12 @@ var_decl_list: TK_IDENTIFICADOR {
 };
 
 var_decl_list: TK_IDENTIFICADOR TK_OC_LE literal {
-    $$ = createNodeWithType($2, declaredType);
-    addChild($$, createNodeWithType($1, declaredType));
-    addChild($$, $3);
-
     SymbolTableValue symbol = createSymbolTableValueWithType(SYMBOL_TYPE_VARIABLE, $1, declaredType);
     addValueToSymbolTableStack(symbolTableStack, symbol);
+
+    $$ = createNodeWithType($2, declaredType);
+    addChild($$, createNodeFromSymbol($1, symbol));
+    addChild($$, $3);
 };
 
 var_decl_list: TK_IDENTIFICADOR ',' var_decl_list { 
@@ -402,14 +402,14 @@ var_decl_list: TK_IDENTIFICADOR ',' var_decl_list {
 };
 
 var_decl_list: TK_IDENTIFICADOR TK_OC_LE literal ',' var_decl_list { 
+    SymbolTableValue symbol = createSymbolTableValueWithType(SYMBOL_TYPE_VARIABLE, $1, declaredType);
+    addValueToSymbolTableStack(symbolTableStack, symbol);
+
     $$ = createNodeWithType($2, declaredType);
-    addChild($$, createNodeWithType($1, declaredType));
+    addChild($$, createNodeFromSymbol($1, symbol));
     addChild($$, $3);
     addChild($$, $5);
     freeLexicalValue($4);
-
-    SymbolTableValue symbol = createSymbolTableValueWithType(SYMBOL_TYPE_VARIABLE, $1, declaredType);
-    addValueToSymbolTableStack(symbolTableStack, symbol);
 };
 
 // Atribuicao

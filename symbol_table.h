@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 #include "free.h"
 #include "types.h"
 #include "print.h"
@@ -26,6 +27,7 @@ SymbolTableValue createSymbolTableValueWithTypeAndArguments(SymbolType symbolTyp
 int expandSymbolTable(SymbolTable* table);
 SymbolTableStack* createSymbolTableStack();
 void addValueToSymbolTableStack(SymbolTableStack* stack, SymbolTableValue value);
+void addValueToSecondSymbolTableOnStack(SymbolTableStack* stack, SymbolTableValue value);
 SymbolTable* getFirstTableFromSymbolTableStack(SymbolTableStack* symbolTableStack);
 SymbolTableStack* createNewTableOnSymbolTableStack(SymbolTableStack* symbolTableStack);
 SymbolTableStack* addTableToSymbolTableStack(SymbolTableStack* symbolTableStack, SymbolTable* symbolTable);

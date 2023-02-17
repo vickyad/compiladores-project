@@ -1,4 +1,4 @@
 int globalVariable;
 char functionOne(int argOne, float argTwo, bool argThree) { 
-    return globalVariable;
+   globalVariable = 10;
 }

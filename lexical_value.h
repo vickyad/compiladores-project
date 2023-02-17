@@ -10,7 +10,6 @@
 LexicalValue createLexicalValue(char* text, TokenType type, LiteralType literalType, int lineNumber);
 void defineLiteralValue(LexicalValue* lexicalValue, char* text, LiteralType literalType);
 int isTextEqualTrue(char* text);
-void freeLexicalValue(LexicalValue lexicalValue);
 char* getLabelName(char* text, LiteralType literalType);
 Dimension getDimension(LexicalValue lexicalValue);
 Dimension getDimensionMultipling(LexicalValue lexicalValue, Dimension dimension);

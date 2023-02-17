@@ -2,25 +2,31 @@
 
 extern Node* tree;
 extern SymbolTableStack* symbolTableStack;
+extern int yylex_destroy(void);
 
 void freeTableValueArguments(FunctionArgument* argument) 
 {
-    if (argument == NULL) return;
+    if (!argument) return;
 
     freeTableValueArguments(argument->nextArgument);
 
     free(argument);
+    argument = NULL;
 }
 
 void freeTableValue(SymbolTableValue value)
 {
     freeTableValueArguments(value.arguments);
+    freeLexicalValue(value.lexicalValue);
 }
 
 void freeTableEntry(SymbolTableEntry entry) 
 {
     freeTableValue(entry.value);
-    free(entry.key);
+    if (entry.key) {
+        free(entry.key);
+        entry.key = NULL;
+    }
 }
 
 void freeTableEntries(SymbolTable* table) 
@@ -30,6 +36,7 @@ void freeTableEntries(SymbolTable* table)
         freeTableEntry(table->entries[index]);
     }
     free(table->entries);
+    table->entries = NULL;
 }
 
 void freeSymbolTable(SymbolTable* table) 
@@ -39,6 +46,7 @@ void freeSymbolTable(SymbolTable* table)
     freeTableEntries(table);
 
     free(table);
+    table = NULL;
 }
 
 void freeSymbolTableStack(SymbolTableStack* symbolTableStack)
@@ -50,6 +58,7 @@ void freeSymbolTableStack(SymbolTableStack* symbolTableStack)
     freeSymbolTable(symbolTableStack->symbolTable);
 
     free(symbolTableStack);
+    symbolTableStack = NULL;
 }
 
 SymbolTableStack* freeFirstTableFromSymbolTableStack(SymbolTableStack* symbolTableStack)
@@ -61,6 +70,7 @@ SymbolTableStack* freeFirstTableFromSymbolTableStack(SymbolTableStack* symbolTab
     SymbolTableStack* nextItem = symbolTableStack->nextItem;
 
     free(symbolTableStack);
+    symbolTableStack = NULL;
 
     return nextItem;
 }
@@ -68,7 +78,10 @@ SymbolTableStack* freeFirstTableFromSymbolTableStack(SymbolTableStack* symbolTab
 void freeLexicalValue(LexicalValue lexicalValue)
 {
     if (!lexicalValue.label) return;
+
     free(lexicalValue.label);
+    
+    lexicalValue.label = NULL;
 }
 
 void freeTree(Node* node)
@@ -84,6 +97,7 @@ void freeTree(Node* node)
     freeTree(brother);
 
     free(node);
+    node = NULL;
 }
 
 void freeGlobalTree() 
@@ -102,4 +116,5 @@ void freeGlobalVariables()
 {
   freeGlobalTree();
   freeGlobalSymbolTableStack();
+  yylex_destroy();
 }

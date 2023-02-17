@@ -114,7 +114,7 @@ void addEntryOnList(SymbolTableEntry* entries, int capacity, char* key, int* siz
         possibleAlreadyExistentEntry = entries[index];
     }
 
-    entries[index].key = malloc(strlen(key));
+    entries[index].key = malloc((strlen(key) + 1) * sizeof(char));
     strcpy(entries[index].key, key);
     
     entries[index].value = value;
@@ -157,7 +157,7 @@ SymbolTableValue createSymbolTableValueWithType(SymbolType symbolType, LexicalVa
     value.dataType = dataType;
     value.size = calculateSymbolSize(symbolType, dataType);
     value.numberOfDimensions = 0;
-    value.arguments = NULL; // TODO Adicionar argumentos quando symbolType for FUNTION
+    value.arguments = NULL;
     return value;
 }
 
@@ -222,6 +222,18 @@ void addValueToSymbolTableStack(SymbolTableStack* stack, SymbolTableValue value)
     }
     
     addEntryOnList(table->entries, table->capacity, value.lexicalValue.label, &table->size, value);
+}
+
+void addValueToSecondSymbolTableOnStack(SymbolTableStack* stack, SymbolTableValue value)
+{
+    if (!stack) 
+    {
+        printError("Adding value to empty stack");
+    }
+    else
+    {
+        addValueToSymbolTableStack(stack->nextItem, value);
+    }
 }
 
 int expandSymbolTable(SymbolTable* table) 
