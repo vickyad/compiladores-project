@@ -112,9 +112,21 @@ void freeGlobalSymbolTableStack()
   symbolTableStack = NULL;
 }
 
+void freeIlocList(IlocOperationList* list)
+{
+    if (!list) return;
+    
+    IlocOperationList* child = list->nextItem;
+    freeIlocList(child);
+
+    free(list);
+    list = NULL;
+}
+
 void freeGlobalVariables()
 {
   freeGlobalTree();
   freeGlobalSymbolTableStack();
   yylex_destroy();
 }
+

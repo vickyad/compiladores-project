@@ -1,13 +1,19 @@
 #ifndef ILOC_GENERATOR_HEADER
 #define ILOC_GENERATOR_HEADER
 
+#include <stdio.h>
 #include "types.h"
 
-int generate_label();
-int generate_register();
-ILOCOperation generate_binary_op_with_one_out(ILOCOperationType type, int op1, int op2, int out);
-ILOCOperation generate_binary_op_with_two_out(ILOCOperationType type, int op1, int op2, int out1, int out2);
-ILOCOperation generate_unary_op_with_one_out(ILOCOperationType type, int op, int out);
-ILOCOperation generate_unary_op_with_two_out(ILOCOperationType type, int op, int out1, int out2);
+int generateLabel();
+int generateRegister();
+IlocOperation generateNop();
+IlocOperation generateBinaryOpWithOneOut(IlocOperationType type, int op1, int op2, int out);
+IlocOperation generateBinaryOpWithTwoOuts(IlocOperationType type, int op1, int op2, int out1, int out2);
+IlocOperation generateUnaryOpWithOneOut(IlocOperationType type, int op, int out);
+IlocOperation generateUnaryOpWithTwoOuts(IlocOperationType type, int op, int out1, int out2);
+char* generateCode(IlocOperationList* operationList);
+IlocOperationList* createIlocList();
+void addOperationToIlocList(IlocOperationList* operationList, IlocOperation operation);
+void unifyOperationLists(IlocOperationList* operationListOne, IlocOperationList* operationListTwo);
 
 #endif

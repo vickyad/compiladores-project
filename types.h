@@ -115,25 +115,26 @@ typedef struct SymbolTableStack {
 // ==============================
 // ILOC
 // ==============================
-typedef enum ILOCOperationType {
+typedef enum IlocOperationType {
     OP_ADD,
     OP_SUB,
     OP_MULT,
-    OP_DIV
-} ILOCOperationType;
+    OP_DIV,
+    OP_NOP
+} IlocOperationType;
 
-typedef struct ILOCOperation {
-    ILOCOperationType type;
+typedef struct IlocOperation {
+    IlocOperationType type;
     int label;
     int op1;
     int op2;
     int out1;
     int out2;
-} ILOCOperation;
+} IlocOperation;
 
-typedef struct ILOCOperationList {
-    ILOCOperation operation;
-    struct ILOCOperationList* nextItem;
-} ILOCOperationList;
+typedef struct IlocOperationList {
+    IlocOperation operation;
+    struct IlocOperationList* nextItem;
+} IlocOperationList;
 
 #endif

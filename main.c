@@ -2,6 +2,7 @@
 #include "free.h"
 #include "generic_tree.h"
 #include "symbol_table.h"
+#include "iloc_generator.h"
 
 extern int yyparse(void);
 
