@@ -86,6 +86,8 @@ typedef struct SymbolTableValue {
     int size;
     int lineNumber;
     int numberOfDimensions;
+    int isGlobal;
+    int position;
     SymbolType symbolType;
     DataType dataType;
     LexicalValue lexicalValue;
@@ -100,12 +102,38 @@ typedef struct SymbolTableEntry {
 typedef struct SymbolTable {
     int size;
     int capacity;
+    int lastPosition;
     SymbolTableEntry* entries;
 } SymbolTable;
 
 typedef struct SymbolTableStack {
     SymbolTable* symbolTable;
     struct SymbolTableStack* nextItem;
+    int isGlobal;
 } SymbolTableStack;
+
+// ==============================
+// ILOC
+// ==============================
+typedef enum ILOCOperationType {
+    OP_ADD,
+    OP_SUB,
+    OP_MULT,
+    OP_DIV
+} ILOCOperationType;
+
+typedef struct ILOCOperation {
+    ILOCOperationType type;
+    int label;
+    int op1;
+    int op2;
+    int out1;
+    int out2;
+} ILOCOperation;
+
+typedef struct ILOCOperationList {
+    ILOCOperation operation;
+    struct ILOCOperationList* nextItem;
+} ILOCOperationList;
 
 #endif

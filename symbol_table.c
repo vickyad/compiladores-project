@@ -5,9 +5,10 @@ extern SymbolTableStack* symbolTableStack;
 
 void initGlobalSymbolStack() 
 {
-  symbolTableStack = createSymbolTableStack();
-  SymbolTable* globalTable = createSymbolTable();
-  symbolTableStack = addTableToSymbolTableStack(symbolTableStack, globalTable);
+    symbolTableStack = createSymbolTableStack();
+    SymbolTable* globalTable = createSymbolTable();
+    symbolTableStack = addTableToSymbolTableStack(symbolTableStack, globalTable);
+    symbolTableStack->isGlobal = 1;
 }
 
 char* getSymbolTypeName(SymbolType symbolType)
@@ -30,6 +31,7 @@ SymbolTable* createSymbolTable()
     }
     table->capacity = SYMBOL_TABLE_INITIAL_CAPACITY;
     table->size = 0;
+    table->lastPosition = 0;
     table->entries = calloc(table->capacity, sizeof(SymbolTableEntry));
     if (!table->entries) 
     {
@@ -220,6 +222,11 @@ void addValueToSymbolTableStack(SymbolTableStack* stack, SymbolTableValue value)
             return;
         }
     }
+
+    value.isGlobal = stack->isGlobal;
+    value.position = table->lastPosition;
+    
+    table->lastPosition = table->lastPosition + value.size;
     
     addEntryOnList(table->entries, table->capacity, value.lexicalValue.label, &table->size, value);
 }
@@ -275,6 +282,7 @@ SymbolTableStack* createSymbolTableStack()
     }
     tableStack->symbolTable = NULL;
     tableStack->nextItem = NULL;
+    tableStack->isGlobal = 0;
     return tableStack;
 }
 
@@ -436,7 +444,7 @@ void printSymbolTableStack(SymbolTableStack* symbolTableStack) {
     for (size_t index = 0; index < table->capacity; index++) {
         SymbolTableEntry entry = table->entries[index];
         if (entry.key) {
-            printf("[key=%s] [type=%s] [size=%d]", entry.key, getDataTypeName(entry.value.dataType), entry.value.size);
+            printf("[key=%s] [type=%s] [size=%d] [isGlobal=%d] [position=%d]", entry.key, getDataTypeName(entry.value.dataType), entry.value.size, entry.value.isGlobal, entry.value.position);
             FunctionArgument* currentArgument = entry.value.arguments;
             while(currentArgument) 
             {

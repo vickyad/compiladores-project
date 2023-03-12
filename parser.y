@@ -5,6 +5,7 @@
 #include "generic_tree.h"
 #include "lexical_value.h"
 #include "symbol_table.h"
+#include "iloc_generator.h"
 #include "print.h"
 
 DataType declaredType = DATA_TYPE_NON_DECLARED;
