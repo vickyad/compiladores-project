@@ -540,6 +540,18 @@ expression_grade_eight: expression_grade_eight TK_OC_OR expression_grade_seven {
     $$ = createNodeFromBinaryOperator($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);
+
+    IlocOperationList* operationList = unifyOperationLists($1.operationList, $3.operationList);
+
+    int r1 = $1.outRegister;
+    int r2 = $3.outRegister;
+    int r3 = generateRegister();
+
+    IlocOperation operation = generateBinaryOpWithOneOut(OP_OR, r1, r2, r3);
+    addOperationToIlocList(operationList, operation);
+
+    $$.outRegister = r3;
+    $$.operationList = operationList;
 };
 
 expression_grade_eight: expression_grade_seven { 
@@ -550,6 +562,18 @@ expression_grade_seven: expression_grade_seven TK_OC_AND expression_grade_six {
     $$ = createNodeFromBinaryOperator($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);
+
+    IlocOperationList* operationList = unifyOperationLists($1.operationList, $3.operationList);
+
+    int r1 = $1.outRegister;
+    int r2 = $3.outRegister;
+    int r3 = generateRegister();
+
+    IlocOperation operation = generateBinaryOpWithOneOut(OP_AND, r1, r2, r3);
+    addOperationToIlocList(operationList, operation);
+
+    $$.outRegister = r3;
+    $$.operationList = operationList;
 };
 
 expression_grade_seven: expression_grade_six { 
@@ -560,12 +584,84 @@ expression_grade_six: expression_grade_six TK_OC_EQ expression_grade_five {
     $$ = createNodeFromBinaryOperator($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);
+
+    IlocOperationList* operationList = unifyOperationLists($1.operationList, $3.operationList);
+
+    int r1 = $1.outRegister;
+    int r2 = $3.outRegister;
+    int r3 = generateRegister();
+    int r4 = generateRegister();
+
+    int labelTrue = generateLabel();
+    int labelFalse = generateLabel();
+    int labelEnd = generateLabel();
+    
+    IlocOperation operationCmpEQ = generateBinaryOpWithOneOut(OP_CMP_EQ, r1, r2, r3);
+    addOperationToIlocList(operationList, operationCmpEQ);
+
+    IlocOperation operationCbr = generateUnaryOpWithTwoOuts(OP_CBR, r3, labelTrue, labelFalse);
+    addOperationToIlocList(operationList, operationCbr);
+
+    // IF TRUE
+    IlocOperation operationTrue = generateUnaryOpWithOneOut(OP_LOADI, 1, r4);
+    addLabelToOperation(operationTrue, labelTrue);
+    IlocOperation operationJumpAfterTrue = generateUnaryOpWithoutOut(OP_JUMPI, labelEnd);
+    addOperationToIlocList(operationList, operationTrue);
+    addOperationToIlocList(operationList, operationJumpAfterTrue);
+
+    // ELSE
+    IlocOperation operationFalse = generateUnaryOpWithOneOut(OP_LOADI, 0, r4);
+    addLabelToOperation(operationFalse, labelFalse);
+    addOperationToIlocList(operationList, operationFalse);
+
+    IlocOperation operationNop = generateNop();
+    addLabelToOperation(generateNop, labelEnd);
+    addOperationToIlocList(operationList, operationNop);
+
+    $$.outRegister = r4;
+    $$.operationList = operationList;
 };
 
 expression_grade_six: expression_grade_six TK_OC_NE expression_grade_five { 
     $$ = createNodeFromBinaryOperator($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);    
+
+    IlocOperationList* operationList = unifyOperationLists($1.operationList, $3.operationList);
+
+    int r1 = $1.outRegister;
+    int r2 = $3.outRegister;
+    int r3 = generateRegister();
+    int r4 = generateRegister();
+
+    int labelTrue = generateLabel();
+    int labelFalse = generateLabel();
+    int labelEnd = generateLabel();
+    
+    IlocOperation operationCmpNE = generateBinaryOpWithOneOut(OP_CMP_NE, r1, r2, r3);
+    addOperationToIlocList(operationList, operationCmpNE);
+
+    IlocOperation operationCbr = generateUnaryOpWithTwoOuts(OP_CBR, r3, labelTrue, labelFalse);
+    addOperationToIlocList(operationList, operationCbr);
+
+    // IF TRUE
+    IlocOperation operationTrue = generateUnaryOpWithOneOut(OP_LOADI, 1, r4);
+    addLabelToOperation(operationTrue, labelTrue);
+    IlocOperation operationJumpAfterTrue = generateUnaryOpWithoutOut(OP_JUMPI, labelEnd);
+    addOperationToIlocList(operationList, operationTrue);
+    addOperationToIlocList(operationList, operationJumpAfterTrue);
+
+    // ELSE
+    IlocOperation operationFalse = generateUnaryOpWithOneOut(OP_LOADI, 0, r4);
+    addLabelToOperation(operationFalse, labelFalse);
+    addOperationToIlocList(operationList, operationFalse);
+
+    IlocOperation operationNop = generateNop();
+    addLabelToOperation(generateNop, labelEnd);
+    addOperationToIlocList(operationList, operationNop);
+
+    $$.outRegister = r4;
+    $$.operationList = operationList;
 };
 
 expression_grade_six: expression_grade_five { 
@@ -576,24 +672,168 @@ expression_grade_five: expression_grade_five '>' expression_grade_four {
     $$ = createNodeFromBinaryOperator($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);
+
+    IlocOperationList* operationList = unifyOperationLists($1.operationList, $3.operationList);
+
+    int r1 = $1.outRegister;
+    int r2 = $3.outRegister;
+    int r3 = generateRegister();
+    int r4 = generateRegister();
+
+    int labelTrue = generateLabel();
+    int labelFalse = generateLabel();
+    int labelEnd = generateLabel();
+    
+    IlocOperation operationCmpGT = generateBinaryOpWithOneOut(OP_CMP_GT, r1, r2, r3);
+    addOperationToIlocList(operationList, operationCmpGT);
+
+    IlocOperation operationCbr = generateUnaryOpWithTwoOuts(OP_CBR, r3, labelTrue, labelFalse);
+    addOperationToIlocList(operationList, operationCbr);
+
+    // IF TRUE
+    IlocOperation operationTrue = generateUnaryOpWithOneOut(OP_LOADI, 1, r4);
+    addLabelToOperation(operationTrue, labelTrue);
+    IlocOperation operationJumpAfterTrue = generateUnaryOpWithoutOut(OP_JUMPI, labelEnd);
+    addOperationToIlocList(operationList, operationTrue);
+    addOperationToIlocList(operationList, operationJumpAfterTrue);
+
+    // ELSE
+    IlocOperation operationFalse = generateUnaryOpWithOneOut(OP_LOADI, 0, r4);
+    addLabelToOperation(operationFalse, labelFalse);
+    addOperationToIlocList(operationList, operationFalse);
+
+    IlocOperation operationNop = generateNop();
+    addLabelToOperation(generateNop, labelEnd);
+    addOperationToIlocList(operationList, operationNop);
+
+    $$.outRegister = r4;
+    $$.operationList = operationList;
 };
 
 expression_grade_five: expression_grade_five '<' expression_grade_four { 
     $$ = createNodeFromBinaryOperator($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);
+
+    IlocOperationList* operationList = unifyOperationLists($1.operationList, $3.operationList);
+
+    int r1 = $1.outRegister;
+    int r2 = $3.outRegister;
+    int r3 = generateRegister();
+    int r4 = generateRegister();
+
+    int labelTrue = generateLabel();
+    int labelFalse = generateLabel();
+    int labelEnd = generateLabel();
+    
+    IlocOperation operationCmpLT = generateBinaryOpWithOneOut(OP_CMP_LT, r1, r2, r3);
+    addOperationToIlocList(operationList, operationCmpLT);
+
+    IlocOperation operationCbr = generateUnaryOpWithTwoOuts(OP_CBR, r3, labelTrue, labelFalse);
+    addOperationToIlocList(operationList, operationCbr);
+
+    // IF TRUE
+    IlocOperation operationTrue = generateUnaryOpWithOneOut(OP_LOADI, 1, r4);
+    addLabelToOperation(operationTrue, labelTrue);
+    IlocOperation operationJumpAfterTrue = generateUnaryOpWithoutOut(OP_JUMPI, labelEnd);
+    addOperationToIlocList(operationList, operationTrue);
+    addOperationToIlocList(operationList, operationJumpAfterTrue);
+
+    // ELSE
+    IlocOperation operationFalse = generateUnaryOpWithOneOut(OP_LOADI, 0, r4);
+    addLabelToOperation(operationFalse, labelFalse);
+    addOperationToIlocList(operationList, operationFalse);
+
+    IlocOperation operationNop = generateNop();
+    addLabelToOperation(generateNop, labelEnd);
+    addOperationToIlocList(operationList, operationNop);
+
+    $$.outRegister = r4;
+    $$.operationList = operationList;
 };
 
 expression_grade_five: expression_grade_five TK_OC_LE expression_grade_four { 
     $$ = createNodeFromBinaryOperator($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);
+
+    IlocOperationList* operationList = unifyOperationLists($1.operationList, $3.operationList);
+
+    int r1 = $1.outRegister;
+    int r2 = $3.outRegister;
+    int r3 = generateRegister();
+    int r4 = generateRegister();
+
+    int labelTrue = generateLabel();
+    int labelFalse = generateLabel();
+    int labelEnd = generateLabel();
+    
+    IlocOperation operationCmpLE = generateBinaryOpWithOneOut(OP_CMP_LE, r1, r2, r3);
+    addOperationToIlocList(operationList, operationCmpLE);
+
+    IlocOperation operationCbr = generateUnaryOpWithTwoOuts(OP_CBR, r3, labelTrue, labelFalse);
+    addOperationToIlocList(operationList, operationCbr);
+
+    // IF TRUE
+    IlocOperation operationTrue = generateUnaryOpWithOneOut(OP_LOADI, 1, r4);
+    addLabelToOperation(operationTrue, labelTrue);
+    IlocOperation operationJumpAfterTrue = generateUnaryOpWithoutOut(OP_JUMPI, labelEnd);
+    addOperationToIlocList(operationList, operationTrue);
+    addOperationToIlocList(operationList, operationJumpAfterTrue);
+
+    // ELSE
+    IlocOperation operationFalse = generateUnaryOpWithOneOut(OP_LOADI, 0, r4);
+    addLabelToOperation(operationFalse, labelFalse);
+    addOperationToIlocList(operationList, operationFalse);
+
+    IlocOperation operationNop = generateNop();
+    addLabelToOperation(generateNop, labelEnd);
+    addOperationToIlocList(operationList, operationNop);
+
+    $$.outRegister = r4;
+    $$.operationList = operationList;
 };
 
 expression_grade_five: expression_grade_five TK_OC_GE expression_grade_four { 
     $$ = createNodeFromBinaryOperator($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);
+
+    IlocOperationList* operationList = unifyOperationLists($1.operationList, $3.operationList);
+
+    int r1 = $1.outRegister;
+    int r2 = $3.outRegister;
+    int r3 = generateRegister();
+    int r4 = generateRegister();
+
+    int labelTrue = generateLabel();
+    int labelFalse = generateLabel();
+    int labelEnd = generateLabel();
+    
+    IlocOperation operationCmpGE = generateBinaryOpWithOneOut(OP_CMP_GE, r1, r2, r3);
+    addOperationToIlocList(operationList, operationCmpGE);
+
+    IlocOperation operationCbr = generateUnaryOpWithTwoOuts(OP_CBR, r3, labelTrue, labelFalse);
+    addOperationToIlocList(operationList, operationCbr);
+
+    // IF TRUE
+    IlocOperation operationTrue = generateUnaryOpWithOneOut(OP_LOADI, 1, r4);
+    addLabelToOperation(operationTrue, labelTrue);
+    IlocOperation operationJumpAfterTrue = generateUnaryOpWithoutOut(OP_JUMPI, labelEnd);
+    addOperationToIlocList(operationList, operationTrue);
+    addOperationToIlocList(operationList, operationJumpAfterTrue);
+
+    // ELSE
+    IlocOperation operationFalse = generateUnaryOpWithOneOut(OP_LOADI, 0, r4);
+    addLabelToOperation(operationFalse, labelFalse);
+    addOperationToIlocList(operationList, operationFalse);
+
+    IlocOperation operationNop = generateNop();
+    addLabelToOperation(generateNop, labelEnd);
+    addOperationToIlocList(operationList, operationNop);
+
+    $$.outRegister = r4;
+    $$.operationList = operationList;
 };
 
 expression_grade_five: expression_grade_four { 
@@ -604,12 +844,36 @@ expression_grade_four: expression_grade_four '+' expression_grade_three {
     $$ = createNodeFromBinaryOperator($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);
+
+    IlocOperationList* operationList = unifyOperationLists($1.operationList, $3.operationList);
+
+    int r1 = $1.outRegister;
+    int r2 = $3.outRegister;
+    int r3 = generateRegister();
+
+    IlocOperation operation = generateBinaryOpWithOneOut(OP_ADD, r1, r2, r3);
+    addOperationToIlocList(operationList, operation);
+
+    $$.outRegister = r3;
+    $$.operationList = operationList;
 };
 
 expression_grade_four: expression_grade_four '-' expression_grade_three { 
     $$ = createNodeFromBinaryOperator($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);
+
+    IlocOperationList* operationList = unifyOperationLists($1.operationList, $3.operationList);
+
+    int r1 = $1.outRegister;
+    int r2 = $3.outRegister;
+    int r3 = generateRegister();
+
+    IlocOperation operation = generateBinaryOpWithOneOut(OP_SUB, r1, r2, r3);
+    addOperationToIlocList(operationList, operation);
+
+    $$.outRegister = r3;
+    $$.operationList = operationList;
 };
 
 expression_grade_four: expression_grade_three {
@@ -620,12 +884,36 @@ expression_grade_three: expression_grade_three '*' expression_grade_two {
     $$ = createNodeFromBinaryOperator($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);
+
+    IlocOperationList* operationList = unifyOperationLists($1.operationList, $3.operationList);
+
+    int r1 = $1.outRegister;
+    int r2 = $3.outRegister;
+    int r3 = generateRegister();
+
+    IlocOperation operation = generateBinaryOpWithOneOut(OP_MULT, r1, r2, r3);
+    addOperationToIlocList(operationList, operation);
+
+    $$.outRegister = r3;
+    $$.operationList = operationList;
 };
 
 expression_grade_three: expression_grade_three '/' expression_grade_two { 
     $$ = createNodeFromBinaryOperator($2, $1, $3);
     addChild($$, $1);
     addChild($$, $3);
+
+    IlocOperationList* operationList = unifyOperationLists($1.operationList, $3.operationList);
+
+    int r1 = $1.outRegister;
+    int r2 = $3.outRegister;
+    int r3 = generateRegister();
+
+    IlocOperation operation = generateBinaryOpWithOneOut(OP_DIV, r1, r2, r3);
+    addOperationToIlocList(operationList, operation);
+
+    $$.outRegister = r3;
+    $$.operationList = operationList;
 };
 
 expression_grade_three: expression_grade_three '%' expression_grade_two { 
@@ -658,6 +946,27 @@ expression_grade_one: TK_IDENTIFICADOR {
     validateVariableUse(symbol, $1);
 
     $$ = createNodeWithType($1, symbol.dataType);
+
+    IlocOperationList* operationList = createIlocList();
+
+    int address = symbol.position;
+    int r1 = generateRegister();
+
+    IlocOperation operation;
+    
+    if (symbol.isGlobal)
+    {
+        operation = generateUnaryOpWithOneOut(OP_LOADI_GLOBAL, address, r1);
+    }
+    else
+    {
+        operation = generateUnaryOpWithOneOut(OP_LOADI_LOCAL, address, r1);
+    }
+
+    addOperationToIlocList(operationList, operation);
+
+    $$.outRegister = r1;
+    $$.operationList = operationList;
 };
 
 expression_grade_one: TK_IDENTIFICADOR '[' expression_list ']' {

@@ -60,6 +60,8 @@ typedef struct LexicalValue {
 typedef struct Node {
     LexicalValue lexicalValue;
 	DataType dataType;
+    IlocOperationList* operationList;
+    int outRegister;
     struct Node* brother;
     struct Node* child;
     struct Node* parent;
@@ -120,6 +122,19 @@ typedef enum IlocOperationType {
     OP_SUB,
     OP_MULT,
     OP_DIV,
+    OP_CMP_GE,
+    OP_CBR,
+    OP_LOADI,
+    OP_JUMPI,
+    OP_CMP_LE,
+    OP_CMP_LT,
+    OP_CMP_GT,
+    OP_CMP_NE,
+    OP_CMP_EQ,
+    OP_AND,
+    OP_OR,
+    OP_LOADI_GLOBAL,
+    OP_LOADI_LOCAL,
     OP_NOP
 } IlocOperationType;
 

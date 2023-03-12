@@ -70,6 +70,19 @@ IlocOperation generateUnaryOpWithTwoOuts(IlocOperationType type, int op, int out
     return operation;
 }
 
+IlocOperation generateUnaryOpWithoutOut(IlocOperationType type, int op)
+{
+    IlocOperation operation = generate_empty_operation();
+    operation.type = type;
+    operation.op1 = op;
+    return operation;
+}
+
+void addLabelToOperation(IlocOperation operation, int label)
+{
+    operation.label = label;   
+}
+
 char* generateCode(IlocOperationList* operationList) 
 {
     // TODO
@@ -108,7 +121,7 @@ void addOperationToIlocList(IlocOperationList* operationList, IlocOperation oper
     lastOperation->nextItem = newOperation;
 }
 
-void unifyOperationLists(IlocOperationList* operationListOne, IlocOperationList* operationListTwo)
+IlocOperationList* unifyOperationLists(IlocOperationList* operationListOne, IlocOperationList* operationListTwo)
 {
     if (operationListOne == NULL)
     {
@@ -121,11 +134,21 @@ void unifyOperationLists(IlocOperationList* operationListOne, IlocOperationList*
         return;
     }
 
-    IlocOperationList* lastOperationFromFirstList = operationListOne;
-    while(lastOperationFromFirstList->nextItem != NULL)
+    IlocOperationList* newOperationList = createIlocList();
+
+    IlocOperationList* operationToCopy = operationListOne;
+    while(operationToCopy != NULL)
     {
-        lastOperationFromFirstList = lastOperationFromFirstList->nextItem;
+        addOperationToIlocList(newOperationList, operationToCopy->operation);
+        operationToCopy = operationToCopy->nextItem;
     }
 
-    lastOperationFromFirstList->nextItem = operationListTwo;
+    IlocOperationList* operationToCopy = operationListTwo;
+    while(operationToCopy != NULL)
+    {
+        addOperationToIlocList(newOperationList, operationToCopy->operation);
+        operationToCopy = operationToCopy->nextItem;
+    }
+
+    return newOperationList;
 }

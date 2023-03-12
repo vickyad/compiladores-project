@@ -9,6 +9,8 @@ Node* createNode(LexicalValue lexicalValue)
     node->child = NULL;
     node->parent = NULL;
     node->dataType = DATA_TYPE_NON_DECLARED;
+    node->operationList = NULL;
+    node->outRegister = -1;
 
     return node;
 }
