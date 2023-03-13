@@ -42,6 +42,7 @@ typedef enum LiteralType {
 
 typedef struct LexicalValue {
     int lineNumber;
+    int functionLabel;
     TokenType type;
     LiteralType literalType;
     
@@ -124,7 +125,6 @@ typedef enum IlocOperationType {
     OP_DIV,
     OP_CMP_GE,
     OP_CBR,
-    OP_LOADI,
     OP_JUMPI,
     OP_CMP_LE,
     OP_CMP_LT,

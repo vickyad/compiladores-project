@@ -181,6 +181,7 @@ LexicalValue copyLexicalValue(LexicalValue lexicalValue)
     copy.literalType = lexicalValue.literalType;
     copy.type = lexicalValue.type;
     copy.value = lexicalValue.value;
+    copy.functionLabel = lexicalValue.functionLabel;
     return copy;
 }
 

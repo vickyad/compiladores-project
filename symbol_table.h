@@ -23,7 +23,7 @@ SymbolTableValue getSymbolTableValueByKey(SymbolTable* table, char* key);
 SymbolTableValue createSymbolTableValue(SymbolType symbolType, Node* node);
 SymbolTableValue createSymbolTableValueWithType(SymbolType symbolType, LexicalValue lexicalValue, DataType dataType);
 SymbolTableValue createSymbolTableValueWithTypeAndDimension(SymbolType symbolType, LexicalValue lexicalValue, DataType dataType, Dimension dimension);
-SymbolTableValue createSymbolTableValueWithTypeAndArguments(SymbolType symbolType, LexicalValue lexicalValue, DataType dataType, FunctionArgument* arguments);
+SymbolTableValue createSymbolTableValueWithTypeAndArguments(SymbolType symbolType, LexicalValue lexicalValue, DataType dataType, FunctionArgument* arguments, int functionLabel);
 int expandSymbolTable(SymbolTable* table);
 SymbolTableStack* createSymbolTableStack();
 void addValueToSymbolTableStack(SymbolTableStack* stack, SymbolTableValue value);

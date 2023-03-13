@@ -6,6 +6,7 @@ LexicalValue createLexicalValue(char* text, TokenType type, LiteralType literalT
     lexicalValue.lineNumber = lineNumber;
     lexicalValue.type = type;
     lexicalValue.label = getLabelName(text, literalType);
+    lexicalValue.functionLabel = -1;
     
     if (literalType != LITERAL_TYPE_IS_NOT_LITERAL) 
     {

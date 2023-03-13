@@ -171,10 +171,11 @@ SymbolTableValue createSymbolTableValueWithTypeAndDimension(SymbolType symbolTyp
     return value;
 }
 
-SymbolTableValue createSymbolTableValueWithTypeAndArguments(SymbolType symbolType, LexicalValue lexicalValue, DataType dataType, FunctionArgument* arguments) 
+SymbolTableValue createSymbolTableValueWithTypeAndArguments(SymbolType symbolType, LexicalValue lexicalValue, DataType dataType, FunctionArgument* arguments, int functionLabel) 
 {
     SymbolTableValue value = createSymbolTableValueWithType(symbolType, lexicalValue, dataType);
     value.arguments = arguments;
+    value.lexicalValue.functionLabel = functionLabel;
     return value;
 }
 

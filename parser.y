@@ -236,7 +236,7 @@ var_list: TK_IDENTIFICADOR ',' var_list {
 var_list: array ',' var_list { 
     $$ = NULL;
     freeLexicalValue($2);
-} ;
+};
 
 // Arranjos
 array: TK_IDENTIFICADOR '[' dimension ']' {
@@ -268,17 +268,32 @@ dimension: TK_LIT_INT '^' dimension {
 function: header body {
     $$ = $1;
     addChild($$, $2);
+
+    IlocOperationList* operationList = createIlocListFromOtherList($1.operationList);
+    addIlocListToIlocList(operationList, $2.operationList);
+
+    $$.operationList = operationList;
 };
 
 header: type TK_IDENTIFICADOR arguments {
     // Then create a new internal context
     symbolTableStack = createNewTableOnSymbolTableStack(symbolTableStack);
 
+    int functionLabel = generateLabel();
+
     // First create function symbol on external context
-    SymbolTableValue symbol = createSymbolTableValueWithTypeAndArguments(SYMBOL_TYPE_FUNCTION, $2, $1, $3);
+    SymbolTableValue symbol = createSymbolTableValueWithTypeAndArguments(SYMBOL_TYPE_FUNCTION, $2, $1, $3, functionLabel);
     addValueToSecondSymbolTableOnStack(symbolTableStack, symbol);
 
     $$ = createNodeFromSymbol($2, symbol);
+
+    IlocOperationList* operationList = createIlocList();
+
+    IlocOperation operationNop = generateNop();
+    addLabelToOperation(operationNop, functionLabel);    
+    addOperationToIlocList(operationList, operationNop);
+
+    $$.operationList = operationList;
 };
 
 body: command_block { 
@@ -494,6 +509,15 @@ function_call: TK_IDENTIFICADOR '(' ')' {
     $$ = createNodeForFunctionCallFromSymbol($1, symbol);
     freeLexicalValue($2);
     freeLexicalValue($3);
+
+    IlocOperationList* operationList = createIlocList();
+
+    int operationList = symbol.lexicalValue.functionLabel;
+
+    IlocOperation operationJumpToFunction = generateUnaryOpWithoutOut(OP_JUMPI, functionLabel);
+    addOperationToIlocList(operationList, operationJumpToFunction);
+
+    $$.operationList = operationList;
 };
 
 function_call: TK_IDENTIFICADOR '(' arg_fn_list ')' { 

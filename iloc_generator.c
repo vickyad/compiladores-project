@@ -83,9 +83,85 @@ void addLabelToOperation(IlocOperation operation, int label)
     operation.label = label;   
 }
 
+void convertOperationToCode(IlocOperation operation) 
+{
+    switch (operation.type)
+    {  
+        case OP_ADD:
+            /* TODO */
+            break;
+        case OP_SUB:
+            /* TODO */
+            break;
+        case OP_MULT:
+            /* TODO */
+            break;
+        case OP_DIV:
+            /* TODO */
+            break;
+        case OP_CMP_GE:
+            /* TODO */
+            break;
+        case OP_CBR:
+            /* TODO */
+            break;
+        case OP_JUMPI:
+            /* TODO */
+            break;
+        case OP_CMP_LE:
+            /* TODO */
+        break;
+        case OP_CMP_LT:
+            /* TODO */
+            break;
+        case OP_CMP_GT:
+            /* TODO */
+            break;
+        case OP_CMP_NE:
+            /* TODO */
+            break;
+        case OP_CMP_EQ:
+            /* TODO */
+            break;
+        case OP_AND:
+            /* TODO */
+            break;
+        case OP_OR:
+            /* TODO */
+            break;
+        case OP_LOADI_GLOBAL:
+            /* TODO */
+            break;
+        case OP_LOADI_LOCAL:
+            /* TODO */
+            break;
+        case OP_LOADI:
+            /* TODO */
+            break;
+        case OP_STOREAI_GLOBAL:
+            /* TODO */
+            break;
+        case OP_STOREAI_LOCAL:
+            /* TODO */
+            break;
+        case OP_NOP:
+            /* TODO */
+            break;
+        default:
+            break;
+    }
+}
+
 char* generateCode(IlocOperationList* operationList) 
 {
-    // TODO
+    IlocOperationList* nextOperation = operationList;
+
+    while(nextOperation != NULL)
+    {
+        IlocOperation operation = nextOperation->operation;
+        convertOperationToCode(operation);
+        nextOperation = nextOperation->nextItem;
+    }
 }
 
 IlocOperationList* createIlocList()
