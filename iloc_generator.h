@@ -15,7 +15,9 @@ IlocOperation generateUnaryOpWithoutOut(IlocOperationType type, int op);
 void addLabelToOperation(IlocOperation operation, int label);
 char* generateCode(IlocOperationList* operationList);
 IlocOperationList* createIlocList();
+IlocOperationList* createIlocListFromOtherList(IlocOperationList* operationList);
 void addOperationToIlocList(IlocOperationList* operationList, IlocOperation operation);
+void addIlocListToIlocList(IlocOperationList* operationList, IlocOperationList* operationListToCopy);
 IlocOperationList* unifyOperationLists(IlocOperationList* operationListOne, IlocOperationList* operationListTwo);
 
 #endif

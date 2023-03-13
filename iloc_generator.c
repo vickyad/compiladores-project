@@ -101,6 +101,23 @@ IlocOperationList* createIlocList()
     return list;
 }
 
+IlocOperationList* createIlocListFromOtherList(IlocOperationList* operationList)
+{
+    IlocOperationList* newOperationList = malloc(sizeof(IlocOperationList));
+    if (!newOperationList) 
+    {
+        printError("[IlocOperationList] Fail to create ILOC operations list!");
+        return NULL;
+    }
+    IlocOperationList* operationToCopy = operationList;
+    while(operationToCopy != NULL)
+    {
+        addOperationToIlocList(newOperationList, operationToCopy->operation);
+        operationToCopy = operationToCopy->nextItem;
+    }
+    return newOperationList;
+}
+
 void addOperationToIlocList(IlocOperationList* operationList, IlocOperation operation)
 {
     if (operationList == NULL)
@@ -119,6 +136,16 @@ void addOperationToIlocList(IlocOperationList* operationList, IlocOperation oper
     newOperation->operation = operation;
 
     lastOperation->nextItem = newOperation;
+}
+
+void addIlocListToIlocList(IlocOperationList* operationList, IlocOperationList* operationListToCopy)
+{
+    IlocOperationList* operationToCopy = operationListToCopy;
+    while(operationToCopy != NULL)
+    {
+        addOperationToIlocList(operationList, operationToCopy->operation);
+        operationToCopy = operationToCopy->nextItem;
+    }
 }
 
 IlocOperationList* unifyOperationLists(IlocOperationList* operationListOne, IlocOperationList* operationListTwo)

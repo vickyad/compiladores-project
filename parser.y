@@ -164,6 +164,17 @@ literal: TK_LIT_INT {
     addValueToSymbolTableStack(symbolTableStack, symbol);
 
     $$ = createNodeFromSymbol($1, symbol);
+
+    IlocOperationList* operationList = createIlocList();
+
+    int c1 = $1.value;
+    int r1 = generateRegister();
+
+    IlocOperation operation = generateUnaryOpWithOneOut(OP_LOADI, c1, r1);
+    addOperationToIlocList(operationList, operation);
+
+    $$.outRegister = r1;
+    $$.operationList = operationList;
 };
 
 literal: TK_LIT_FLOAT {     
@@ -424,6 +435,26 @@ attribution: TK_IDENTIFICADOR '=' expression {
     $$ = createNodeFromAttribution($2, variable, $3); 
     addChild($$, variable);
     addChild($$, $3);
+
+    IlocOperationList* operationList = createIlocListFromOtherList($3.operationList);
+
+    int address = symbol.position;
+    int r1 = $3.outRegister;
+
+    IlocOperation operation;
+    
+    if (symbol.isGlobal)
+    {
+        operation = generateUnaryOpWithOneOut(OP_STOREAI_GLOBAL, address, r1);
+    }
+    else
+    {
+        operation = generateUnaryOpWithOneOut(OP_STOREAI_LOCAL, address, r1);
+    }
+
+    addOperationToIlocList(operationList, operation);
+
+    $$.operationList = operationList;
 };
 
 attribution: TK_IDENTIFICADOR '[' attr_array ']' '=' expression {
@@ -499,6 +530,36 @@ flow_control_commands: TK_PR_IF '(' expression start_flow_control_block TK_PR_TH
     addChild($$, $6);
     freeLexicalValue($2);
     freeLexicalValue($5);
+
+    IlocOperationList* operationList = createIlocListFromOtherList($3.operationList);
+
+    int rExpression = $3.outRegister;
+    int rFalse = generateRegister();
+    int rCmpResult = generateRegister();
+
+    int labelTrue = generateLabel();
+    int labelEnd = generateLabel();
+
+    IlocOperation operationLoadFalse = generateUnaryOpWithOneOut(OP_LOADI, 0, rFalse);
+    addOperationToIlocList(operationList, operationLoadFalse);
+    
+    IlocOperation operationCmpFalse = generateBinaryOpWithOneOut(OP_CMP_NE, rExpression, rFalse, rCmpResult);
+    addOperationToIlocList(operationList, operationCmpFalse);
+
+    IlocOperation operationCbr = generateUnaryOpWithTwoOuts(OP_CBR, rCmpResult, labelTrue, labelEnd);
+    addOperationToIlocList(operationList, operationCbr);
+
+    // IF TRUE
+    IlocOperation operationNopTrue = generateNop();
+    addLabelToOperation(operationNopTrue, labelTrue);    
+    addOperationToIlocList(operationList, operationNopTrue);
+    addIlocListToIlocList(operationList, $6.operationList);
+
+    IlocOperation operationNopEnd = generateNop();
+    addLabelToOperation(operationNopEnd, labelEnd);
+    addOperationToIlocList(operationList, operationNopEnd);
+
+    $$.operationList = operationList;
 };
 
 flow_control_commands: TK_PR_IF '(' expression start_flow_control_block TK_PR_THEN command_block flow_control_else command_block { 
@@ -508,6 +569,50 @@ flow_control_commands: TK_PR_IF '(' expression start_flow_control_block TK_PR_TH
     addChild($$, $8);
     freeLexicalValue($2);
     freeLexicalValue($5);
+
+    IlocOperationList* operationList = createIlocListFromOtherList($3.operationList);
+
+    int rExpression = $3.outRegister;
+    int rFalse = generateRegister();
+    int rCmpResult = generateRegister();
+
+    int labelTrue = generateLabel();
+    int labelFalse = generateLabel();
+    int labelEnd = generateLabel();
+
+    IlocOperation operationLoadFalse = generateUnaryOpWithOneOut(OP_LOADI, 0, rFalse);
+    addOperationToIlocList(operationList, operationLoadFalse);
+    
+    IlocOperation operationCmpFalse = generateBinaryOpWithOneOut(OP_CMP_NE, rExpression, rFalse, rCmpResult);
+    addOperationToIlocList(operationList, operationCmpFalse);
+
+    IlocOperation operationCbr = generateUnaryOpWithTwoOuts(OP_CBR, rCmpResult, labelTrue, labelFalse);
+    addOperationToIlocList(operationList, operationCbr);
+    
+    // IF TRUE
+    IlocOperation operationNopTrue = generateNop();
+    addLabelToOperation(operationNopTrue, labelTrue);    
+    addOperationToIlocList(operationList, operationNopTrue);
+
+    addIlocListToIlocList(operationList, $6.operationList);
+
+    IlocOperation operationJumpAfterTrue = generateUnaryOpWithoutOut(OP_JUMPI, labelEnd);
+    addOperationToIlocList(operationList, operationJumpAfterTrue);
+    // END TRUE
+
+    // ELSE
+    IlocOperation operationNopFalse = generateNop();
+    addLabelToOperation(operationNopFalse, labelFalse);
+    addOperationToIlocList(operationList, operationNopFalse);
+
+    addIlocListToIlocList(operationList, $8.operationList);
+    // END ELSE
+
+    IlocOperation operationNopEnd = generateNop();
+    addLabelToOperation(operationNopEnd, labelEnd);
+    addOperationToIlocList(operationList, operationNopEnd);
+
+    $$.operationList = operationList;
 };
 
 flow_control_commands: TK_PR_WHILE '(' expression start_flow_control_block command_block { 
@@ -515,6 +620,51 @@ flow_control_commands: TK_PR_WHILE '(' expression start_flow_control_block comma
     addChild($$, $3);
     addChild($$, $5);
     freeLexicalValue($2);
+
+    int rExpression = $3.outRegister;
+    int rFalse = generateRegister();
+    int rCmpResult = generateRegister();
+
+    int labelStart = generateLabel();
+    int labelTrue = generateLabel();
+    int labelEnd = generateLabel();
+
+    IlocOperationList* operationList = createIlocList();
+
+    // Carrega o valor falso para comparação
+    IlocOperation operationLoadFalse = generateUnaryOpWithOneOut(OP_LOADI, 0, rFalse);
+    addOperationToIlocList(operationList, operationLoadFalse);
+
+    // Ponto de inicío do loop
+    IlocOperation operationNopStart = generateNop();
+    addLabelToOperation(operationNopStart, labelStart);    
+    addOperationToIlocList(operationList, operationNopStart);
+
+    // Gerar valor do condicional
+    addIlocListToIlocList(operationList, $3.operationList);
+
+    // Gerar salto condicional
+    IlocOperation operationCmpFalse = generateBinaryOpWithOneOut(OP_CMP_NE, rExpression, rFalse, rCmpResult);
+    addOperationToIlocList(operationList, operationCmpFalse);
+    IlocOperation operationCbr = generateUnaryOpWithTwoOuts(OP_CBR, rCmpResult, labelTrue, labelEnd);
+    addOperationToIlocList(operationList, operationCbr);
+
+    // Executar bloco de comando em caso verdadeiro
+    IlocOperation operationNopTrue = generateNop();
+    addLabelToOperation(operationNopTrue, labelTrue);    
+    addOperationToIlocList(operationList, operationNopTrue);
+    addIlocListToIlocList(operationList, $5.operationList);
+    
+    // Retonar ao condicional para validar próxima execução
+    IlocOperation operationJumpAfterTrue = generateUnaryOpWithoutOut(OP_JUMPI, labelStart);
+    addOperationToIlocList(operationList, operationJumpAfterTrue);
+
+    // Definir o final da execução
+    IlocOperation operationNopEnd = generateNop();
+    addLabelToOperation(operationNopEnd, labelEnd);
+    addOperationToIlocList(operationList, operationNopEnd);
+
+    $$.operationList = operationList;
 };
 
 start_flow_control_block: ')' {
