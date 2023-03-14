@@ -102,7 +102,7 @@ extern SymbolTableStack* symbolTableStack;
 %%
 program:  { 
     $$ = NULL; 
-    tree = NULL; 
+    tree = NULL;
 };
 
 program: elements_list { 
@@ -113,6 +113,7 @@ program: elements_list {
 elements_list: function elements_list { 
     $$ = $1;
     addChild($$, $2);
+    addIlocListToIlocList($$->operationList, $2->operationList);
 };
 
 elements_list: global_declaration elements_list {
@@ -131,7 +132,7 @@ elements_list: global_declaration {
 // =======================
 // =        Tipos        =
 // =======================
-type: TK_PR_INT { 
+type: TK_PR_INT {
     $$ = DATA_TYPE_INT; 
     freeLexicalValue($1);
     declaredType = DATA_TYPE_INT;
@@ -167,14 +168,14 @@ literal: TK_LIT_INT {
 
     IlocOperationList* operationList = createIlocList();
 
-    int c1 = $1.value;
+    int c1 = $1.value.value_int;
     int r1 = generateRegister();
 
     IlocOperation operation = generateUnaryOpWithOneOut(OP_LOADI, c1, r1);
     addOperationToIlocList(operationList, operation);
 
-    $$.outRegister = r1;
-    $$.operationList = operationList;
+    $$->outRegister = r1;
+    $$->operationList = operationList;
 };
 
 literal: TK_LIT_FLOAT {     
@@ -268,11 +269,7 @@ dimension: TK_LIT_INT '^' dimension {
 function: header body {
     $$ = $1;
     addChild($$, $2);
-
-    IlocOperationList* operationList = createIlocListFromOtherList($1.operationList);
-    addIlocListToIlocList(operationList, $2.operationList);
-
-    $$.operationList = operationList;
+    addIlocListToIlocList($$->operationList, $2->operationList);
 };
 
 header: type TK_IDENTIFICADOR arguments {
@@ -290,10 +287,10 @@ header: type TK_IDENTIFICADOR arguments {
     IlocOperationList* operationList = createIlocList();
 
     IlocOperation operationNop = generateNop();
-    addLabelToOperation(operationNop, functionLabel);    
+    operationNop = addLabelToOperation(operationNop, functionLabel);    
     addOperationToIlocList(operationList, operationNop);
 
-    $$.operationList = operationList;
+    $$->operationList = operationList;
 };
 
 body: command_block { 
@@ -358,6 +355,7 @@ simple_command_list: simple_command simple_command_list {
     {
         $$ = $1;
         addChild($$, $2);
+        addIlocListToIlocList($1->operationList, $2->operationList);
     }
     else
     {        
@@ -451,25 +449,25 @@ attribution: TK_IDENTIFICADOR '=' expression {
     addChild($$, variable);
     addChild($$, $3);
 
-    IlocOperationList* operationList = createIlocListFromOtherList($3.operationList);
+    IlocOperationList* operationList = createIlocListFromOtherList($3->operationList);
 
     int address = symbol.position;
-    int r1 = $3.outRegister;
+    int r1 = $3->outRegister;
 
     IlocOperation operation;
     
     if (symbol.isGlobal)
     {
-        operation = generateUnaryOpWithOneOut(OP_STOREAI_GLOBAL, address, r1);
+        operation = generateUnaryOpWithOneOut(OP_STOREAI_GLOBAL, r1, address);
     }
     else
     {
-        operation = generateUnaryOpWithOneOut(OP_STOREAI_LOCAL, address, r1);
+        operation = generateUnaryOpWithOneOut(OP_STOREAI_LOCAL, r1, address);
     }
 
     addOperationToIlocList(operationList, operation);
 
-    $$.operationList = operationList;
+    $$->operationList = operationList;
 };
 
 attribution: TK_IDENTIFICADOR '[' attr_array ']' '=' expression {
@@ -512,12 +510,12 @@ function_call: TK_IDENTIFICADOR '(' ')' {
 
     IlocOperationList* operationList = createIlocList();
 
-    int operationList = symbol.lexicalValue.functionLabel;
+    int functionLabel = symbol.lexicalValue.functionLabel;
 
     IlocOperation operationJumpToFunction = generateUnaryOpWithoutOut(OP_JUMPI, functionLabel);
     addOperationToIlocList(operationList, operationJumpToFunction);
 
-    $$.operationList = operationList;
+    $$->operationList = operationList;
 };
 
 function_call: TK_IDENTIFICADOR '(' arg_fn_list ')' { 
@@ -555,9 +553,9 @@ flow_control_commands: TK_PR_IF '(' expression start_flow_control_block TK_PR_TH
     freeLexicalValue($2);
     freeLexicalValue($5);
 
-    IlocOperationList* operationList = createIlocListFromOtherList($3.operationList);
+    IlocOperationList* operationList = createIlocListFromOtherList($3->operationList);
 
-    int rExpression = $3.outRegister;
+    int rExpression = $3->outRegister;
     int rFalse = generateRegister();
     int rCmpResult = generateRegister();
 
@@ -575,15 +573,15 @@ flow_control_commands: TK_PR_IF '(' expression start_flow_control_block TK_PR_TH
 
     // IF TRUE
     IlocOperation operationNopTrue = generateNop();
-    addLabelToOperation(operationNopTrue, labelTrue);    
+    operationNopTrue = addLabelToOperation(operationNopTrue, labelTrue);    
     addOperationToIlocList(operationList, operationNopTrue);
-    addIlocListToIlocList(operationList, $6.operationList);
+    addIlocListToIlocList(operationList, $6->operationList);
 
     IlocOperation operationNopEnd = generateNop();
-    addLabelToOperation(operationNopEnd, labelEnd);
+    operationNopEnd = addLabelToOperation(operationNopEnd, labelEnd);
     addOperationToIlocList(operationList, operationNopEnd);
 
-    $$.operationList = operationList;
+    $$->operationList = operationList;
 };
 
 flow_control_commands: TK_PR_IF '(' expression start_flow_control_block TK_PR_THEN command_block flow_control_else command_block { 
@@ -594,9 +592,9 @@ flow_control_commands: TK_PR_IF '(' expression start_flow_control_block TK_PR_TH
     freeLexicalValue($2);
     freeLexicalValue($5);
 
-    IlocOperationList* operationList = createIlocListFromOtherList($3.operationList);
+    IlocOperationList* operationList = createIlocListFromOtherList($3->operationList);
 
-    int rExpression = $3.outRegister;
+    int rExpression = $3->outRegister;
     int rFalse = generateRegister();
     int rCmpResult = generateRegister();
 
@@ -615,10 +613,10 @@ flow_control_commands: TK_PR_IF '(' expression start_flow_control_block TK_PR_TH
     
     // IF TRUE
     IlocOperation operationNopTrue = generateNop();
-    addLabelToOperation(operationNopTrue, labelTrue);    
+    operationNopTrue = addLabelToOperation(operationNopTrue, labelTrue);    
     addOperationToIlocList(operationList, operationNopTrue);
 
-    addIlocListToIlocList(operationList, $6.operationList);
+    addIlocListToIlocList(operationList, $6->operationList);
 
     IlocOperation operationJumpAfterTrue = generateUnaryOpWithoutOut(OP_JUMPI, labelEnd);
     addOperationToIlocList(operationList, operationJumpAfterTrue);
@@ -626,17 +624,17 @@ flow_control_commands: TK_PR_IF '(' expression start_flow_control_block TK_PR_TH
 
     // ELSE
     IlocOperation operationNopFalse = generateNop();
-    addLabelToOperation(operationNopFalse, labelFalse);
+    operationNopFalse = addLabelToOperation(operationNopFalse, labelFalse);
     addOperationToIlocList(operationList, operationNopFalse);
 
-    addIlocListToIlocList(operationList, $8.operationList);
+    addIlocListToIlocList(operationList, $8->operationList);
     // END ELSE
 
     IlocOperation operationNopEnd = generateNop();
-    addLabelToOperation(operationNopEnd, labelEnd);
+    operationNopEnd = addLabelToOperation(operationNopEnd, labelEnd);
     addOperationToIlocList(operationList, operationNopEnd);
 
-    $$.operationList = operationList;
+    $$->operationList = operationList;
 };
 
 flow_control_commands: TK_PR_WHILE '(' expression start_flow_control_block command_block { 
@@ -645,7 +643,7 @@ flow_control_commands: TK_PR_WHILE '(' expression start_flow_control_block comma
     addChild($$, $5);
     freeLexicalValue($2);
 
-    int rExpression = $3.outRegister;
+    int rExpression = $3->outRegister;
     int rFalse = generateRegister();
     int rCmpResult = generateRegister();
 
@@ -661,11 +659,11 @@ flow_control_commands: TK_PR_WHILE '(' expression start_flow_control_block comma
 
     // Ponto de inicío do loop
     IlocOperation operationNopStart = generateNop();
-    addLabelToOperation(operationNopStart, labelStart);    
+    operationNopStart = addLabelToOperation(operationNopStart, labelStart);    
     addOperationToIlocList(operationList, operationNopStart);
 
     // Gerar valor do condicional
-    addIlocListToIlocList(operationList, $3.operationList);
+    addIlocListToIlocList(operationList, $3->operationList);
 
     // Gerar salto condicional
     IlocOperation operationCmpFalse = generateBinaryOpWithOneOut(OP_CMP_NE, rExpression, rFalse, rCmpResult);
@@ -675,9 +673,9 @@ flow_control_commands: TK_PR_WHILE '(' expression start_flow_control_block comma
 
     // Executar bloco de comando em caso verdadeiro
     IlocOperation operationNopTrue = generateNop();
-    addLabelToOperation(operationNopTrue, labelTrue);    
+    operationNopTrue = addLabelToOperation(operationNopTrue, labelTrue);    
     addOperationToIlocList(operationList, operationNopTrue);
-    addIlocListToIlocList(operationList, $5.operationList);
+    addIlocListToIlocList(operationList, $5->operationList);
     
     // Retonar ao condicional para validar próxima execução
     IlocOperation operationJumpAfterTrue = generateUnaryOpWithoutOut(OP_JUMPI, labelStart);
@@ -685,10 +683,10 @@ flow_control_commands: TK_PR_WHILE '(' expression start_flow_control_block comma
 
     // Definir o final da execução
     IlocOperation operationNopEnd = generateNop();
-    addLabelToOperation(operationNopEnd, labelEnd);
+    operationNopEnd = addLabelToOperation(operationNopEnd, labelEnd);
     addOperationToIlocList(operationList, operationNopEnd);
 
-    $$.operationList = operationList;
+    $$->operationList = operationList;
 };
 
 start_flow_control_block: ')' {
@@ -715,17 +713,17 @@ expression_grade_eight: expression_grade_eight TK_OC_OR expression_grade_seven {
     addChild($$, $1);
     addChild($$, $3);
 
-    IlocOperationList* operationList = unifyOperationLists($1.operationList, $3.operationList);
+    IlocOperationList* operationList = unifyOperationLists($1->operationList, $3->operationList);
 
-    int r1 = $1.outRegister;
-    int r2 = $3.outRegister;
+    int r1 = $1->outRegister;
+    int r2 = $3->outRegister;
     int r3 = generateRegister();
 
     IlocOperation operation = generateBinaryOpWithOneOut(OP_OR, r1, r2, r3);
     addOperationToIlocList(operationList, operation);
 
-    $$.outRegister = r3;
-    $$.operationList = operationList;
+    $$->outRegister = r3;
+    $$->operationList = operationList;
 };
 
 expression_grade_eight: expression_grade_seven { 
@@ -737,17 +735,17 @@ expression_grade_seven: expression_grade_seven TK_OC_AND expression_grade_six {
     addChild($$, $1);
     addChild($$, $3);
 
-    IlocOperationList* operationList = unifyOperationLists($1.operationList, $3.operationList);
+    IlocOperationList* operationList = unifyOperationLists($1->operationList, $3->operationList);
 
-    int r1 = $1.outRegister;
-    int r2 = $3.outRegister;
+    int r1 = $1->outRegister;
+    int r2 = $3->outRegister;
     int r3 = generateRegister();
 
     IlocOperation operation = generateBinaryOpWithOneOut(OP_AND, r1, r2, r3);
     addOperationToIlocList(operationList, operation);
 
-    $$.outRegister = r3;
-    $$.operationList = operationList;
+    $$->outRegister = r3;
+    $$->operationList = operationList;
 };
 
 expression_grade_seven: expression_grade_six { 
@@ -759,10 +757,10 @@ expression_grade_six: expression_grade_six TK_OC_EQ expression_grade_five {
     addChild($$, $1);
     addChild($$, $3);
 
-    IlocOperationList* operationList = unifyOperationLists($1.operationList, $3.operationList);
+    IlocOperationList* operationList = unifyOperationLists($1->operationList, $3->operationList);
 
-    int r1 = $1.outRegister;
-    int r2 = $3.outRegister;
+    int r1 = $1->outRegister;
+    int r2 = $3->outRegister;
     int r3 = generateRegister();
     int r4 = generateRegister();
 
@@ -778,22 +776,22 @@ expression_grade_six: expression_grade_six TK_OC_EQ expression_grade_five {
 
     // IF TRUE
     IlocOperation operationTrue = generateUnaryOpWithOneOut(OP_LOADI, 1, r4);
-    addLabelToOperation(operationTrue, labelTrue);
+    operationTrue = addLabelToOperation(operationTrue, labelTrue);
     IlocOperation operationJumpAfterTrue = generateUnaryOpWithoutOut(OP_JUMPI, labelEnd);
     addOperationToIlocList(operationList, operationTrue);
     addOperationToIlocList(operationList, operationJumpAfterTrue);
 
     // ELSE
     IlocOperation operationFalse = generateUnaryOpWithOneOut(OP_LOADI, 0, r4);
-    addLabelToOperation(operationFalse, labelFalse);
+    operationFalse = addLabelToOperation(operationFalse, labelFalse);
     addOperationToIlocList(operationList, operationFalse);
 
     IlocOperation operationNop = generateNop();
-    addLabelToOperation(generateNop, labelEnd);
+    operationNop = addLabelToOperation(operationNop, labelEnd);
     addOperationToIlocList(operationList, operationNop);
 
-    $$.outRegister = r4;
-    $$.operationList = operationList;
+    $$->outRegister = r4;
+    $$->operationList = operationList;
 };
 
 expression_grade_six: expression_grade_six TK_OC_NE expression_grade_five { 
@@ -801,10 +799,10 @@ expression_grade_six: expression_grade_six TK_OC_NE expression_grade_five {
     addChild($$, $1);
     addChild($$, $3);    
 
-    IlocOperationList* operationList = unifyOperationLists($1.operationList, $3.operationList);
+    IlocOperationList* operationList = unifyOperationLists($1->operationList, $3->operationList);
 
-    int r1 = $1.outRegister;
-    int r2 = $3.outRegister;
+    int r1 = $1->outRegister;
+    int r2 = $3->outRegister;
     int r3 = generateRegister();
     int r4 = generateRegister();
 
@@ -820,22 +818,22 @@ expression_grade_six: expression_grade_six TK_OC_NE expression_grade_five {
 
     // IF TRUE
     IlocOperation operationTrue = generateUnaryOpWithOneOut(OP_LOADI, 1, r4);
-    addLabelToOperation(operationTrue, labelTrue);
+    operationTrue = addLabelToOperation(operationTrue, labelTrue);
     IlocOperation operationJumpAfterTrue = generateUnaryOpWithoutOut(OP_JUMPI, labelEnd);
     addOperationToIlocList(operationList, operationTrue);
     addOperationToIlocList(operationList, operationJumpAfterTrue);
 
     // ELSE
     IlocOperation operationFalse = generateUnaryOpWithOneOut(OP_LOADI, 0, r4);
-    addLabelToOperation(operationFalse, labelFalse);
+    operationFalse = addLabelToOperation(operationFalse, labelFalse);
     addOperationToIlocList(operationList, operationFalse);
 
     IlocOperation operationNop = generateNop();
-    addLabelToOperation(generateNop, labelEnd);
+    operationNop = addLabelToOperation(operationNop, labelEnd);
     addOperationToIlocList(operationList, operationNop);
 
-    $$.outRegister = r4;
-    $$.operationList = operationList;
+    $$->outRegister = r4;
+    $$->operationList = operationList;
 };
 
 expression_grade_six: expression_grade_five { 
@@ -847,10 +845,10 @@ expression_grade_five: expression_grade_five '>' expression_grade_four {
     addChild($$, $1);
     addChild($$, $3);
 
-    IlocOperationList* operationList = unifyOperationLists($1.operationList, $3.operationList);
+    IlocOperationList* operationList = unifyOperationLists($1->operationList, $3->operationList);
 
-    int r1 = $1.outRegister;
-    int r2 = $3.outRegister;
+    int r1 = $1->outRegister;
+    int r2 = $3->outRegister;
     int r3 = generateRegister();
     int r4 = generateRegister();
 
@@ -866,22 +864,22 @@ expression_grade_five: expression_grade_five '>' expression_grade_four {
 
     // IF TRUE
     IlocOperation operationTrue = generateUnaryOpWithOneOut(OP_LOADI, 1, r4);
-    addLabelToOperation(operationTrue, labelTrue);
+    operationTrue = addLabelToOperation(operationTrue, labelTrue);
     IlocOperation operationJumpAfterTrue = generateUnaryOpWithoutOut(OP_JUMPI, labelEnd);
     addOperationToIlocList(operationList, operationTrue);
     addOperationToIlocList(operationList, operationJumpAfterTrue);
 
     // ELSE
     IlocOperation operationFalse = generateUnaryOpWithOneOut(OP_LOADI, 0, r4);
-    addLabelToOperation(operationFalse, labelFalse);
+    operationFalse = addLabelToOperation(operationFalse, labelFalse);
     addOperationToIlocList(operationList, operationFalse);
 
     IlocOperation operationNop = generateNop();
-    addLabelToOperation(generateNop, labelEnd);
+    operationNop = addLabelToOperation(operationNop, labelEnd);
     addOperationToIlocList(operationList, operationNop);
 
-    $$.outRegister = r4;
-    $$.operationList = operationList;
+    $$->outRegister = r4;
+    $$->operationList = operationList;
 };
 
 expression_grade_five: expression_grade_five '<' expression_grade_four { 
@@ -889,10 +887,10 @@ expression_grade_five: expression_grade_five '<' expression_grade_four {
     addChild($$, $1);
     addChild($$, $3);
 
-    IlocOperationList* operationList = unifyOperationLists($1.operationList, $3.operationList);
+    IlocOperationList* operationList = unifyOperationLists($1->operationList, $3->operationList);
 
-    int r1 = $1.outRegister;
-    int r2 = $3.outRegister;
+    int r1 = $1->outRegister;
+    int r2 = $3->outRegister;
     int r3 = generateRegister();
     int r4 = generateRegister();
 
@@ -908,22 +906,22 @@ expression_grade_five: expression_grade_five '<' expression_grade_four {
 
     // IF TRUE
     IlocOperation operationTrue = generateUnaryOpWithOneOut(OP_LOADI, 1, r4);
-    addLabelToOperation(operationTrue, labelTrue);
+    operationTrue = addLabelToOperation(operationTrue, labelTrue);
     IlocOperation operationJumpAfterTrue = generateUnaryOpWithoutOut(OP_JUMPI, labelEnd);
     addOperationToIlocList(operationList, operationTrue);
     addOperationToIlocList(operationList, operationJumpAfterTrue);
 
     // ELSE
     IlocOperation operationFalse = generateUnaryOpWithOneOut(OP_LOADI, 0, r4);
-    addLabelToOperation(operationFalse, labelFalse);
+    operationFalse = addLabelToOperation(operationFalse, labelFalse);
     addOperationToIlocList(operationList, operationFalse);
 
     IlocOperation operationNop = generateNop();
-    addLabelToOperation(generateNop, labelEnd);
+    operationNop = addLabelToOperation(operationNop, labelEnd);
     addOperationToIlocList(operationList, operationNop);
 
-    $$.outRegister = r4;
-    $$.operationList = operationList;
+    $$->outRegister = r4;
+    $$->operationList = operationList;
 };
 
 expression_grade_five: expression_grade_five TK_OC_LE expression_grade_four { 
@@ -931,10 +929,10 @@ expression_grade_five: expression_grade_five TK_OC_LE expression_grade_four {
     addChild($$, $1);
     addChild($$, $3);
 
-    IlocOperationList* operationList = unifyOperationLists($1.operationList, $3.operationList);
+    IlocOperationList* operationList = unifyOperationLists($1->operationList, $3->operationList);
 
-    int r1 = $1.outRegister;
-    int r2 = $3.outRegister;
+    int r1 = $1->outRegister;
+    int r2 = $3->outRegister;
     int r3 = generateRegister();
     int r4 = generateRegister();
 
@@ -950,22 +948,22 @@ expression_grade_five: expression_grade_five TK_OC_LE expression_grade_four {
 
     // IF TRUE
     IlocOperation operationTrue = generateUnaryOpWithOneOut(OP_LOADI, 1, r4);
-    addLabelToOperation(operationTrue, labelTrue);
+    operationTrue = addLabelToOperation(operationTrue, labelTrue);
     IlocOperation operationJumpAfterTrue = generateUnaryOpWithoutOut(OP_JUMPI, labelEnd);
     addOperationToIlocList(operationList, operationTrue);
     addOperationToIlocList(operationList, operationJumpAfterTrue);
 
     // ELSE
     IlocOperation operationFalse = generateUnaryOpWithOneOut(OP_LOADI, 0, r4);
-    addLabelToOperation(operationFalse, labelFalse);
+    operationFalse = addLabelToOperation(operationFalse, labelFalse);
     addOperationToIlocList(operationList, operationFalse);
 
     IlocOperation operationNop = generateNop();
-    addLabelToOperation(generateNop, labelEnd);
+    operationNop = addLabelToOperation(operationNop, labelEnd);
     addOperationToIlocList(operationList, operationNop);
 
-    $$.outRegister = r4;
-    $$.operationList = operationList;
+    $$->outRegister = r4;
+    $$->operationList = operationList;
 };
 
 expression_grade_five: expression_grade_five TK_OC_GE expression_grade_four { 
@@ -973,10 +971,10 @@ expression_grade_five: expression_grade_five TK_OC_GE expression_grade_four {
     addChild($$, $1);
     addChild($$, $3);
 
-    IlocOperationList* operationList = unifyOperationLists($1.operationList, $3.operationList);
+    IlocOperationList* operationList = unifyOperationLists($1->operationList, $3->operationList);
 
-    int r1 = $1.outRegister;
-    int r2 = $3.outRegister;
+    int r1 = $1->outRegister;
+    int r2 = $3->outRegister;
     int r3 = generateRegister();
     int r4 = generateRegister();
 
@@ -992,22 +990,22 @@ expression_grade_five: expression_grade_five TK_OC_GE expression_grade_four {
 
     // IF TRUE
     IlocOperation operationTrue = generateUnaryOpWithOneOut(OP_LOADI, 1, r4);
-    addLabelToOperation(operationTrue, labelTrue);
+    operationTrue = addLabelToOperation(operationTrue, labelTrue);
     IlocOperation operationJumpAfterTrue = generateUnaryOpWithoutOut(OP_JUMPI, labelEnd);
     addOperationToIlocList(operationList, operationTrue);
     addOperationToIlocList(operationList, operationJumpAfterTrue);
 
     // ELSE
     IlocOperation operationFalse = generateUnaryOpWithOneOut(OP_LOADI, 0, r4);
-    addLabelToOperation(operationFalse, labelFalse);
+    operationFalse = addLabelToOperation(operationFalse, labelFalse);
     addOperationToIlocList(operationList, operationFalse);
 
     IlocOperation operationNop = generateNop();
-    addLabelToOperation(generateNop, labelEnd);
+    operationNop = addLabelToOperation(operationNop, labelEnd);
     addOperationToIlocList(operationList, operationNop);
 
-    $$.outRegister = r4;
-    $$.operationList = operationList;
+    $$->outRegister = r4;
+    $$->operationList = operationList;
 };
 
 expression_grade_five: expression_grade_four { 
@@ -1019,17 +1017,17 @@ expression_grade_four: expression_grade_four '+' expression_grade_three {
     addChild($$, $1);
     addChild($$, $3);
 
-    IlocOperationList* operationList = unifyOperationLists($1.operationList, $3.operationList);
+    IlocOperationList* operationList = unifyOperationLists($1->operationList, $3->operationList);
 
-    int r1 = $1.outRegister;
-    int r2 = $3.outRegister;
+    int r1 = $1->outRegister;
+    int r2 = $3->outRegister;
     int r3 = generateRegister();
 
     IlocOperation operation = generateBinaryOpWithOneOut(OP_ADD, r1, r2, r3);
     addOperationToIlocList(operationList, operation);
 
-    $$.outRegister = r3;
-    $$.operationList = operationList;
+    $$->outRegister = r3;
+    $$->operationList = operationList;
 };
 
 expression_grade_four: expression_grade_four '-' expression_grade_three { 
@@ -1037,17 +1035,17 @@ expression_grade_four: expression_grade_four '-' expression_grade_three {
     addChild($$, $1);
     addChild($$, $3);
 
-    IlocOperationList* operationList = unifyOperationLists($1.operationList, $3.operationList);
+    IlocOperationList* operationList = unifyOperationLists($1->operationList, $3->operationList);
 
-    int r1 = $1.outRegister;
-    int r2 = $3.outRegister;
+    int r1 = $1->outRegister;
+    int r2 = $3->outRegister;
     int r3 = generateRegister();
 
     IlocOperation operation = generateBinaryOpWithOneOut(OP_SUB, r1, r2, r3);
     addOperationToIlocList(operationList, operation);
 
-    $$.outRegister = r3;
-    $$.operationList = operationList;
+    $$->outRegister = r3;
+    $$->operationList = operationList;
 };
 
 expression_grade_four: expression_grade_three {
@@ -1059,17 +1057,17 @@ expression_grade_three: expression_grade_three '*' expression_grade_two {
     addChild($$, $1);
     addChild($$, $3);
 
-    IlocOperationList* operationList = unifyOperationLists($1.operationList, $3.operationList);
+    IlocOperationList* operationList = unifyOperationLists($1->operationList, $3->operationList);
 
-    int r1 = $1.outRegister;
-    int r2 = $3.outRegister;
+    int r1 = $1->outRegister;
+    int r2 = $3->outRegister;
     int r3 = generateRegister();
 
     IlocOperation operation = generateBinaryOpWithOneOut(OP_MULT, r1, r2, r3);
     addOperationToIlocList(operationList, operation);
 
-    $$.outRegister = r3;
-    $$.operationList = operationList;
+    $$->outRegister = r3;
+    $$->operationList = operationList;
 };
 
 expression_grade_three: expression_grade_three '/' expression_grade_two { 
@@ -1077,17 +1075,17 @@ expression_grade_three: expression_grade_three '/' expression_grade_two {
     addChild($$, $1);
     addChild($$, $3);
 
-    IlocOperationList* operationList = unifyOperationLists($1.operationList, $3.operationList);
+    IlocOperationList* operationList = unifyOperationLists($1->operationList, $3->operationList);
 
-    int r1 = $1.outRegister;
-    int r2 = $3.outRegister;
+    int r1 = $1->outRegister;
+    int r2 = $3->outRegister;
     int r3 = generateRegister();
 
     IlocOperation operation = generateBinaryOpWithOneOut(OP_DIV, r1, r2, r3);
     addOperationToIlocList(operationList, operation);
 
-    $$.outRegister = r3;
-    $$.operationList = operationList;
+    $$->outRegister = r3;
+    $$->operationList = operationList;
 };
 
 expression_grade_three: expression_grade_three '%' expression_grade_two { 
@@ -1130,17 +1128,17 @@ expression_grade_one: TK_IDENTIFICADOR {
     
     if (symbol.isGlobal)
     {
-        operation = generateUnaryOpWithOneOut(OP_LOADI_GLOBAL, address, r1);
+        operation = generateUnaryOpWithOneOut(OP_LOADAI_GLOBAL, address, r1);
     }
     else
     {
-        operation = generateUnaryOpWithOneOut(OP_LOADI_LOCAL, address, r1);
+        operation = generateUnaryOpWithOneOut(OP_LOADAI_LOCAL, address, r1);
     }
 
     addOperationToIlocList(operationList, operation);
 
-    $$.outRegister = r1;
-    $$.operationList = operationList;
+    $$->outRegister = r1;
+    $$->operationList = operationList;
 };
 
 expression_grade_one: TK_IDENTIFICADOR '[' expression_list ']' {

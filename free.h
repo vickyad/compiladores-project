@@ -22,6 +22,6 @@ SymbolTableStack* freeFirstTableFromSymbolTableStack(SymbolTableStack* symbolTab
 
 void freeGlobalVariables();
 
-void freeIlocList();
+void freeIlocList(IlocOperationList* list);
 
 #endif

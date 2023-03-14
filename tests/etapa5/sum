@@ -1,0 +1,8 @@
+int h;
+int v;
+int z;
+int functionOne() { 
+    v = 10;
+    h = 20;
+    z = v + h;
+}

@@ -61,7 +61,7 @@ typedef struct LexicalValue {
 typedef struct Node {
     LexicalValue lexicalValue;
 	DataType dataType;
-    IlocOperationList* operationList;
+    struct IlocOperationList* operationList;
     int outRegister;
     struct Node* brother;
     struct Node* child;
@@ -119,6 +119,7 @@ typedef struct SymbolTableStack {
 // ILOC
 // ==============================
 typedef enum IlocOperationType {
+    OP_INVALID,
     OP_ADD,
     OP_SUB,
     OP_MULT,
@@ -133,8 +134,8 @@ typedef enum IlocOperationType {
     OP_CMP_EQ,
     OP_AND,
     OP_OR,
-    OP_LOADI_GLOBAL,
-    OP_LOADI_LOCAL,
+    OP_LOADAI_GLOBAL,
+    OP_LOADAI_LOCAL,
     OP_LOADI,
     OP_STOREAI_GLOBAL,
     OP_STOREAI_LOCAL,

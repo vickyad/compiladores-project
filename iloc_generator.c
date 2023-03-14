@@ -20,6 +20,14 @@ IlocOperation generate_empty_operation()
     operation.op2 = -1;
     operation.out1 = -1;
     operation.out2 = -1;
+    operation.type = -1;
+    return operation;
+}
+
+IlocOperation generateInvalid()
+{
+    IlocOperation operation = generate_empty_operation();
+    operation.type = OP_INVALID;
     return operation;
 }
 
@@ -78,81 +86,85 @@ IlocOperation generateUnaryOpWithoutOut(IlocOperationType type, int op)
     return operation;
 }
 
-void addLabelToOperation(IlocOperation operation, int label)
+IlocOperation addLabelToOperation(IlocOperation operation, int label)
 {
     operation.label = label;   
+    return operation;
 }
 
 void convertOperationToCode(IlocOperation operation) 
 {
+    if (operation.type != OP_INVALID && operation.label != -1) {
+        printf("l%d: ", operation.label);
+    }
     switch (operation.type)
     {  
         case OP_ADD:
-            /* TODO */
+            printf("add r%d, r%d => r%d \n", operation.op1, operation.op2, operation.out1);
             break;
         case OP_SUB:
-            /* TODO */
+            printf("sub r%d, r%d => r%d \n", operation.op1, operation.op2, operation.out1);
             break;
         case OP_MULT:
-            /* TODO */
+            printf("mult r%d, r%d => r%d \n", operation.op1, operation.op2, operation.out1);
             break;
         case OP_DIV:
-            /* TODO */
+            printf("div r%d, r%d => r%d \n", operation.op1, operation.op2, operation.out1);
             break;
         case OP_CMP_GE:
-            /* TODO */
+            printf("cmp_GE r%d, r%d -> r%d \n", operation.op1, operation.op2, operation.out1);
             break;
         case OP_CBR:
-            /* TODO */
+            printf("cbr r%d -> l%d, l%d \n", operation.op1, operation.out1, operation.out2);
             break;
         case OP_JUMPI:
-            /* TODO */
+            printf("jumpI -> l%d \n", operation.op1);
             break;
         case OP_CMP_LE:
-            /* TODO */
-        break;
+            printf("cmp_LE r%d, r%d -> r%d \n", operation.op1, operation.op2, operation.out1);
+            break;
         case OP_CMP_LT:
-            /* TODO */
+            printf("cmp_LT r%d, r%d -> r%d \n", operation.op1, operation.op2, operation.out1);
             break;
         case OP_CMP_GT:
-            /* TODO */
+            printf("cmp_GT r%d, r%d -> r%d \n", operation.op1, operation.op2, operation.out1);
             break;
         case OP_CMP_NE:
-            /* TODO */
+            printf("cmp_NE r%d, r%d -> r%d \n", operation.op1, operation.op2, operation.out1);
             break;
         case OP_CMP_EQ:
-            /* TODO */
+            printf("cmp_EQ r%d, r%d -> r%d \n", operation.op1, operation.op2, operation.out1);
             break;
         case OP_AND:
-            /* TODO */
+            printf("and r%d, r%d => r%d \n", operation.op1, operation.op2, operation.out1);
             break;
         case OP_OR:
-            /* TODO */
+            printf("or r%d, r%d => r%d \n", operation.op1, operation.op2, operation.out1);
             break;
-        case OP_LOADI_GLOBAL:
-            /* TODO */
+        case OP_LOADAI_GLOBAL:
+            printf("loadAI rbss, %d => r%d \n", operation.op1, operation.out1);
             break;
-        case OP_LOADI_LOCAL:
-            /* TODO */
+        case OP_LOADAI_LOCAL:
+            printf("loadAI rfp, %d => r%d \n", operation.op1, operation.out1);
             break;
         case OP_LOADI:
-            /* TODO */
+            printf("loadI %d => r%d \n", operation.op1, operation.out1);
             break;
         case OP_STOREAI_GLOBAL:
-            /* TODO */
+            printf("storeAI r%d => rbss, %d \n", operation.op1, operation.out1);
             break;
         case OP_STOREAI_LOCAL:
-            /* TODO */
+            printf("storeAI r%d => rfp, %d \n", operation.op1, operation.out1);
             break;
         case OP_NOP:
-            /* TODO */
+            printf("nop \n");
             break;
         default:
             break;
     }
 }
 
-char* generateCode(IlocOperationList* operationList) 
+void generateCode(IlocOperationList* operationList) 
 {
     IlocOperationList* nextOperation = operationList;
 
@@ -172,7 +184,7 @@ IlocOperationList* createIlocList()
         printError("[IlocOperationList] Fail to create ILOC operations list!");
         return NULL;
     }
-    list->operation = generateNop();
+    list->operation = generateInvalid();
     list->nextItem = NULL;
     return list;
 }
@@ -199,7 +211,7 @@ void addOperationToIlocList(IlocOperationList* operationList, IlocOperation oper
     if (operationList == NULL)
     {
         printError("[IlocOperationList] Fail to add operation on null list!");
-        return NULL;
+        return;
     }
     
     IlocOperationList* lastOperation = operationList;
@@ -229,12 +241,12 @@ IlocOperationList* unifyOperationLists(IlocOperationList* operationListOne, Iloc
     if (operationListOne == NULL)
     {
         printError("[IlocOperationList] First list was null while unifying!");
-        return;
+        return NULL;
     }
     if (operationListTwo == NULL)
     {
         printError("[IlocOperationList] Second list was null while unifying!");
-        return;
+        return NULL;
     }
 
     IlocOperationList* newOperationList = createIlocList();
@@ -246,7 +258,7 @@ IlocOperationList* unifyOperationLists(IlocOperationList* operationListOne, Iloc
         operationToCopy = operationToCopy->nextItem;
     }
 
-    IlocOperationList* operationToCopy = operationListTwo;
+    operationToCopy = operationListTwo;
     while(operationToCopy != NULL)
     {
         addOperationToIlocList(newOperationList, operationToCopy->operation);

@@ -13,7 +13,11 @@ int main (int argc, char **argv)
 {
   initGlobalSymbolStack();
   int ret = yyparse(); 
-  // exportTree(tree);
+  if (tree != NULL) 
+  {
+    // exportTree(tree);
+    generateCode(tree->operationList);
+  }
   freeGlobalVariables();
   return 0;
 }
