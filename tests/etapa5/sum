@@ -6,3 +6,6 @@ int functionOne() {
     h = 20;
     z = v + h;
 }
+int functionTwo() {
+    functionOne();
+}
