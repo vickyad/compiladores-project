@@ -1,11 +1,18 @@
-int h;
 int v;
 int z;
-int functionOne() { 
-    v = 10;
-    h = 20;
-    z = v + h;
+int functionOne(int one, int two, int three) { 
+    three = 10;
+    {
+        int v;
+    };
 }
-int functionTwo() {
+int functionTwo(int five, int six, int seven) {
+    seven = 20;
+    {
+        int z;
+    };
+}
+int functionThree() {}
+int main() {
     functionOne();
 }

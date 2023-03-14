@@ -1,5 +1,6 @@
 %{
 #include <stdio.h>
+#include <stdlib.h>
 #include "types.h"
 #include "data_type.h"
 #include "generic_tree.h"
@@ -9,6 +10,7 @@
 #include "print.h"
 
 DataType declaredType = DATA_TYPE_NON_DECLARED;
+int mainLabel = 0;
 
 int yylex(void);
 void yyerror (char const *message);
@@ -70,6 +72,7 @@ extern SymbolTableStack* symbolTableStack;
 %type<Dimension> dimension
 %type<Node> function
 %type<Node> header
+%type<LexicalValue> function_name
 %type<Node> body
 %type<FunctionArgument> arguments
 %type<FunctionArgument> arg_list
@@ -108,6 +111,15 @@ program:  {
 program: elements_list { 
     $$ = $1; 
     tree = $$;
+
+    IlocOperationList* operationListStartingWithMain = createIlocList();
+
+    IlocOperation operationJumpToMain = generateUnaryOpWithoutOut(OP_JUMPI, mainLabel);
+    addOperationToIlocList(operationListStartingWithMain, operationJumpToMain);
+
+    addIlocListToIlocList(operationListStartingWithMain, $$->operationList);
+
+    $$->operationList = operationListStartingWithMain;
 };
 
 elements_list: function elements_list { 
@@ -269,14 +281,17 @@ dimension: TK_LIT_INT '^' dimension {
 function: header body {
     $$ = $1;
     addChild($$, $2);
-    addIlocListToIlocList($$->operationList, $2->operationList);
+    if ($2) {
+        addIlocListToIlocList($$->operationList, $2->operationList);
+    }
 };
 
-header: type TK_IDENTIFICADOR arguments {
-    // Then create a new internal context
-    symbolTableStack = createNewTableOnSymbolTableStack(symbolTableStack);
-
+header: type function_name arguments {
     int functionLabel = generateLabel();
+
+    if (strncmp($2.label, "main", 4) == 0) {
+        mainLabel = functionLabel;
+    }
 
     // First create function symbol on external context
     SymbolTableValue symbol = createSymbolTableValueWithTypeAndArguments(SYMBOL_TYPE_FUNCTION, $2, $1, $3, functionLabel);
@@ -292,6 +307,11 @@ header: type TK_IDENTIFICADOR arguments {
 
     $$->operationList = operationList;
 };
+
+function_name: TK_IDENTIFICADOR {
+    $$ = $1;
+    symbolTableStack = createNewTableOnSymbolTableStack(symbolTableStack);
+}
 
 body: command_block { 
     $$ = $1;
@@ -395,6 +415,7 @@ simple_command: flow_control_commands ';' {
 simple_command: command_block ';' { 
     $$ = $1;
     freeLexicalValue($2);
+    symbolTableStack = createNewTableOnSymbolTableStack(symbolTableStack);
 };
 
 // Declaracao de variavel

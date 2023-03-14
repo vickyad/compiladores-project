@@ -113,6 +113,7 @@ typedef struct SymbolTableStack {
     SymbolTable* symbolTable;
     struct SymbolTableStack* nextItem;
     int isGlobal;
+    int lastPosition;
 } SymbolTableStack;
 
 // ==============================

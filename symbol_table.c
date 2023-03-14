@@ -9,6 +9,7 @@ void initGlobalSymbolStack()
     SymbolTable* globalTable = createSymbolTable();
     symbolTableStack = addTableToSymbolTableStack(symbolTableStack, globalTable);
     symbolTableStack->isGlobal = 1;
+    symbolTableStack->lastPosition = 0;
 }
 
 char* getSymbolTypeName(SymbolType symbolType)
@@ -191,6 +192,7 @@ void addValueToSymbolTableStack(SymbolTableStack* stack, SymbolTableValue value)
     if (!table)
     {
         printError("Trying to add symbol on null table");
+        printf("%s", value.lexicalValue.label);
         return;
     }
 
@@ -228,6 +230,7 @@ void addValueToSymbolTableStack(SymbolTableStack* stack, SymbolTableValue value)
     value.position = table->lastPosition;
     
     table->lastPosition = table->lastPosition + value.size;
+    stack->lastPosition = table->lastPosition;
     
     addEntryOnList(table->entries, table->capacity, value.lexicalValue.label, &table->size, value);
 }
@@ -284,6 +287,7 @@ SymbolTableStack* createSymbolTableStack()
     tableStack->symbolTable = NULL;
     tableStack->nextItem = NULL;
     tableStack->isGlobal = 0;
+    tableStack->lastPosition = 0;
     return tableStack;
 }
 
@@ -314,6 +318,14 @@ SymbolTableStack* addTableToSymbolTableStack(SymbolTableStack* currentFirstTable
     SymbolTableStack* newFirstTable = createSymbolTableStack();
     newFirstTable->symbolTable = symbolTable;
     newFirstTable->nextItem = currentFirstTable;
+    if (currentFirstTable->isGlobal) 
+    {
+        newFirstTable->lastPosition = 0;
+    }
+    else 
+    {
+        newFirstTable->lastPosition = currentFirstTable->lastPosition;
+    }
 
     return newFirstTable;
 }
