@@ -1,18 +1,9 @@
-int v;
-int z;
+int v, z;
 int functionOne(int one, int two, int three) { 
-    three = 10;
-    {
-        int v;
+    if (v < z) then {
+        z = 100;
     };
 }
-int functionTwo(int five, int six, int seven) {
-    seven = 20;
-    {
-        int z;
-    };
-}
-int functionThree() {}
 int main() {
     functionOne();
 }

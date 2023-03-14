@@ -191,7 +191,7 @@ IlocOperationList* createIlocList()
 
 IlocOperationList* createIlocListFromOtherList(IlocOperationList* operationList)
 {
-    IlocOperationList* newOperationList = malloc(sizeof(IlocOperationList));
+    IlocOperationList* newOperationList = createIlocList();
     if (!newOperationList) 
     {
         printError("[IlocOperationList] Fail to create ILOC operations list!");

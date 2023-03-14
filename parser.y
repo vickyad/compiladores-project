@@ -585,7 +585,7 @@ flow_control_commands: TK_PR_IF '(' expression start_flow_control_block TK_PR_TH
 
     IlocOperation operationLoadFalse = generateUnaryOpWithOneOut(OP_LOADI, 0, rFalse);
     addOperationToIlocList(operationList, operationLoadFalse);
-    
+
     IlocOperation operationCmpFalse = generateBinaryOpWithOneOut(OP_CMP_NE, rExpression, rFalse, rCmpResult);
     addOperationToIlocList(operationList, operationCmpFalse);
 
@@ -858,7 +858,7 @@ expression_grade_six: expression_grade_six TK_OC_NE expression_grade_five {
 };
 
 expression_grade_six: expression_grade_five { 
-    $$ = $1;
+    $$ = $1; 
 };
 
 expression_grade_five: expression_grade_five '>' expression_grade_four { 
