@@ -157,10 +157,13 @@ void convertOperationToCode(IlocOperation operation)
             printf("loadI %d => r%d \n", operation.op1, operation.out1);
             break;
         case OP_LOADI_TO_RFP:
-            printf("loadI %d => rfp \n", operation.op1);
+            printf("addI r%d, 0 => rfp \n", operation.op1);
+            break;
+        case OP_LOAD_RFP:
+            printf("addI rfp, 0 => r%d \n", operation.op1);
             break;
         case OP_LOAD_PC:
-            printf("load rpc => r%d \n", operation.op1);
+            printf("addI rpc, 0 => r%d \n", operation.op1);
             break;
         case OP_STOREAI_GLOBAL:
             printf("storeAI r%d => rbss, %d \n", operation.op1, operation.out1);

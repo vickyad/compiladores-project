@@ -146,6 +146,7 @@ typedef enum IlocOperationType {
     OP_LOADI,
     OP_LOAD_PC,
     OP_LOADI_TO_RFP,
+    OP_LOAD_RFP,
     OP_STOREAI_GLOBAL,
     OP_STOREAI_LOCAL,
     OP_NOP

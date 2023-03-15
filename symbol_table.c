@@ -372,6 +372,7 @@ SymbolTableStack* addTableToSymbolTableStack(SymbolTableStack* currentFirstTable
     }
     else 
     {
+        symbolTable->lastPosition = currentFirstTable->lastPosition;
         newFirstTable->lastPosition = currentFirstTable->lastPosition;
     }
 

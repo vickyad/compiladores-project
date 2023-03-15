@@ -1,5 +1,16 @@
-int v;
-int main(int one) {
-    v = 10;
-    return 0;
+int v, h;
+int doubleIt(int value) {
+    return value * 2;
+}
+int setV(int value) {
+    v = value;
+}
+int main() {
+    int temp;
+    temp = doubleIt(doubleIt(doubleIt(100)) * 2);
+    setV(temp);
+    if (temp > 1500) then {
+        h = 1;
+    };
+    return 1;
 }
