@@ -1,8 +1,5 @@
 int v;
-int functionMirror(int one) { 
-    return one;
-}
 int main(int one) {
-    functionMirror(10);
-    v = 20;
+    v = 10;
+    return 0;
 }

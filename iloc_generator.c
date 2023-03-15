@@ -103,7 +103,7 @@ void convertOperationToCode(IlocOperation operation)
             printf("add r%d, r%d => r%d \n", operation.op1, operation.op2, operation.out1);
             break;
         case OP_ADD_RFP:
-            printf("add rfp, %d => rfp \n", operation.op1);
+            printf("add rfp, r%d => rfp \n", operation.op1);
             break;
         case OP_SUB:
             printf("sub r%d, r%d => r%d \n", operation.op1, operation.op2, operation.out1);
@@ -159,8 +159,8 @@ void convertOperationToCode(IlocOperation operation)
         case OP_LOADI_TO_RFP:
             printf("loadI %d => rfp \n", operation.op1);
             break;
-        case OP_LOADI_PC:
-            printf("loadI rpc => r%d \n", operation.op1);
+        case OP_LOAD_PC:
+            printf("load rpc => r%d \n", operation.op1);
             break;
         case OP_STOREAI_GLOBAL:
             printf("storeAI r%d => rbss, %d \n", operation.op1, operation.out1);

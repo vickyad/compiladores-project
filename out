@@ -1,0 +1,10 @@
+loadI 2048 => r3 
+storeAI r3 => rfp, 0 
+jumpI -> l0 
+l0: nop 
+loadI 20 => r0 
+storeAI r0 => rbss, 0 
+load rpc => r1 
+storeAI r1 => rfp, 4 
+loadAI rfp, 0 => r2 
+jump -> r2 

@@ -115,10 +115,15 @@ program: elements_list {
     $$ = $1; 
     tree = $$;
 
+    int r1 = generateRegister();
+
     IlocOperationList* operationListStartingWithMain = createIlocList();
 
-    IlocOperation operationLoadZeroToRFP = generateUnaryOpWithoutOut(OP_LOADI_TO_RFP, 0);
-    addOperationToIlocList(operationListStartingWithMain, operationLoadZeroToRFP);
+    IlocOperation operationLoadFinalJump = generateUnaryOpWithOneOut(OP_LOADI, 2048, r1);
+    addOperationToIlocList(operationListStartingWithMain, operationLoadFinalJump);
+
+    IlocOperation operationStoreReturnAddress = generateUnaryOpWithOneOut(OP_STOREAI_LOCAL, r1, 0); 
+    addOperationToIlocList(operationListStartingWithMain, operationStoreReturnAddress);
 
     IlocOperation operationJumpToMain = generateUnaryOpWithoutOut(OP_JUMPI, mainLabel);
     addOperationToIlocList(operationListStartingWithMain, operationJumpToMain);
@@ -552,9 +557,32 @@ function_call: TK_IDENTIFICADOR '(' ')' {
     freeLexicalValue($2);
     freeLexicalValue($3);
 
+    int r1 = generateRegister();
+    int r2 = generateRegister();
+    int r3 = generateRegister();
+    int r4 = generateRegister();
+
     IlocOperationList* operationList = createIlocList();
 
     int functionLabel = symbol.lexicalValue.functionLabel;
+
+    IlocOperation operationLoadRFPShift = generateUnaryOpWithOneOut(OP_LOADI, symbolTableStack->lastPosition, r4);
+    addOperationToIlocList(operationList, operationLoadRFPShift);
+
+    IlocOperation operationUpdateRFP = generateUnaryOpWithoutOut(OP_ADD_RFP, r4);
+    addOperationToIlocList(operationList, operationUpdateRFP);
+
+    IlocOperation operationLoadPC = generateUnaryOpWithoutOut(OP_LOAD_PC, r1);
+    addOperationToIlocList(operationList, operationLoadPC);
+
+    IlocOperation operationLoadPCJump = generateUnaryOpWithOneOut(OP_LOADI, 5, r2);
+    addOperationToIlocList(operationList, operationLoadPCJump);
+
+    IlocOperation operationCalculateToReturnAddress = generateBinaryOpWithOneOut(OP_ADD, r1, r2, r3);
+    addOperationToIlocList(operationList, operationCalculateToReturnAddress);
+
+    IlocOperation operationStoreReturnAddress = generateUnaryOpWithOneOut(OP_STOREAI_LOCAL, r3, 0); 
+    addOperationToIlocList(operationList, operationStoreReturnAddress);
 
     IlocOperation operationJumpToFunction = generateUnaryOpWithoutOut(OP_JUMPI, functionLabel);
     addOperationToIlocList(operationList, operationJumpToFunction);
@@ -575,12 +603,16 @@ function_call: TK_IDENTIFICADOR '(' arg_fn_list ')' {
     int r1 = generateRegister();
     int r2 = generateRegister();
     int r3 = generateRegister();
+    int r4 = generateRegister();
 
     IlocOperationList* operationList = createIlocListFromOtherList($3->node->operationList);
 
     int functionLabel = symbol.lexicalValue.functionLabel;
 
-    IlocOperation operationUpdateRFP = generateUnaryOpWithoutOut(OP_ADD_RFP, symbolTableStack->lastPosition);
+    IlocOperation operationLoadRFPShift = generateUnaryOpWithOneOut(OP_LOADI, symbolTableStack->lastPosition, r4);
+    addOperationToIlocList(operationList, operationLoadRFPShift);
+
+    IlocOperation operationUpdateRFP = generateUnaryOpWithoutOut(OP_ADD_RFP, r4);
     addOperationToIlocList(operationList, operationUpdateRFP);
 
     int address = 8;
@@ -597,10 +629,10 @@ function_call: TK_IDENTIFICADOR '(' arg_fn_list ')' {
         argument = argument->nextArgument;
     }
 
-    IlocOperation operationLoadPC = generateUnaryOpWithoutOut(OP_LOADI_PC, r1);
+    IlocOperation operationLoadPC = generateUnaryOpWithoutOut(OP_LOAD_PC, r1);
     addOperationToIlocList(operationList, operationLoadPC);
 
-    IlocOperation operationLoadPCJump = generateUnaryOpWithOneOut(OP_LOADI, 4, r2);
+    IlocOperation operationLoadPCJump = generateUnaryOpWithOneOut(OP_LOADI, 5, r2);
     addOperationToIlocList(operationList, operationLoadPCJump);
 
     IlocOperation operationCalculateToReturnAddress = generateBinaryOpWithOneOut(OP_ADD, r1, r2, r3);
