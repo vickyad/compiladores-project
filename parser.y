@@ -312,6 +312,12 @@ header: type function_name arguments {
     operationNop = addLabelToOperation(operationNop, functionLabel);    
     addOperationToIlocList(operationList, operationNop);
 
+    FunctionArgument* argument = $3;
+    while(argument)
+    {
+        argument = argument->nextArgument;
+    }
+
     $$->operationList = operationList;
 };
 
@@ -576,10 +582,15 @@ function_call: TK_IDENTIFICADOR '(' arg_fn_list ')' {
     int address = 8;
     FunctionCallArgument* argument = $3;
     while(argument) {
+        argument = argument->nextArgument;
+        address += 4;
+    }
+    argument = $3;
+    while(argument) {
+        address -= 4;
         IlocOperation argOperation = generateUnaryOpWithOneOut(OP_STOREAI_LOCAL, argument->value, address);
         addOperationToIlocList(operationList, argOperation);
         argument = argument->nextArgument;
-        address += 4;
     }
 
     IlocOperation operationJumpToFunction = generateUnaryOpWithoutOut(OP_JUMPI, functionLabel);
@@ -607,6 +618,13 @@ arg_fn_list: expression ',' arg_fn_list {
 return_command: TK_PR_RETURN expression { 
     $$ = createNodeFromUnaryOperator($1, $2);
     addChild($$, $2);
+
+    IlocOperationList* operationList = createIlocListFromOtherList($2->operationList);
+
+    IlocOperation returnOperation = generateUnaryOpWithOneOut(OP_STOREAI_LOCAL, $2->outRegister, 0);
+    addOperationToIlocList(operationList, returnOperation);
+
+    $$->operationList = operationList;
 };
 
 // Comando de controle de fluxo

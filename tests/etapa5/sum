@@ -1,7 +1,7 @@
 int v;
 int functionOne(int one, int two) { 
-    int z;
-    z = 10;
+    v = one;
+    return two;
 }
 int main(int one) {
     int h;
