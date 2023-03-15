@@ -13,5 +13,6 @@ int isTextEqualTrue(char* text);
 char* getLabelName(char* text, LiteralType literalType);
 Dimension getDimension(LexicalValue lexicalValue);
 Dimension getDimensionMultipling(LexicalValue lexicalValue, Dimension dimension);
+LexicalValue copyLexicalValue(LexicalValue lexicalValue);
 
 #endif

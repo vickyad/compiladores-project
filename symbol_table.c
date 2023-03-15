@@ -61,16 +61,39 @@ int isSameKey(SymbolTableEntry entry, char* key)
     return strcmp(key, entry.key) == 0;
 }
 
-SymbolTableValue getEmptyValue()
+SymbolTableValue getEmptySymbolValue()
 {
     SymbolTableValue value;
     value.symbolType = SYMBOL_TYPE_NON_EXISTENT;
     return value;
 }
 
+void updateFunctionLastPositionOnSymbleTable(SymbolTable* table, char* key, int functionLastPosition)
+{
+    if (!table) return;
+
+    size_t index = getIndex(table->capacity, key);
+
+    SymbolTableEntry possibleEntry = table->entries[index];
+    while (possibleEntry.key) {
+        if (isSameKey(possibleEntry, key)) 
+        {
+            table->entries[index].value.functionLastPosition = functionLastPosition;
+            return;
+        }
+        
+        index++;
+        if (index >= table->capacity) 
+        {
+            index = 0;
+        }
+        possibleEntry = table->entries[index];
+    }
+}
+
 SymbolTableValue getSymbolTableValueByKey(SymbolTable* table, char* key) 
 {
-    if (!table) return getEmptyValue();
+    if (!table) return getEmptySymbolValue();
 
     size_t index = getIndex(table->capacity, key);
 
@@ -89,7 +112,7 @@ SymbolTableValue getSymbolTableValueByKey(SymbolTable* table, char* key)
         possibleEntry = table->entries[index];
     }
 
-    return getEmptyValue();
+    return getEmptySymbolValue();
 }
 
 void addEntryOnList(SymbolTableEntry* entries, int capacity, char* key, int* size, SymbolTableValue value)
@@ -161,6 +184,7 @@ SymbolTableValue createSymbolTableValueWithType(SymbolType symbolType, LexicalVa
     value.size = calculateSymbolSize(symbolType, dataType);
     value.numberOfDimensions = 0;
     value.arguments = NULL;
+    value.functionLastPosition = 0;
     return value;
 }
 
@@ -180,10 +204,10 @@ SymbolTableValue createSymbolTableValueWithTypeAndArguments(SymbolType symbolTyp
     return value;
 }
 
-void addValueToSymbolTableStack(SymbolTableStack* stack, SymbolTableValue value)
+void addBlankSpaceToSymbolTableStack(SymbolTableStack* stack)
 {
     if (!stack) {
-        printError("Trying to add symbol on null stack");
+        printError("Trying to add blank space on null stack");
         return;
     }
 
@@ -191,20 +215,39 @@ void addValueToSymbolTableStack(SymbolTableStack* stack, SymbolTableValue value)
 
     if (!table)
     {
-        printError("Trying to add symbol on null table");
-        printf("%s", value.lexicalValue.label);
+        printError("Trying to add blank space on null table \n");
         return;
+    }
+    
+    table->lastPosition = table->lastPosition + 4;
+    stack->lastPosition = table->lastPosition;
+}
+
+SymbolTableValue addValueToSymbolTableStack(SymbolTableStack* stack, SymbolTableValue value)
+{
+    if (!stack) {
+        printError("Trying to add symbol on null stack");
+        return value;
+    }
+
+    SymbolTable* table = stack->symbolTable;
+
+    if (!table)
+    {
+        printError("Trying to add symbol on null table \n");
+        printf("Symbol: %s", value.lexicalValue.label);
+        return value;
     }
 
     if (!value.lexicalValue.label)
     {
         printError("Trying to add symbol without label");
-        return;
+        return value;
     }
 
     SymbolTableValue existentValue = getSymbolTableValueByKey(table, value.lexicalValue.label);
 
-    if (existentValue.symbolType == SYMBOL_TYPE_LITERAL) return;
+    if (existentValue.symbolType == SYMBOL_TYPE_LITERAL) return value;
 
     if (existentValue.symbolType != SYMBOL_TYPE_NON_EXISTENT) 
     {
@@ -222,28 +265,33 @@ void addValueToSymbolTableStack(SymbolTableStack* stack, SymbolTableValue value)
         printDebug("Expanding table");
         if (!expandSymbolTable(table)) {
             printError("Fail to expand the table, symbol will not be added");
-            return;
+            return value;
         }
     }
 
     value.isGlobal = stack->isGlobal;
     value.position = table->lastPosition;
     
-    table->lastPosition = table->lastPosition + value.size;
+    if (value.symbolType != SYMBOL_TYPE_LITERAL) {
+        table->lastPosition = table->lastPosition + value.size;
+    }
     stack->lastPosition = table->lastPosition;
     
     addEntryOnList(table->entries, table->capacity, value.lexicalValue.label, &table->size, value);
+
+    return value;
 }
 
-void addValueToSecondSymbolTableOnStack(SymbolTableStack* stack, SymbolTableValue value)
+SymbolTableValue addValueToSecondSymbolTableOnStack(SymbolTableStack* stack, SymbolTableValue value)
 {
     if (!stack) 
     {
         printError("Adding value to empty stack");
+        return value;
     }
     else
     {
-        addValueToSymbolTableStack(stack->nextItem, value);
+        return addValueToSymbolTableStack(stack->nextItem, value);
     }
 }
 
@@ -350,6 +398,38 @@ SymbolTableValue getByLexicalValueOnSymbolTableStack(SymbolTableStack* symbolTab
     }
 }
 
+void updateFunctionLastPosition(SymbolTableStack* symbolTableStack, LexicalValue lexicalValue, int functionLastPosition)
+{
+    if (!symbolTableStack) 
+    {
+        printf("ERRO! Variável %s não foi declarada antes do seu uso na linha %d", lexicalValue.label, lexicalValue.lineNumber);
+        freeGlobalVariables();
+        exit(ERR_UNDECLARED);
+    }
+
+    updateFunctionLastPositionOnSymbleTable(symbolTableStack->symbolTable, lexicalValue.label, functionLastPosition);
+}
+
+SymbolTableStack* getStackByLexicalValue(SymbolTableStack* symbolTableStack, LexicalValue lexicalValue)
+{
+    if (!symbolTableStack) 
+    {
+        printf("ERRO! Variável %s não foi declarada antes do seu uso na linha %d", lexicalValue.label, lexicalValue.lineNumber);
+        freeGlobalVariables();
+        exit(ERR_UNDECLARED);
+    }
+    
+    SymbolTableValue value = getSymbolTableValueByKey(symbolTableStack->symbolTable, lexicalValue.label);
+    if (value.symbolType == SYMBOL_TYPE_NON_EXISTENT) 
+    {
+        return getStackByLexicalValue(symbolTableStack->nextItem, lexicalValue);
+    }
+    else
+    {
+        return symbolTableStack;
+    }
+}
+
 int checkValueIsOnFirstSymbolTable(SymbolTableStack* symbolTableStack, char* key)
 {
 	if (!symbolTableStack) return 0;
@@ -374,10 +454,11 @@ FunctionArgument* createFunctionArgument(LexicalValue lexicalValue, DataType dat
     {
         printf("Fail to create function argument.");
     }
-
     functionArgument->nextArgument = NULL;
     functionArgument->type = dataType;
-    functionArgument->lexicalValue = lexicalValue;
+    functionArgument->lexicalValue = copyLexicalValue(lexicalValue);
+    functionArgument->position = -1;
+    functionArgument->tempRegister = -1;
 
     return functionArgument;
 }
@@ -389,7 +470,7 @@ FunctionArgument* addFunctionArgument(FunctionArgument* functionArgument, Lexica
     return newFunctionArgument;
 }
 
-void validateFunctionCall(SymbolTableValue symbol, LexicalValue lexicalValue, Node* node)
+void validateFunctionCall(SymbolTableValue symbol, LexicalValue lexicalValue)
 {
     if (symbol.symbolType != SYMBOL_TYPE_FUNCTION) 
     {

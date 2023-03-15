@@ -63,6 +63,7 @@ typedef struct Node {
 	DataType dataType;
     struct IlocOperationList* operationList;
     int outRegister;
+    int lastPosition;
     struct Node* brother;
     struct Node* child;
     struct Node* parent;
@@ -72,9 +73,11 @@ typedef struct Node {
 // SYMBOL TABLE
 // ==============================
 typedef struct FunctionArgument {
+    int position;
     DataType type;
     LexicalValue lexicalValue;
     struct FunctionArgument* nextArgument;
+    int tempRegister;
 } FunctionArgument;
 
 typedef enum SymbolType {
@@ -91,6 +94,7 @@ typedef struct SymbolTableValue {
     int numberOfDimensions;
     int isGlobal;
     int position;
+    int functionLastPosition;
     SymbolType symbolType;
     DataType dataType;
     LexicalValue lexicalValue;
@@ -122,6 +126,7 @@ typedef struct SymbolTableStack {
 typedef enum IlocOperationType {
     OP_INVALID,
     OP_ADD,
+    OP_ADD_RFP,
     OP_SUB,
     OP_MULT,
     OP_DIV,
@@ -138,6 +143,7 @@ typedef enum IlocOperationType {
     OP_LOADAI_GLOBAL,
     OP_LOADAI_LOCAL,
     OP_LOADI,
+    OP_LOADI_TO_RFP,
     OP_STOREAI_GLOBAL,
     OP_STOREAI_LOCAL,
     OP_NOP
@@ -156,5 +162,11 @@ typedef struct IlocOperationList {
     IlocOperation operation;
     struct IlocOperationList* nextItem;
 } IlocOperationList;
+
+typedef struct FunctionCallArgument {
+    int value;
+    struct Node* node;
+    struct FunctionCallArgument* nextArgument;
+} FunctionCallArgument;
 
 #endif

@@ -1,9 +1,10 @@
-int v, z;
-int functionOne(int one, int two, int three) { 
-    if (v < z) then {
-        z = 100;
-    };
+int v;
+int functionOne(int one, int two) { 
+    int z;
+    z = 10;
 }
-int main() {
-    functionOne();
+int main(int one) {
+    int h;
+    h = 20;
+    functionOne(10, 20);
 }

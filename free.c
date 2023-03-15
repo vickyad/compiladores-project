@@ -10,7 +10,9 @@ void freeTableValueArguments(FunctionArgument* argument)
 
     freeTableValueArguments(argument->nextArgument);
 
+    freeLexicalValue(argument->lexicalValue);
     free(argument);
+
     argument = NULL;
 }
 

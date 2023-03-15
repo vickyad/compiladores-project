@@ -102,6 +102,9 @@ void convertOperationToCode(IlocOperation operation)
         case OP_ADD:
             printf("add r%d, r%d => r%d \n", operation.op1, operation.op2, operation.out1);
             break;
+        case OP_ADD_RFP:
+            printf("add rfp, %d => rfp \n", operation.op1);
+            break;
         case OP_SUB:
             printf("sub r%d, r%d => r%d \n", operation.op1, operation.op2, operation.out1);
             break;
@@ -149,6 +152,9 @@ void convertOperationToCode(IlocOperation operation)
             break;
         case OP_LOADI:
             printf("loadI %d => r%d \n", operation.op1, operation.out1);
+            break;
+        case OP_LOADI_TO_RFP:
+            printf("loadI %d => rfp \n", operation.op1);
             break;
         case OP_STOREAI_GLOBAL:
             printf("storeAI r%d => rbss, %d \n", operation.op1, operation.out1);
@@ -266,4 +272,23 @@ IlocOperationList* unifyOperationLists(IlocOperationList* operationListOne, Iloc
     }
 
     return newOperationList;
+}
+
+FunctionCallArgument* createFunctionCallArgument(int value)
+{
+    FunctionCallArgument* functionCallArgument = malloc(sizeof(FunctionCallArgument));
+    if (!functionCallArgument) 
+    {
+        printf("Fail to create function call argument.");
+    }
+    functionCallArgument->value = value;
+
+    return functionCallArgument;
+}
+
+FunctionCallArgument* addFunctionCallArgument(FunctionCallArgument* functionCallArgument, int value)
+{
+    FunctionCallArgument* newFunctionCallArgument = createFunctionCallArgument(value);
+    newFunctionCallArgument->nextArgument = functionCallArgument;
+    return newFunctionCallArgument;
 }

@@ -11,6 +11,8 @@
 
 DataType declaredType = DATA_TYPE_NON_DECLARED;
 int mainLabel = 0;
+int mainPosition = 0;
+int currentRFPOffset = 0;
 
 int yylex(void);
 void yyerror (char const *message);
@@ -31,6 +33,7 @@ extern SymbolTableStack* symbolTableStack;
     DataType DataType;
     struct Node* Node;
     struct FunctionArgument* FunctionArgument;
+    struct FunctionCallArgument* FunctionCallArgument;
 }
 
 %define parse.error verbose
@@ -84,7 +87,7 @@ extern SymbolTableStack* symbolTableStack;
 %type<Node> attribution
 %type<Node> attr_array
 %type<Node> function_call
-%type<Node> arg_fn_list
+%type<FunctionCallArgument> arg_fn_list
 %type<Node> return_command
 %type<Node> flow_control_commands
 %type<Node> start_flow_control_block
@@ -113,6 +116,9 @@ program: elements_list {
     tree = $$;
 
     IlocOperationList* operationListStartingWithMain = createIlocList();
+
+    IlocOperation operationLoadZeroToRFP = generateUnaryOpWithoutOut(OP_LOADI_TO_RFP, 0);
+    addOperationToIlocList(operationListStartingWithMain, operationLoadZeroToRFP);
 
     IlocOperation operationJumpToMain = generateUnaryOpWithoutOut(OP_JUMPI, mainLabel);
     addOperationToIlocList(operationListStartingWithMain, operationJumpToMain);
@@ -283,20 +289,21 @@ function: header body {
     addChild($$, $2);
     if ($2) {
         addIlocListToIlocList($$->operationList, $2->operationList);
+        updateFunctionLastPosition(symbolTableStack, $$->lexicalValue, $2->lastPosition);
     }
 };
 
 header: type function_name arguments {
     int functionLabel = generateLabel();
 
+    SymbolTableValue symbol = createSymbolTableValueWithTypeAndArguments(SYMBOL_TYPE_FUNCTION, $2, $1, $3, functionLabel);
+    symbol = addValueToSecondSymbolTableOnStack(symbolTableStack, symbol);
+
     if (strncmp($2.label, "main", 4) == 0) {
         mainLabel = functionLabel;
+        mainPosition = symbol.position;
     }
-
-    // First create function symbol on external context
-    SymbolTableValue symbol = createSymbolTableValueWithTypeAndArguments(SYMBOL_TYPE_FUNCTION, $2, $1, $3, functionLabel);
-    addValueToSecondSymbolTableOnStack(symbolTableStack, symbol);
-
+    
     $$ = createNodeFromSymbol($2, symbol);
 
     IlocOperationList* operationList = createIlocList();
@@ -311,6 +318,11 @@ header: type function_name arguments {
 function_name: TK_IDENTIFICADOR {
     $$ = $1;
     symbolTableStack = createNewTableOnSymbolTableStack(symbolTableStack);
+
+    // Adding space for return address
+    addBlankSpaceToSymbolTableStack(symbolTableStack);
+    // Adding space for return value
+    addBlankSpaceToSymbolTableStack(symbolTableStack);
 }
 
 body: command_block { 
@@ -336,7 +348,9 @@ arg_list: type TK_IDENTIFICADOR {
     $$ = createFunctionArgument($2, $1);
 
     SymbolTableValue symbol = createSymbolTableValueWithType(SYMBOL_TYPE_VARIABLE, $2, $1);
-    addValueToSymbolTableStack(symbolTableStack, symbol);
+    symbol = addValueToSymbolTableStack(symbolTableStack, symbol);
+    
+    $$->position = symbol.position;
 };
 
 arg_list: type TK_IDENTIFICADOR ',' arg_list {
@@ -345,7 +359,9 @@ arg_list: type TK_IDENTIFICADOR ',' arg_list {
     freeLexicalValue($3);
 
     SymbolTableValue symbol = createSymbolTableValueWithType(SYMBOL_TYPE_VARIABLE, $2, $1);
-    addValueToSymbolTableStack(symbolTableStack, symbol);
+    symbol = addValueToSymbolTableStack(symbolTableStack, symbol);
+
+    $$->position = symbol.position;
 };
 
 
@@ -361,6 +377,7 @@ command_block: '{' '}' {
 
 command_block: '{' simple_command_list '}' { 
     $$ = $2;
+    $$->lastPosition = symbolTableStack->lastPosition;
     freeLexicalValue($1);
     freeLexicalValue($3);
     symbolTableStack = freeFirstTableFromSymbolTableStack(symbolTableStack);
@@ -523,7 +540,7 @@ attr_array: expression {
 function_call: TK_IDENTIFICADOR '(' ')' { 
     SymbolTableValue symbol = getByLexicalValueOnSymbolTableStack(symbolTableStack, $1);
 
-    validateFunctionCall(symbol, $1, NULL);
+    validateFunctionCall(symbol, $1);
 
     $$ = createNodeForFunctionCallFromSymbol($1, symbol);
     freeLexicalValue($2);
@@ -539,25 +556,51 @@ function_call: TK_IDENTIFICADOR '(' ')' {
     $$->operationList = operationList;
 };
 
-function_call: TK_IDENTIFICADOR '(' arg_fn_list ')' { 
+function_call: TK_IDENTIFICADOR '(' arg_fn_list ')' {
     SymbolTableValue symbol = getByLexicalValueOnSymbolTableStack(symbolTableStack, $1);
 
-    validateFunctionCall(symbol, $1, $3);
+    validateFunctionCall(symbol, $1);
 
     $$ = createNodeForFunctionCallFromSymbol($1, symbol);
-    addChild($$, $3);
+    addChild($$, $3->node);
     freeLexicalValue($2);
     freeLexicalValue($4);
+
+    IlocOperationList* operationList = createIlocListFromOtherList($3->node->operationList);
+
+    int functionLabel = symbol.lexicalValue.functionLabel;
+
+    IlocOperation operationUpdateRFP = generateUnaryOpWithoutOut(OP_ADD_RFP, symbolTableStack->lastPosition);
+    addOperationToIlocList(operationList, operationUpdateRFP);
+
+    int address = 8;
+    FunctionCallArgument* argument = $3;
+    while(argument) {
+        IlocOperation argOperation = generateUnaryOpWithOneOut(OP_STOREAI_LOCAL, argument->value, address);
+        addOperationToIlocList(operationList, argOperation);
+        argument = argument->nextArgument;
+        address += 4;
+    }
+
+    IlocOperation operationJumpToFunction = generateUnaryOpWithoutOut(OP_JUMPI, functionLabel);
+    addOperationToIlocList(operationList, operationJumpToFunction);
+
+    $$->operationList = operationList;
 };
 
 arg_fn_list: expression { 
-    $$ = $1;
+    $$ = createFunctionCallArgument($1->outRegister);
+    $$->node = $1;
 };
 
 arg_fn_list: expression ',' arg_fn_list { 
-    $$ = $1;
-    addChild($$, $3);
+    $$ = addFunctionCallArgument($3, $1->outRegister);
+    $$->node = $1;
+    addChild($$->node, $3->node);
     freeLexicalValue($2);
+
+    IlocOperationList* operationList = unifyOperationLists($1->operationList, $3->node->operationList);
+    $$->node->operationList = operationList;
 };
 
 // Comando de retorno

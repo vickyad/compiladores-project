@@ -79,3 +79,16 @@ Dimension getDimensionMultipling(LexicalValue lexicalValue, Dimension previousDi
     newDimension.quantity = previousDimension.quantity + 1;
     return newDimension;
 }
+
+LexicalValue copyLexicalValue(LexicalValue lexicalValue)
+{
+    LexicalValue copy;
+    copy.label = malloc(strlen(lexicalValue.label) + 1);
+    strcpy(copy.label, lexicalValue.label);
+    copy.lineNumber = lexicalValue.lineNumber;
+    copy.literalType = lexicalValue.literalType;
+    copy.type = lexicalValue.type;
+    copy.value = lexicalValue.value;
+    copy.functionLabel = lexicalValue.functionLabel;
+    return copy;
+}

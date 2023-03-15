@@ -22,5 +22,7 @@ IlocOperationList* createIlocListFromOtherList(IlocOperationList* operationList)
 void addOperationToIlocList(IlocOperationList* operationList, IlocOperation operation);
 void addIlocListToIlocList(IlocOperationList* operationList, IlocOperationList* operationListToCopy);
 IlocOperationList* unifyOperationLists(IlocOperationList* operationListOne, IlocOperationList* operationListTwo);
+FunctionCallArgument* createFunctionCallArgument(int value);
+FunctionCallArgument* addFunctionCallArgument(FunctionCallArgument* functionCallArgument, int value);
 
 #endif
