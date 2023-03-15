@@ -123,6 +123,9 @@ void convertOperationToCode(IlocOperation operation)
         case OP_JUMPI:
             printf("jumpI -> l%d \n", operation.op1);
             break;
+        case OP_JUMPI_REGISTER:
+            printf("jump -> r%d \n", operation.op1);
+            break;
         case OP_CMP_LE:
             printf("cmp_LE r%d, r%d -> r%d \n", operation.op1, operation.op2, operation.out1);
             break;
@@ -155,6 +158,9 @@ void convertOperationToCode(IlocOperation operation)
             break;
         case OP_LOADI_TO_RFP:
             printf("loadI %d => rfp \n", operation.op1);
+            break;
+        case OP_LOADI_PC:
+            printf("loadI rpc => r%d \n", operation.op1);
             break;
         case OP_STOREAI_GLOBAL:
             printf("storeAI r%d => rbss, %d \n", operation.op1, operation.out1);

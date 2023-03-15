@@ -572,6 +572,10 @@ function_call: TK_IDENTIFICADOR '(' arg_fn_list ')' {
     freeLexicalValue($2);
     freeLexicalValue($4);
 
+    int r1 = generateRegister();
+    int r2 = generateRegister();
+    int r3 = generateRegister();
+
     IlocOperationList* operationList = createIlocListFromOtherList($3->node->operationList);
 
     int functionLabel = symbol.lexicalValue.functionLabel;
@@ -592,6 +596,18 @@ function_call: TK_IDENTIFICADOR '(' arg_fn_list ')' {
         addOperationToIlocList(operationList, argOperation);
         argument = argument->nextArgument;
     }
+
+    IlocOperation operationLoadPC = generateUnaryOpWithoutOut(OP_LOADI_PC, r1);
+    addOperationToIlocList(operationList, operationLoadPC);
+
+    IlocOperation operationLoadPCJump = generateUnaryOpWithOneOut(OP_LOADI, 4, r2);
+    addOperationToIlocList(operationList, operationLoadPCJump);
+
+    IlocOperation operationCalculateToReturnAddress = generateBinaryOpWithOneOut(OP_ADD, r1, r2, r3);
+    addOperationToIlocList(operationList, operationCalculateToReturnAddress);
+
+    IlocOperation operationStoreReturnAddress = generateUnaryOpWithOneOut(OP_STOREAI_LOCAL, r3, 0); 
+    addOperationToIlocList(operationList, operationStoreReturnAddress);
 
     IlocOperation operationJumpToFunction = generateUnaryOpWithoutOut(OP_JUMPI, functionLabel);
     addOperationToIlocList(operationList, operationJumpToFunction);
@@ -619,10 +635,18 @@ return_command: TK_PR_RETURN expression {
     $$ = createNodeFromUnaryOperator($1, $2);
     addChild($$, $2);
 
+    int r1 = generateRegister();
+
     IlocOperationList* operationList = createIlocListFromOtherList($2->operationList);
 
-    IlocOperation returnOperation = generateUnaryOpWithOneOut(OP_STOREAI_LOCAL, $2->outRegister, 0);
+    IlocOperation returnOperation = generateUnaryOpWithOneOut(OP_STOREAI_LOCAL, $2->outRegister, 4);
     addOperationToIlocList(operationList, returnOperation);
+
+    IlocOperation loadReturnAddressOperation = generateUnaryOpWithOneOut(OP_LOADAI_LOCAL, 0, r1);
+    addOperationToIlocList(operationList, loadReturnAddressOperation);
+
+    IlocOperation jumpBackOperation = generateUnaryOpWithoutOut(OP_JUMPI_REGISTER, r1);
+    addOperationToIlocList(operationList, jumpBackOperation);
 
     $$->operationList = operationList;
 };
