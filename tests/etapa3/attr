@@ -1,0 +1,4 @@
+int functionOne() { 
+    int varOne <= 10;
+    char varOne <= 15;
+}
