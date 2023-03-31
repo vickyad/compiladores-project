@@ -122,7 +122,7 @@ program: elements_list {
     IlocOperation operationStartStackPointer = generateUnaryOp(OP_LOAD_RFP_TO_STACK_POINTER);
     addOperationToIlocList(operationListStartingWithMain, operationStartStackPointer);
 
-    IlocOperation operationLoadFinalJump = generateUnaryOpWithOneOut(OP_LOADI, 8192, r1);
+    IlocOperation operationLoadFinalJump = generateUnaryOpWithOneOut(OP_LOADI, 40000, r1);
     addOperationToIlocList(operationListStartingWithMain, operationLoadFinalJump);
 
     IlocOperation operationStoreReturnAddress = generateUnaryOpWithOneOut(OP_STOREAI_LOCAL, r1, 0); 
