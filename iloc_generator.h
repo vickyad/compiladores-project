@@ -10,6 +10,7 @@ int generateLabel();
 int generateRegister();
 IlocOperation generate_empty_operation();
 IlocOperation generateNop();
+IlocOperation generateUnaryOp(IlocOperationType type);
 IlocOperation generateBinaryOpWithOneOut(IlocOperationType type, int op1, int op2, int out);
 IlocOperation generateBinaryOpWithTwoOuts(IlocOperationType type, int op1, int op2, int out1, int out2);
 IlocOperation generateUnaryOpWithOneOut(IlocOperationType type, int op, int out);

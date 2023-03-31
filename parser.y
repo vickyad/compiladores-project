@@ -119,6 +119,9 @@ program: elements_list {
 
     IlocOperationList* operationListStartingWithMain = createIlocList();
 
+    IlocOperation operationStartStackPointer = generateUnaryOp(OP_LOAD_RFP_TO_STACK_POINTER);
+    addOperationToIlocList(operationListStartingWithMain, operationStartStackPointer);
+
     IlocOperation operationLoadFinalJump = generateUnaryOpWithOneOut(OP_LOADI, 8192, r1);
     addOperationToIlocList(operationListStartingWithMain, operationLoadFinalJump);
 
@@ -576,14 +579,14 @@ function_call: TK_IDENTIFICADOR '(' ')' {
 
     int functionLabel = symbol.lexicalValue.functionLabel;
 
-    IlocOperation operationSaveCurrentRFP = generateUnaryOpWithoutOut(OP_LOAD_RFP, r5);
-    addOperationToIlocList(operationList, operationSaveCurrentRFP);
+    IlocOperation operationSaveCurrentStackPointer = generateUnaryOpWithoutOut(OP_LOAD_STACK_POINTER, r5);
+    addOperationToIlocList(operationList, operationSaveCurrentStackPointer);
 
-    IlocOperation operationLoadRFPShift = generateUnaryOpWithOneOut(OP_LOADI, symbolTableStack->lastPosition, r4);
-    addOperationToIlocList(operationList, operationLoadRFPShift);
+    IlocOperation operationLoadStackPointerShift = generateUnaryOpWithOneOut(OP_LOADI, symbolTableStack->lastPosition, r4);
+    addOperationToIlocList(operationList, operationLoadStackPointerShift);
 
-    IlocOperation operationUpdateRFP = generateUnaryOpWithoutOut(OP_ADD_RFP, r4);
-    addOperationToIlocList(operationList, operationUpdateRFP);
+    IlocOperation operationUpdateStackPointer = generateUnaryOpWithoutOut(OP_ADD_TO_STACK_POINTER, r4);
+    addOperationToIlocList(operationList, operationUpdateStackPointer);
 
     IlocOperation operationLoadPC = generateUnaryOpWithoutOut(OP_LOAD_PC, r1);
     addOperationToIlocList(operationList, operationLoadPC);
@@ -603,8 +606,8 @@ function_call: TK_IDENTIFICADOR '(' ')' {
     IlocOperation operationReadReturnValue = generateUnaryOpWithOneOut(OP_LOADAI_LOCAL, 4, r6);
     addOperationToIlocList(operationList, operationReadReturnValue);
 
-    IlocOperation operationRestoreRFP = generateUnaryOpWithoutOut(OP_LOADI_TO_RFP, r5);
-    addOperationToIlocList(operationList, operationRestoreRFP);
+    IlocOperation operationRestoreStackPointer = generateUnaryOpWithoutOut(OP_LOADI_TO_STACK_POINTER, r5);
+    addOperationToIlocList(operationList, operationRestoreStackPointer);
 
     $$->operationList = operationList;
     $$->outRegister = r6;
@@ -631,13 +634,13 @@ function_call: TK_IDENTIFICADOR '(' arg_fn_list ')' {
 
     int functionLabel = symbol.lexicalValue.functionLabel;
 
-    IlocOperation operationSaveCurrentRFP = generateUnaryOpWithoutOut(OP_LOAD_RFP, r5);
+    IlocOperation operationSaveCurrentRFP = generateUnaryOpWithoutOut(OP_LOAD_STACK_POINTER, r5);
     addOperationToIlocList(operationList, operationSaveCurrentRFP);
 
     IlocOperation operationLoadRFPShift = generateUnaryOpWithOneOut(OP_LOADI, symbolTableStack->lastPosition, r4);
     addOperationToIlocList(operationList, operationLoadRFPShift);
 
-    IlocOperation operationUpdateRFP = generateUnaryOpWithoutOut(OP_ADD_RFP, r4);
+    IlocOperation operationUpdateRFP = generateUnaryOpWithoutOut(OP_ADD_TO_STACK_POINTER, r4);
     addOperationToIlocList(operationList, operationUpdateRFP);
 
     int address = 8;
@@ -672,7 +675,7 @@ function_call: TK_IDENTIFICADOR '(' arg_fn_list ')' {
     IlocOperation operationReadReturnValue = generateUnaryOpWithOneOut(OP_LOADAI_LOCAL, 4, r6);
     addOperationToIlocList(operationList, operationReadReturnValue);
 
-    IlocOperation operationRestoreRFP = generateUnaryOpWithoutOut(OP_LOADI_TO_RFP, r5);
+    IlocOperation operationRestoreRFP = generateUnaryOpWithoutOut(OP_LOADI_TO_STACK_POINTER, r5);
     addOperationToIlocList(operationList, operationRestoreRFP);
 
     $$->operationList = operationList;

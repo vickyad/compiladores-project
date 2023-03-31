@@ -2,13 +2,13 @@
 
 int generateLabel()
 {
-  static int label_counter = 0;
+  static int label_counter = 1;
   return label_counter++;
 }
 
 int generateRegister()
 {
-  static int register_counter = 0;
+  static int register_counter = 1;
   return register_counter++;
 }
 
@@ -35,6 +35,13 @@ IlocOperation generateNop()
 {
     IlocOperation operation = generate_empty_operation();
     operation.type = OP_NOP;
+    return operation;
+}
+
+IlocOperation generateUnaryOp(IlocOperationType type) 
+{
+    IlocOperation operation = generate_empty_operation();
+    operation.type = type;
     return operation;
 }
 
@@ -102,8 +109,8 @@ void convertOperationToCode(IlocOperation operation)
         case OP_ADD:
             printf("add r%d, r%d => r%d \n", operation.op1, operation.op2, operation.out1);
             break;
-        case OP_ADD_RFP:
-            printf("add rfp, r%d => rfp \n", operation.op1);
+        case OP_ADD_TO_STACK_POINTER:
+            printf("add r0, r%d => r0 \n", operation.op1);
             break;
         case OP_SUB:
             printf("sub r%d, r%d => r%d \n", operation.op1, operation.op2, operation.out1);
@@ -154,16 +161,19 @@ void convertOperationToCode(IlocOperation operation)
             printf("loadAI rbss, %d => r%d \n", operation.op1, operation.out1);
             break;
         case OP_LOADAI_LOCAL:
-            printf("loadAI rfp, %d => r%d \n", operation.op1, operation.out1);
+            printf("loadAI r0, %d => r%d \n", operation.op1, operation.out1);
             break;
         case OP_LOADI:
             printf("loadI %d => r%d \n", operation.op1, operation.out1);
             break;
-        case OP_LOADI_TO_RFP:
-            printf("addI r%d, 0 => rfp \n", operation.op1);
+        case OP_LOADI_TO_STACK_POINTER:
+            printf("addI r%d, 0 => r0 \n", operation.op1);
             break;
-        case OP_LOAD_RFP:
-            printf("addI rfp, 0 => r%d \n", operation.op1);
+        case OP_LOAD_RFP_TO_STACK_POINTER:
+            printf("addI rfp, 0 => r0 \n");
+            break;
+        case OP_LOAD_STACK_POINTER:
+            printf("addI r0, 0 => r%d \n", operation.op1);
             break;
         case OP_LOAD_PC:
             printf("addI rpc, 0 => r%d \n", operation.op1);
@@ -172,7 +182,7 @@ void convertOperationToCode(IlocOperation operation)
             printf("storeAI r%d => rbss, %d \n", operation.op1, operation.out1);
             break;
         case OP_STOREAI_LOCAL:
-            printf("storeAI r%d => rfp, %d \n", operation.op1, operation.out1);
+            printf("storeAI r%d => r0, %d \n", operation.op1, operation.out1);
             break;
         case OP_NOP:
             printf("nop \n");

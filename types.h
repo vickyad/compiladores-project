@@ -126,7 +126,7 @@ typedef struct SymbolTableStack {
 typedef enum IlocOperationType {
     OP_INVALID,
     OP_ADD,
-    OP_ADD_RFP,
+    OP_ADD_TO_STACK_POINTER,
     OP_SUB,
     OP_MULT,
     OP_DIV,
@@ -146,8 +146,9 @@ typedef enum IlocOperationType {
     OP_LOADAI_LOCAL,
     OP_LOADI,
     OP_LOAD_PC,
-    OP_LOADI_TO_RFP,
-    OP_LOAD_RFP,
+    OP_LOADI_TO_STACK_POINTER,
+    OP_LOAD_RFP_TO_STACK_POINTER,
+    OP_LOAD_STACK_POINTER,
     OP_STOREAI_GLOBAL,
     OP_STOREAI_LOCAL,
     OP_NOP
