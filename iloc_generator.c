@@ -114,6 +114,9 @@ void convertOperationToCode(IlocOperation operation)
         case OP_DIV:
             printf("div r%d, r%d => r%d \n", operation.op1, operation.op2, operation.out1);
             break;
+        case OP_NEG:
+            printf("rsubI r%d, 0 => r%d \n", operation.op1, operation.out1);
+            break;
         case OP_CMP_GE:
             printf("cmp_GE r%d, r%d -> r%d \n", operation.op1, operation.op2, operation.out1);
             break;

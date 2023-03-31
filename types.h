@@ -130,6 +130,7 @@ typedef enum IlocOperationType {
     OP_SUB,
     OP_MULT,
     OP_DIV,
+    OP_NEG,
     OP_CMP_GE,
     OP_CBR,
     OP_JUMPI,

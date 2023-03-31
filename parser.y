@@ -1268,6 +1268,17 @@ expression_grade_two: '!' expression_grade_one {
 expression_grade_two: '-' expression_grade_one { 
     $$ = createNodeFromUnaryOperator($1, $2); 
     addChild($$, $2);
+
+    IlocOperationList* operationList = createIlocListFromOtherList($2->operationList);
+
+    int r1 = $2->outRegister;
+    int r2 = generateRegister();
+
+    IlocOperation operation = generateUnaryOpWithOneOut(OP_NEG, r1, r2);
+    addOperationToIlocList(operationList, operation);
+
+    $$->outRegister = r2;
+    $$->operationList = operationList;
 };
 
 expression_grade_two: expression_grade_one {
